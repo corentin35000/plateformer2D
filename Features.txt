@@ -1,0 +1,5 @@
+Double JUMP.
+
+Dash - Avant/Arrière
+
+Limité le temps d'utilisation de la réduction de l'inertie (y+)
