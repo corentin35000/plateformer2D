@@ -1,0 +1,330 @@
+{
+    "skeleton": {
+        "hash": "We/tqTgViAR8tWH5s6aC6NbmhIY",
+        "spine": "3.8.99",
+        "x": 0,
+        "y": 0,
+        "width": 283.68,
+        "height": 227.34,
+        "images": "./Golem Compresser/",
+        "audio": ""
+    },
+    "bones": [
+        {
+            "name": "root",
+            "x": 64.96,
+            "y": -159.65
+        },
+        {
+            "name": "bone",
+            "parent": "root",
+            "length": 219.11,
+            "rotation": 90.58,
+            "x": -57.93,
+            "y": 170.54
+        },
+        {
+            "name": "bone3",
+            "parent": "bone",
+            "length": 87.01,
+            "rotation": 141.1,
+            "x": 185.27,
+            "y": 28.97
+        },
+        {
+            "name": "bone4",
+            "parent": "bone3",
+            "length": 85.49,
+            "rotation": 45.72,
+            "x": 87.19,
+            "y": 1.55
+        },
+        {
+            "name": "bone5",
+            "parent": "bone",
+            "length": 52.21,
+            "rotation": -133.01,
+            "x": 86.07,
+            "y": -91.15
+        },
+        {
+            "name": "bone6",
+            "parent": "bone",
+            "length": 47.29,
+            "rotation": 167.33,
+            "x": 47.51,
+            "y": 16.04
+        },
+        {
+            "name": "bone7",
+            "parent": "bone",
+            "length": 49.93,
+            "rotation": -166.54,
+            "x": 48.23,
+            "y": -21.4
+        },
+        {
+            "name": "bone2",
+            "parent": "bone",
+            "length": 79.53,
+            "rotation": -158.63,
+            "x": 186.88,
+            "y": -29.4
+        },
+        {
+            "name": "bone8",
+            "parent": "bone2",
+            "length": 46.36,
+            "rotation": -17.86,
+            "x": 86.25,
+            "y": -9.83
+        },
+        {
+            "name": "bone9",
+            "parent": "bone",
+            "length": 134.21,
+            "rotation": 174.91,
+            "x": 207.05,
+            "y": 3.8
+        }
+    ],
+    "slots": [
+        {
+            "name": "BODY",
+            "bone": "bone9",
+            "attachment": "BODY"
+        },
+        {
+            "name": "L-ARM-1",
+            "bone": "root"
+        },
+        {
+            "name": "L-ARM-2",
+            "bone": "bone5",
+            "attachment": "L-ARM-2"
+        },
+        {
+            "name": "L-LEG",
+            "bone": "bone7",
+            "attachment": "L-LEG"
+        },
+        {
+            "name": "R-LEG",
+            "bone": "bone6",
+            "attachment": "R-LEG"
+        },
+        {
+            "name": "HEAD-1",
+            "bone": "bone2",
+            "attachment": "HEAD-2"
+        },
+        {
+            "name": "JAW",
+            "bone": "bone8",
+            "attachment": "JAW"
+        },
+        {
+            "name": "R-ARM-1",
+            "bone": "bone3",
+            "attachment": "R-ARM-1"
+        },
+        {
+            "name": "R-ARM-2",
+            "bone": "bone4",
+            "attachment": "R-ARM-2"
+        }
+    ],
+    "skins": [
+        {
+            "name": "default",
+            "attachments": {
+                "BODY": {
+                    "BODY": {
+                        "x": 82.52,
+                        "y": 14.84,
+                        "rotation": 94.51,
+                        "width": 164,
+                        "height": 199
+                    }
+                },
+                "JAW": {
+                    "JAW": {
+                        "x": -0.74,
+                        "y": -2.28,
+                        "rotation": 85.91,
+                        "width": 128,
+                        "height": 101
+                    }
+                },
+                "L-ARM-2": {
+                    "L-ARM-2": {
+                        "x": 6.87,
+                        "y": -1.85,
+                        "rotation": 42.44,
+                        "width": 116,
+                        "height": 110
+                    }
+                },
+                "L-LEG": {
+                    "L-LEG": {
+                        "x": 27.97,
+                        "y": -15.34,
+                        "rotation": 75.96,
+                        "width": 67,
+                        "height": 36
+                    }
+                },
+                "R-ARM-1": {
+                    "R-ARM-1": {
+                        "x": 61.14,
+                        "y": -3.49,
+                        "rotation": 128.32,
+                        "width": 93,
+                        "height": 100
+                    }
+                },
+                "R-ARM-2": {
+                    "R-ARM-2": {
+                        "x": 40.01,
+                        "y": -2.07,
+                        "rotation": 82.6,
+                        "width": 102,
+                        "height": 117
+                    }
+                },
+                "R-LEG": {
+                    "R-LEG": {
+                        "x": 26.06,
+                        "y": 0.63,
+                        "rotation": 102.09,
+                        "width": 69,
+                        "height": 52
+                    }
+                }
+            }
+        },
+        {
+            "name": "golemRunSkins1",
+            "attachments": {
+                "HEAD-1": {
+                    "HEAD-2": {
+                        "name": "HEAD-1",
+                        "x": 50.1,
+                        "y": 1.26,
+                        "rotation": 68.05,
+                        "width": 109,
+                        "height": 112
+                    }
+                }
+            }
+        },
+        {
+            "name": "golemRunSkins2",
+            "attachments": {
+                "HEAD-1": {
+                    "HEAD-2": {
+                        "x": 50.1,
+                        "y": 1.26,
+                        "rotation": 68.05,
+                        "width": 109,
+                        "height": 112
+                    }
+                }
+            }
+        }
+    ],
+    "animations": {
+        "jump": {
+            "bones": {
+                "bone3": {
+                    "rotate": [
+                        {},
+                        {
+                            "time": 0.6667,
+                            "angle": 40
+                        },
+                        {
+                            "time": 1.3333
+                        }
+                    ]
+                },
+                "bone5": {
+                    "rotate": [
+                        {},
+                        {
+                            "time": 0.6667,
+                            "angle": -30
+                        },
+                        {
+                            "time": 1.3333
+                        }
+                    ]
+                }
+            }
+        },
+        "run": {
+            "bones": {
+                "bone6": {
+                    "rotate": [
+                        {},
+                        {
+                            "time": 0.5,
+                            "angle": -40
+                        },
+                        {
+                            "time": 1
+                        }
+                    ]
+                },
+                "bone7": {
+                    "rotate": [
+                        {},
+                        {
+                            "time": 0.5,
+                            "angle": 40
+                        },
+                        {
+                            "time": 1
+                        }
+                    ]
+                },
+                "bone3": {
+                    "rotate": [
+                        {},
+                        {
+                            "time": 0.5,
+                            "angle": 50
+                        },
+                        {
+                            "time": 1
+                        }
+                    ]
+                },
+                "bone4": {
+                    "rotate": [
+                        {},
+                        {
+                            "time": 0.5,
+                            "angle": 10
+                        },
+                        {
+                            "time": 1
+                        }
+                    ]
+                },
+                "bone5": {
+                    "rotate": [
+                        {},
+                        {
+                            "time": 0.5,
+                            "angle": 30
+                        },
+                        {
+                            "time": 1
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

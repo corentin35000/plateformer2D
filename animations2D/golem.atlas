@@ -1,0 +1,76 @@
+
+golem.png
+size: 605,222
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+BODY
+  rotate: false
+  xy: 2, 21
+  size: 164, 199
+  orig: 164, 199
+  offset: 0, 0
+  index: -1
+HEAD-1
+  rotate: false
+  xy: 383, 108
+  size: 109, 112
+  orig: 109, 112
+  offset: 0, 0
+  index: -1
+HEAD-2
+  rotate: false
+  xy: 494, 108
+  size: 109, 112
+  orig: 109, 112
+  offset: 0, 0
+  index: -1
+JAW
+  rotate: true
+  xy: 168, 92
+  size: 128, 101
+  orig: 128, 101
+  offset: 0, 0
+  index: -1
+L-ARM-1
+  rotate: true
+  xy: 168, 4
+  size: 86, 119
+  orig: 86, 119
+  offset: 0, 0
+  index: -1
+L-ARM-2
+  rotate: true
+  xy: 271, 104
+  size: 116, 110
+  orig: 116, 110
+  offset: 0, 0
+  index: -1
+L-LEG
+  rotate: false
+  xy: 503, 16
+  size: 67, 36
+  orig: 67, 36
+  offset: 0, 0
+  index: -1
+R-ARM-1
+  rotate: false
+  xy: 289, 2
+  size: 93, 100
+  orig: 93, 100
+  offset: 0, 0
+  index: -1
+R-ARM-2
+  rotate: true
+  xy: 384, 4
+  size: 102, 117
+  orig: 102, 117
+  offset: 0, 0
+  index: -1
+R-LEG
+  rotate: false
+  xy: 503, 54
+  size: 69, 52
+  orig: 69, 52
+  offset: 0, 0
+  index: -1

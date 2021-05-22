@@ -1,5 +1,34 @@
 local menu = {}
 
+-- Les images du background du Menu et les bouttons du Menu.
+imgMenu = {} 
+imgMenu.background = nil
+imgMenu.play = nil
+imgMenu.options = nil
+imgMenu.exit = nil
+
+
+
+
+
+
+function menu.Load()
+
+  -- Initialiser/Charger les images du Menu
+  imgMenu.background = love.graphics.newImage("assets/background_menu.jpg")
+  imgMenu.play = love.graphics.newImage("assets/menu_play.png")
+  imgMenu.options = love.graphics.newImage("assets/menu_options.png")
+  imgMenu.exit = love.graphics.newImage("assets/menu_exit.png")
+  
+end
+
+
+function menu.Update()
+
+  
+end
+
+
 function menu.Draw()
   
   -- Affichage du background du Menu.

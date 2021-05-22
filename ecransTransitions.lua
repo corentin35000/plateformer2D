@@ -22,8 +22,7 @@ counterOpacityGameOver = 1;
 
 
 
-
-function ecransTransitions.Update()
+function ecransTransitions.Update(dt)
   
   -- Ecran de transition (opacity) a la fin du SplashScreen et au début de la scène du Menu.
   if playingVideo == true and counterOpacitySplashScreen <= 1 and counterTimeSplashScreen >= 870 then
