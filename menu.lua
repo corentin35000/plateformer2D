@@ -11,7 +11,6 @@ imgMenu.exit = nil
 
 
 
-
 function menu.Load()
 
   -- Initialiser/Charger les images du Menu
@@ -20,6 +19,10 @@ function menu.Load()
   imgMenu.options = love.graphics.newImage("assets/menu_options.png")
   imgMenu.exit = love.graphics.newImage("assets/menu_exit.png")
   
+
+  -- Récupère le scaleX et scaleY pour adapter le background a n'importe quel taille d'écran.
+  imgBackgroundMenuScaleX, imgBackgroundMenuScaleY = getScaling(imgMenu.background)
+
 end
 
 
@@ -32,8 +35,8 @@ end
 function menu.Draw()
   
   -- Affichage du background du Menu.
-  love.graphics.draw(imgMenu.background, 0, 0)
-  
+  love.graphics.draw(imgMenu.background, 0, 0, 0, imgBackgroundMenuScaleX, imgBackgroundMenuScaleY)
+
 
   -- Affichages des bouttons du Menu.
   love.graphics.draw(imgMenu.play, (largeurEcran / 2), (hauteurEcran / 3), 0, 1, 1, imgMenu.play:getWidth() / 2, imgMenu.play:getHeight() / 2)

@@ -167,7 +167,7 @@ function player.Load()
 end
 
 function player.Update(dt)
-  --player.bonusPlayer(dt)
+  --player.bonusPlayer(dt)  
 end
 
 function player.Draw()

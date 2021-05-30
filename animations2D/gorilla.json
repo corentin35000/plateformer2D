@@ -1,0 +1,204 @@
+{
+    "skeleton": {
+        "hash": "kzKZY0sPrlXmM5uU1+KdPBZ3VzM",
+        "spine": "3.8.99",
+        "x": -109.11,
+        "y": 2.11,
+        "width": 256.08,
+        "height": 251.32,
+        "images": "./Gorilla/",
+        "audio": ""
+    },
+    "bones": [
+        {
+            "name": "root",
+            "x": 153.7,
+            "y": -155.75
+        },
+        {
+            "name": "bone",
+            "parent": "root",
+            "length": 206.07,
+            "rotation": 90.54,
+            "x": -150.2,
+            "y": 163.55
+        },
+        {
+            "name": "bone2",
+            "parent": "root",
+            "length": 48.42,
+            "rotation": -74.48,
+            "x": -127.52,
+            "y": 208.91
+        },
+        {
+            "name": "bone3",
+            "parent": "root",
+            "length": 47.79,
+            "rotation": -102.53,
+            "x": -166.4,
+            "y": 206.32
+        },
+        {
+            "name": "bone4",
+            "parent": "root",
+            "length": 84.37,
+            "rotation": -126.25,
+            "x": -167.7,
+            "y": 346.29
+        },
+        {
+            "name": "bone5",
+            "parent": "bone4",
+            "length": 84.91,
+            "rotation": 34.94,
+            "x": 89.57,
+            "y": 0.59
+        },
+        {
+            "name": "bone6",
+            "parent": "root",
+            "length": 68.04,
+            "rotation": -40.36,
+            "x": -95.12,
+            "y": 242.61
+        },
+        {
+            "name": "bone7",
+            "parent": "root",
+            "length": 139.66,
+            "rotation": -38.78,
+            "x": -146.32,
+            "y": 367.67
+        }
+    ],
+    "slots": [
+        {
+            "name": "L-ARM-2",
+            "bone": "bone6",
+            "attachment": "L-ARM-2"
+        },
+        {
+            "name": "BODY",
+            "bone": "bone",
+            "attachment": "BODY"
+        },
+        {
+            "name": "HEAD",
+            "bone": "bone7",
+            "attachment": "HEAD"
+        },
+        {
+            "name": "L-ARM-1",
+            "bone": "root"
+        },
+        {
+            "name": "R-ARM-1",
+            "bone": "bone4",
+            "attachment": "R-ARM-1"
+        },
+        {
+            "name": "L-LEG",
+            "bone": "bone2",
+            "attachment": "L-LEG"
+        },
+        {
+            "name": "R-LEG",
+            "bone": "bone3",
+            "attachment": "R-LEG"
+        },
+        {
+            "name": "R-ARM-2",
+            "bone": "bone5",
+            "attachment": "R-ARM-2"
+        }
+    ],
+    "skins": [
+        {
+            "name": "default",
+            "attachments": {
+                "BODY": {
+                    "BODY": {
+                        "x": 124.49,
+                        "y": -10.29,
+                        "rotation": -90.54,
+                        "width": 142,
+                        "height": 178
+                    }
+                },
+                "HEAD": {
+                    "HEAD": {
+                        "x": 80.03,
+                        "y": 2.73,
+                        "rotation": 38.78,
+                        "width": 151,
+                        "height": 179
+                    }
+                },
+                "L-ARM-2": {
+                    "L-ARM-2": {
+                        "x": 24.47,
+                        "y": 18.66,
+                        "rotation": 40.36,
+                        "width": 97,
+                        "height": 104
+                    }
+                },
+                "L-LEG": {
+                    "L-LEG": {
+                        "x": 19.56,
+                        "y": -9.81,
+                        "rotation": 74.48,
+                        "width": 67,
+                        "height": 49
+                    }
+                },
+                "R-ARM-1": {
+                    "R-ARM-1": {
+                        "x": 58.07,
+                        "y": -5.16,
+                        "rotation": 126.25,
+                        "width": 87,
+                        "height": 98
+                    }
+                },
+                "R-ARM-2": {
+                    "R-ARM-2": {
+                        "x": 37.19,
+                        "y": -0.77,
+                        "rotation": 91.31,
+                        "width": 82,
+                        "height": 107
+                    }
+                },
+                "R-LEG": {
+                    "R-LEG": {
+                        "x": 20.96,
+                        "y": 9.21,
+                        "rotation": 102.53,
+                        "width": 69,
+                        "height": 52
+                    }
+                }
+            }
+        }
+    ],
+    "animations": {
+        "walk": {
+            "bones": {
+                "bone4": {
+                    "rotate": [
+                        {},
+                        {
+                            "time": 0.5,
+                            "angle": 70
+                        },
+                        {
+                            "time": 1
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

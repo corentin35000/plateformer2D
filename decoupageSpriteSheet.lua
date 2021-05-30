@@ -1,18 +1,13 @@
 local decoupageSpriteSheet = {}
 
--- Load toute les Spritesheets
-
-
--- Tableau a deux dimensions.
-data = {}
-
 -- Découpage d'une Spritesheet.
--- decoupeSpriteSheet(0, 0, largeurImg, hauteurImg, nombreImgParColonne, nombreImgParLigne, imgSpriteSheetAnimation , nomKeyTableauAnimation)
-function decoupeSpriteSheet(pPixelWidth, pPixelHeight, pImgWidth, pImgHeight, pNombreColonneSpriteSheet, pNombreLignSpriteSheet, pImgSpriteSheetAnim, pKeyTableau)
-    local data2 = {}
+-- decoupeSpriteSheet(0, 0, largeurImg, hauteurImg, nombreImgParColonneSpriteSheet, nombreLignSpriteSheet, pNombreColonneADeduire, imgSpriteSheet)
+function decoupeSpriteSheet(pPixelWidth, pPixelHeight, pImgWidth, pImgHeight, pNombreColonneSpriteSheet, pNombreLignSpriteSheet, pNombreColonneADeduire, pImgSpriteSheet)
+    local arrayQuad = {}
 
-    nombreColonneImg = pNombreColonneSpriteSheet 
+    counterNombreColonneSpriteSheet = 0 
     nombreTotalColonnes = pNombreLignSpriteSheet * pNombreColonneSpriteSheet 
+    nombreTotalColonnes = nombreTotalColonnes - pNombreColonneADeduire
 
     for i=0,nombreTotalColonnes,1 do
         if i == nombreTotalColonnes then
@@ -24,39 +19,20 @@ function decoupeSpriteSheet(pPixelWidth, pPixelHeight, pImgWidth, pImgHeight, pN
             end
 
             -- Change de ligne dans la SpriteSheet (axe y)
-            if i == pNombreColonneSpriteSheet then
-                pNombreColonneSpriteSheet = pNombreColonneSpriteSheet + pNombreColonneSpriteSheet
+            if counterNombreColonneSpriteSheet == pNombreColonneSpriteSheet then
                 pPixelWidth = 0
                 pPixelHeight = pPixelHeight + pImgHeight
+                counterNombreColonneSpriteSheet = 0
             end
+
+            counterNombreColonneSpriteSheet = counterNombreColonneSpriteSheet + 1
         end
 
-        local quad = love.graphics.newQuad(pPixelWidth, pPixelHeight, pImgWidth, pImgHeight, pImgSpriteSheetAnim)
-        table.insert(animation, quad)
+        local quad = love.graphics.newQuad(pPixelWidth, pPixelHeight, pImgWidth, pImgHeight, pImgSpriteSheet)
+        table.insert(arrayQuad, quad)
     end
 
-    data[pKeyTableau] = data2 -- Ajout dans le tableau a deux dimensions.
-end
-
-
-
-
-
-
-
-function decoupageSpriteSheet.Load()
-    --decoupeSpriteSheet(0, 0, 102, 79, 7, 2, imgTileMapSpriteSheet, 'tileMapDesert')
-    -- Creer la propriétée data.frames pour changer d'image dynamiquement
-end
-
-function decoupageSpriteSheet.Update()
- 
-end
-
-function decoupageSpriteSheet.Draw()
-    --local frameArrondie = math.floor(animationsPlayer.frames)
-
-    --love.graphics.draw(imgGolemSpritesheetRun, animationGolemRun[frameArrondie], Hero.x, Hero.y, 0, rotationImgX, rotationImgY, Hero.img:getWidth() / 2, Hero.img:getHeight() / 2)
+    return arrayQuad
 end
 
 return decoupageSpriteSheet

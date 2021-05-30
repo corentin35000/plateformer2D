@@ -17,24 +17,44 @@ ecransTransitionsModule = require("ecransTransitions")
 playerModule = require("player")
 splashcreenModule = require("splashscreen")
 menuModule = require("menu")
-tileMapsModule = require("tileMaps")
 gameoverModule = require("gameover")
 gameplayModule = require("gameplay")
 controlesModule = require("controles")
 collisionsModule = require("collisions")
 animationsCharactersModule = require("animationsCharacters")
 decoupageSpriteSheetModule = require("decoupageSpriteSheet")
+cameraModule = require("camera")
+tileMapsEditorModule = require("tileMapsEditor")
+scenesModule = require("scenes")
+animationsParticulesFXEffetsModule = require("animationsParticulesFXEffets")
+sauvegardeModule = require("sauvegarde")
 
 
 -- Scènes de jeu différentes
 sceneMenu = false
 sceneGameplay = true
 sceneGameOver = false
+sceneTileMapEditor = false
 
 
 -- Par rapport au click et au Menu.
 sceneGameplayActiver = false
 sceneInGameplayActiver = false
+
+
+-- Pour adapter une image a la taille d'écran actuel du joueur, grâce au scaleX et scaleY (background..)
+-- Load : imageScaleX, imageScaleY = getScaling(img)
+-- Draw : love.graphics.draw(img, x, y, 0, imageScaleX, imageScaleY)
+function getScaling(image)
+	local imgWidth = image:getWidth()
+	local imgHeight = image:getHeight()
+
+	local scaleX = largeurEcran / imgWidth
+	local scaleY = hauteurEcran / imgHeight
+
+	return scaleX, scaleY
+end
+
 
 
 
@@ -69,7 +89,7 @@ function love.load()
 
 
   -- Module splashscreen.lua (Load)
-  splashcreenModule.Load() 
+  --splashcreenModule.Load() 
 
 
   -- Module menu.lua (Load)
@@ -82,6 +102,10 @@ function love.load()
 
   -- Module player.lua (Load)
   playerModule.Load()
+
+
+  -- Module tileMapsEditor.lua (Load)
+  tileMapsEditorModule.Load()
 
 end
 
@@ -104,9 +128,12 @@ function love.update(dt)
   playerModule.Update(dt)
 
 
+  -- Le module tileMapsEditor.lua de la fonction Update
+  tileMapsEditorModule.Update(dt)
+
+
   -- Le module ecransTransitions.lua de la fonction Update
   ecransTransitionsModule.Update(dt)
-
 end
 
 
@@ -116,8 +143,12 @@ end
 
 function love.draw()
 
-  -- Remmettre playingVideo a true apres les test
-  if playingVideo == false then
+  if sceneTileMapEditor == true then
+  -- Le module tileMapEditor.lua de la fonction Draw
+  tileMapsEditorModule.Draw()
+
+  --remettre a true playingvideo..
+  elseif playingVideo == true then
     -- Le module splashscreen.lua de la fonction Draw
     splashcreenModule.Draw()    
 
@@ -129,10 +160,11 @@ function love.draw()
     -- Le module menu.lua de la fonction Draw
     menuModule.Draw()
     
-    
+    love.graphics.printf(text, 0, 0, love.graphics.getWidth())
+
     -- Effet de transition d'écran
     ecransTransitionsModule.Draw.Menu()
-
+ 
   elseif sceneGameplay == true then
     -- Le module player.lua de la fonction Draw
     playerModule.Draw()
@@ -173,9 +205,11 @@ function love.keypressed(key, isrepeat)
   if key == "w" then 
     love.event.quit('restart')
   end
-  
+
+  tileMapsEditorModule.keypressed(key, isrepeat)
+
   print(key)
-  
+
 end
 
 
@@ -188,7 +222,19 @@ function love.mousepressed(x, y, button, isTouch)
   if x >= largeurEcran / 2  and sceneMenu == true then
     sceneGameplayActiver = true
   end
-  
+
+  tileMapsEditorModule.mousepressed(x, y, button, isTouch)
+
   print ("x : " .. x .. " - y : " .. y)
+
+end
+
+
+
+
+
+function love.textinput(event)
+
+  tileMapsEditorModule.textinput(event)
 
 end
