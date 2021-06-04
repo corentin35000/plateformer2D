@@ -21,8 +21,7 @@ function menu.Load()
   
 
   -- Récupère le scaleX et scaleY pour adapter le background a n'importe quel taille d'écran.
-  imgBackgroundMenuScaleX, imgBackgroundMenuScaleY = getScaling(imgMenu.background)
-
+  imgBackgroundMenuScaleX, imgBackgroundMenuScaleY = adaptImageToScreenSizeModule(imgMenu.background)
 end
 
 

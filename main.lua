@@ -28,6 +28,7 @@ tileMapsEditorModule = require("tileMapsEditor")
 scenesModule = require("scenes")
 animationsParticulesFXEffetsModule = require("animationsParticulesFXEffets")
 sauvegardeModule = require("sauvegarde")
+adaptImageToScreenSizeModule = require("adaptImageToScreenSize")
 
 
 -- Scènes de jeu différentes
@@ -40,20 +41,6 @@ sceneTileMapEditor = false
 -- Par rapport au click et au Menu.
 sceneGameplayActiver = false
 sceneInGameplayActiver = false
-
-
--- Pour adapter une image a la taille d'écran actuel du joueur, grâce au scaleX et scaleY (background..)
--- Load : imageScaleX, imageScaleY = getScaling(img)
--- Draw : love.graphics.draw(img, x, y, 0, imageScaleX, imageScaleY)
-function getScaling(image)
-	local imgWidth = image:getWidth()
-	local imgHeight = image:getHeight()
-
-	local scaleX = largeurEcran / imgWidth
-	local scaleY = hauteurEcran / imgHeight
-
-	return scaleX, scaleY
-end
 
 
 
@@ -147,10 +134,9 @@ function love.draw()
   -- Le module tileMapEditor.lua de la fonction Draw
   tileMapsEditorModule.Draw()
 
-  --remettre a true playingvideo..
   elseif playingVideo == true then
     -- Le module splashscreen.lua de la fonction Draw
-    splashcreenModule.Draw()    
+    --splashcreenModule.Draw()    
 
 
     -- Effet de transition d'écran
@@ -160,7 +146,6 @@ function love.draw()
     -- Le module menu.lua de la fonction Draw
     menuModule.Draw()
     
-    love.graphics.printf(text, 0, 0, love.graphics.getWidth())
 
     -- Effet de transition d'écran
     ecransTransitionsModule.Draw.Menu()
@@ -178,7 +163,9 @@ function love.draw()
     ecransTransitionsModule.Draw.GamePlay()
     
   elseif sceneGameOver == true then
+
     love.graphics.graphics("PERDU", largeurEcran / 2, hauteurEcran / 2)
+
   end
 
 end
@@ -208,7 +195,7 @@ function love.keypressed(key, isrepeat)
 
   tileMapsEditorModule.keypressed(key, isrepeat)
 
-  print(key)
+  --print(key)
 
 end
 
@@ -225,7 +212,7 @@ function love.mousepressed(x, y, button, isTouch)
 
   tileMapsEditorModule.mousepressed(x, y, button, isTouch)
 
-  print ("x : " .. x .. " - y : " .. y)
+  --print ("x : " .. x .. " - y : " .. y)
 
 end
 
