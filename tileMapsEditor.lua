@@ -7,18 +7,23 @@
 -- 5) On peux Load une Map créer avant en la chargeant en mettant le numéro du niveau.
 -- 6) On peux supprimer un niveau de Map qui a était créer et sauvegarder.
 
+-- Créer au minimum un fichier : map.lua -> local map = {} return map : Puis faire un require("map") dans main.lua
 
--- IMPORTANT (POSSIBILITER) :
--- Remettre la possibilité de pouvoir changer la LARGEUR/HAUTEUR DE LA MAP même après création du niveau de la MAP.
- -----------------------------------------------------------------
+-- BUGS : 
+-- Impossible d'effacer quand dans l'input : SAVE_MAP (input)
+-- Impossible de load la dernière map après sa création, obliger de relancer Love2D. (function loadMap())
+-- Bug quand j'import le reste des maps dans la deuxième étape. (function saveMap())
+
+-----------------------------------------------------------------
 
 
 local tileMapsEditor = {}
 
-local utf8 = require("utf8")
-
-
 --
+require("map")
+  
+
+-- Toute les données importante de l'éditeur de Map.
 ORIENTATION_TILES = "Orthogonale"
 MAP_WIDTH = 0
 MAP_HEIGHT = 0
@@ -31,7 +36,7 @@ CURRENT_LIGNE = 0
 CURRENT_COLONNE = 0
 MAP_NIVEAU = "?"
 LOAD_MAP = "" 
-DELETE_MAP = ""
+SAVE_MAP = ""
 
 
 --
@@ -72,7 +77,7 @@ inputText.TILE_HEIGHT = { txt = TILE_HEIGHT, widthFont = font:getWidth('TILE_HEI
 inputText.GENERATE_MAP = { widthFont = font:getWidth('GENERATE MAP :') }
 inputText.NEW_MAP = { widthFont = font:getWidth('NEW MAP :') }
 inputText.LOAD_MAP = { txt = "", widthFont = font:getWidth('LOAD_MAP : ' .. LOAD_MAP) }
-inputText.DELETE_MAP = { txt = DELETE_MAP, widthFont = font:getWidth('DELETE_MAP : ' .. DELETE_MAP) }
+inputText.SAVE_MAP = { txt = SAVE_MAP, widthFont = font:getWidth('SAVE_MAP : ' .. SAVE_MAP) }
 
 inputText.backgroundColorRed = { widthFont = font:getWidth('Background-color (r) : ' .. backgroundColor.red) }
 inputText.backgroundColorGreen = { widthFont = font:getWidth('Background-color (r) : ' .. backgroundColor.green) }
@@ -200,12 +205,11 @@ function drawTileRedOrTexture()
             love.graphics.setColor(255, 0, 0, 0.3)    
             love.graphics.rectangle("fill", offsetXColonne, offsetYLigne, TILE_WIDTH, TILE_HEIGHT)
             love.graphics.setColor(1, 1, 1, 1)
-
         else
             -- Affiche la taille d'une Tile a l'écrans sur la grille au survol on vois apparaitre la Tile en transparent qui a était choisi.
-            --love.graphics.setColor(1, 1, 1, 0.5)    
-            --love.graphics.draw(Game.TileSheets[Game.TileSheetActive], Game.TileTextures[Game.TileSheetActive][1], offsetXColonne, offsetYLigne)
-            --love.graphics.setColor(1, 1, 1, 1)
+            love.graphics.setColor(48, 140, 198, 0.3)    
+            love.graphics.rectangle("fill", offsetXColonne, offsetYLigne, TILE_WIDTH, TILE_HEIGHT)
+            love.graphics.setColor(1, 1, 1, 1)
         end
     end
 end
@@ -286,7 +290,7 @@ function guiTileMapEditor()
     love.graphics.print('GENERATE MAP', 0 - window.translate.x, 200 - window.translate.y)
     love.graphics.print('NEW MAP', 0 - window.translate.x, 220 - window.translate.y)
     love.graphics.printf('LOAD_MAP : ' .. inputText.LOAD_MAP.txt, 0 - window.translate.x, 240 - window.translate.y, love.graphics.getWidth())
-    love.graphics.printf('DELETE_MAP : '  .. inputText.DELETE_MAP.txt, 0 - window.translate.x, 260 - window.translate.y, love.graphics.getWidth())
+    love.graphics.printf('SAVE_MAP : '  .. inputText.SAVE_MAP.txt, 0 - window.translate.x, 260 - window.translate.y, love.graphics.getWidth())
     
     love.graphics.print('Background-color (r) : ' .. backgroundColor.red, 0 - window.translate.x, 300 - window.translate.y)
     love.graphics.print('Background-color (g) : ' .. backgroundColor.green, 0 - window.translate.x, 320 - window.translate.y)
@@ -435,10 +439,10 @@ function generateMap()
     map.TILE_WIDTH = tonumber(inputText.TILE_WIDTH.txt)
     map.TILE_HEIGHT = tonumber(inputText.TILE_HEIGHT.txt)
 
-    for l=0,MAP_HEIGHT do
+    for l=1,MAP_HEIGHT do
         local lineTable = {}
 
-        for c=0,MAP_WIDTH do
+        for c=1,MAP_WIDTH do
             local colonne = 0 -- 0 = aucune Tile
             lineTable[c] = colonne
         end
@@ -448,8 +452,76 @@ function generateMap()
 
     table.insert(Game.MapNiveau, map)
 
-    Game.MapNiveauActive = #Game.MapNiveau
-    MAP_NIVEAU = Game.MapNiveauActive
+    if TileMaps == nil then
+        Game.MapNiveauActive = 1
+        MAP_NIVEAU = Game.MapNiveauActive
+    else
+        Game.MapNiveauActive = #TileMaps + 1
+        MAP_NIVEAU = Game.MapNiveauActive
+    end
+
+    -- Je commence a reparcourir ma map qui a était créer précédement plus haut, 
+    -- pour permettre d'inserer dans le fichier avec une indentation propre..etc
+    data = nil
+    lengthLigneMap = #Game.MapNiveau[#Game.MapNiveau]
+    lengthColonneMap = #Game.MapNiveau[#Game.MapNiveau][1]
+
+    for l=1,lengthLigneMap do
+        local ligne = "                    { "
+
+        for c=1,lengthColonneMap do
+            if c == lengthColonneMap then
+                ligne = ligne .. Game.MapNiveau[#Game.MapNiveau][lengthLigneMap][lengthColonneMap]
+            else
+                ligne = ligne .. Game.MapNiveau[#Game.MapNiveau][lengthLigneMap][lengthColonneMap] .. ", "
+            end
+        end
+
+        ligne = ligne .. " },"
+        
+        if l ~= 1 then
+            data = data .. "\n" .. ligne
+        else
+            data = ligne
+        end
+    end
+
+    dataMap = "                {" .. "\n" ..
+                    data .. "\n" .. "\n" ..
+                    "                    MAP_WIDTH = " .. MAP_WIDTH .. "," .. "\n" ..
+                    "                    MAP_HEIGHT = " .. MAP_HEIGHT .. "," .. "\n" ..
+                    "                    TILE_WIDTH = " .. TILE_WIDTH .. "," .. "\n" ..
+                    "                    TILE_HEIGHT = " .. TILE_HEIGHT .. "," .. "\n" ..
+              "                },"
+
+    fileData = "local map = {}" .. "\n" .. "\n" ..
+               "ORIENTATION_TILES = " .. '"' .. ORIENTATION_TILES .. '"' .. "\n" ..
+               "TILE_OFFSETX = " .. 0 .. "\n" ..
+               "TILE_OFFSETY = " .. 0 .. "\n" ..
+               "TileMaps = {" .. "\n" .. dataMap .. "\n" .. "           }" .. "\n" .. "\n" ..
+               "return map"
+
+    -- Bugs je suis obliger de déclarer deux fichiers pour récupèrer la longueur du fichier et toute la chaîne de caractères.
+    file1 = io.open(pathCurrent .. '/map.lua', "r")
+    file2 = io.open(pathCurrent .. '/map.lua', "r")
+    fileDataLength = #file1:read("*all")
+    fileDataCurrent = file2:read("*all")
+
+    -- Si il y a au moins une map de créer alors..
+    if fileDataLength >= 50 then
+        fileDataCurrent = string.sub(fileDataCurrent, 1, fileDataLength - 15)
+        fileData = fileDataCurrent .. "\n" .. dataMap .. "\n" .. "           }" .. "\n" .. "\n" .. "return map"
+
+        file = io.open(pathCurrent .. '/map.lua', 'w+')
+        file:write(fileData)
+        file:close()
+    else
+        -- Si jamais il n'y a encore aucune Map 
+        -- J'ouvre le fichier, puis j'écrase ce qui a dessus et j'écris les nouvelles données.
+        file = io.open(pathCurrent .. '/map.lua', 'w+')
+        file:write(fileData)
+        file:close()
+    end
 end
 
 
@@ -457,12 +529,12 @@ end
 function loadMap(pNiveauMap)
     pNiveauMap = tonumber(pNiveauMap)
     
-    if Game.MapNiveau[pNiveauMap] ~= nil then
-        MAP_WIDTH = Game.MapNiveau[pNiveauMap].MAP_WIDTH 
-        MAP_HEIGHT = Game.MapNiveau[pNiveauMap].MAP_HEIGHT 
+    if TileMaps[pNiveauMap] ~= nil then -- BUG QUAND JE CREE UNE MAP, ET QUE J ESSAYE DE LOAD LA DERNIERE MAP SA MARCHE PAS
+        MAP_WIDTH = TileMaps[pNiveauMap].MAP_WIDTH 
+        MAP_HEIGHT = TileMaps[pNiveauMap].MAP_HEIGHT 
 
-        TILE_WIDTH = Game.MapNiveau[pNiveauMap].TILE_WIDTH 
-        TILE_HEIGHT = Game.MapNiveau[pNiveauMap].TILE_HEIGHT
+        TILE_WIDTH = TileMaps[pNiveauMap].TILE_WIDTH 
+        TILE_HEIGHT = TileMaps[pNiveauMap].TILE_HEIGHT
 
         inputText.MAP_WIDTH.txt = MAP_WIDTH
         inputText.MAP_HEIGHT.txt = MAP_HEIGHT
@@ -479,23 +551,143 @@ function loadMap(pNiveauMap)
 end
 
 
--- Delete un niveau de map
-function deleteMap(pNiveauMap)
+-- Sauvegarde la Map actuellement chargée dans l'éditeur de niveau.
+function saveMap(pNiveauMap)
     pNiveauMap = tonumber(pNiveauMap)
 
-    if Game.MapNiveau[pNiveauMap] ~= nil then
-        if pNiveauMap == Game.MapNiveauActive then
-            newMap()
-            table.remove(Game.MapNiveau, pNiveauMap) 
-        else
-            table.remove(Game.MapNiveau, pNiveauMap) 
-        end
-    end
+    if TileMaps[pNiveauMap] ~= nil then
+        local lengthLigneMap = TileMaps[pNiveauMap].MAP_HEIGHT
+        local lengthColonneMap = TileMaps[pNiveauMap].MAP_WIDTH
 
+        -- Test
+        TileMaps[pNiveauMap][1][1] = 1
+        TileMaps[pNiveauMap][1][2] = 2
+
+        --
+        local data = nil
+
+        for l=1,lengthLigneMap do
+            local ligne = "                    { "
+
+            for c=1,lengthColonneMap do
+                if c == lengthColonneMap then
+                    ligne = ligne .. TileMaps[pNiveauMap][l][c]
+                else
+                    ligne = ligne .. TileMaps[pNiveauMap][l][c] .. ", "
+                end
+            end
+
+            ligne = ligne .. " },"
+            
+            if l ~= 1 then
+                data = data .. "\n" .. ligne
+            else
+                data = ligne
+            end
+        end
+
+        dataMapChanger = "                {" .. "\n" ..
+                            data .. "\n" .. "\n" ..
+                        "                    MAP_WIDTH = " .. MAP_WIDTH .. "," .. "\n" ..
+                        "                    MAP_HEIGHT = " .. MAP_HEIGHT .. "," .. "\n" ..
+                        "                    TILE_WIDTH = " .. TILE_WIDTH .. "," .. "\n" ..
+                        "                    TILE_HEIGHT = " .. TILE_HEIGHT .. "," .. "\n" ..
+                        "                },"
+
+        saveMapCurrent = pNiveauMap
+        lengthMaps = #TileMaps
+
+        dataMapsRestant = ""
+        dataMapsRestant2 = ""
+
+        dataDebutARecuperer = saveMapCurrent - 1 -- Le numéro du niveau - 1 pour récupèrer tout les niveaux avant 
+        dataFinARecuperer = lengthMaps
+
+        print('MAPS A RECUPERER AU DEBUT : ' .. dataDebutARecuperer) 
+        print('MAP A METTRE A JOUR : ' .. saveMapCurrent) -- mapData
+        print('MAPS A RECUPERER A LA FIN : ' .. dataFinARecuperer)
+        
+        --
+        file = io.open(pathCurrent .. '/map.lua', "r")
+        file2 = io.open(pathCurrent .. '/map.lua', "r")
+        counterLines = 0
+        counterLines2 = 0
+
+        for line in file2:lines() do
+            counterLines2 = counterLines2 + 1
+        end
+
+        for line in file:lines() do
+            if counterLines >= 6 then
+
+                if saveMapCurrent == 1 then
+                    leNumeroLigneACommencer = TileMaps[pNiveauMap].MAP_HEIGHT + 7 + 6
+
+                    if counterLines >= leNumeroLigneACommencer then
+                        dataMapsRestant = dataMapsRestant .. line .. "\n"
+                    end
+                elseif saveMapCurrent == lengthMaps then
+                    if counterLines < counterLines2 - (TileMaps[lengthMaps].MAP_HEIGHT + 10) then
+                        dataMapsRestant = dataMapsRestant .. line .. "\n"
+                    end
+                else
+                    leNumeroLigneACommencer = 7
+                    leNumeroLigneDeFin = 0
+
+                    for n=1,dataDebutARecuperer do
+                        leNumeroLigneDeFin = leNumeroLigneDeFin + (TileMaps[n].MAP_HEIGHT + 7)
+                    end
+
+                    leNumeroLigneACommencer2 = leNumeroLigneACommencer + leNumeroLigneDeFin + TileMaps[saveMapCurrent].MAP_HEIGHT + 7
+
+                    if counterLines < (leNumeroLigneACommencer + leNumeroLigneDeFin) then
+                        dataMapsRestant = dataMapsRestant .. line .. "\n"
+                    elseif counterLines >= leNumeroLigneACommencer2 then -- BUG POUR RECUPERER LE RESTE.
+                        dataMapsRestant2 = dataMapsRestant2 .. line .. "\n"
+                    end
+                end
+
+            end
+
+            counterLines = counterLines + 1
+        end
+
+
+        --print(dataMapsRestant)
+        --print(dataMapChanger)
+        --print(dataMapsRestant2)
+
+
+        if saveMapCurrent == 1 then -- Si c'est la map 1 de mon niveau.
+            fileData = "local map = {}" .. "\n" .. "\n" ..
+                        "ORIENTATION_TILES = " .. '"' .. ORIENTATION_TILES .. '"' .. "\n" ..
+                        "TILE_OFFSETX = " .. 0 .. "\n" ..
+                        "TILE_OFFSETY = " .. 0 .. "\n" ..
+                        "TileMaps = {" .. "\n" .. dataMapChanger .. "\n" ..dataMapsRestant
+
+        elseif saveMapCurrent == lengthMaps then -- Si c'est la derniere de mon niveau.
+            fileData = "local map = {}" .. "\n" .. "\n" ..
+                        "ORIENTATION_TILES = " .. '"' .. ORIENTATION_TILES .. '"' .. "\n" ..
+                        "TILE_OFFSETX = " .. 0 .. "\n" ..
+                        "TILE_OFFSETY = " .. 0 .. "\n" ..
+                        "TileMaps = {" .. "\n" .. dataMapsRestant .. dataMapChanger .. "\n" .. "           }" .. "\n" .. "\n" ..
+                        "return map"
+        else
+            fileData = "local map = {}" .. "\n" .. "\n" ..
+                        "ORIENTATION_TILES = " .. '"' .. ORIENTATION_TILES .. '"' .. "\n" ..
+                        "TILE_OFFSETX = " .. 0 .. "\n" ..
+                        "TILE_OFFSETY = " .. 0 .. "\n" ..
+                        "TileMaps = {" .. "\n" .. dataMapsRestant .. "\n" .. dataMapChanger .. "\n" .. dataMapsRestant2
+        end
+
+        file = io.open(pathCurrent .. '/map.lua', 'w+')
+        file:write(fileData)
+        file:close()
+    end
 end
 
 
--- Delete un niveau de map
+-- New map (reset)
 function newMap()
     MAP_WIDTH = 0
     MAP_HEIGHT = 0
@@ -522,6 +714,8 @@ end
 
 
 
+
+
 --[[   
 ██       ██████   █████  ██████  
 ██      ██    ██ ██   ██ ██   ██ 
@@ -531,6 +725,12 @@ end
 ]]
 
 function tileMapsEditor.Load()
+    -- Récupère le chemin jusqu'a avant le dossier du jeu, puis je récupère le nom du dossier du jeu.
+    path = love.filesystem.getSourceBaseDirectory()
+    dirNameGame = love.filesystem.getIdentity()
+    pathCurrent = path .. "/" .. dirNameGame
+
+
     -- Je charge toutes mes TileSheets (Une SpriteSheet qui contient des Tiles (Textures))
     -- loadTileSheets(nomDuDossier, nomFichierImg)
     loadTileSheets('assets', 'tileSet')
@@ -552,6 +752,9 @@ function tileMapsEditor.Load()
 
     --
     love.keyboard.setKeyRepeat(true)
+
+
+   
 end
 
 
@@ -675,8 +878,8 @@ function tileMapsEditor.textinput(event)
             inputText.TILE_HEIGHT.txt = inputText.TILE_HEIGHT.txt .. event
         elseif inputTextActive == "LOAD_MAP" then
             inputText.LOAD_MAP.txt = inputText.LOAD_MAP.txt .. event
-        elseif inputTextActive == "DELETE_MAP" then
-            inputText.DELETE_MAP.txt = inputText.DELETE_MAP.txt .. event
+        elseif inputTextActive == "SAVE_MAP" and MAP_NIVEAU ~= "?" then
+            inputText.SAVE_MAP.txt = inputText.SAVE_MAP.txt .. event
         end
     end
 
@@ -688,7 +891,7 @@ function tileMapsEditor.textinput(event)
     NOMBRE_COLONNE = MAP_WIDTH * TILE_WIDTH
     MAP_PIXELS = NOMBRE_LIGNE .. ' x ' .. NOMBRE_COLONNE .. ' pixels'
     LOAD_MAP = tonumber(inputText.LOAD_MAP.txt)
-    DELETE_MAP = tonumber(inputText.DELETE_MAP.txt)
+    SAVE_MAP = tonumber(inputText.SAVE_MAP.txt)
 end
 
 
@@ -805,11 +1008,11 @@ function tileMapsEditor.keypressed(key, isrepeat)
             GUI.imgFleche.y = GUI.imgFleche.y + 20
             inputTextActive = "LOAD_MAP"
         elseif GUI.imgFleche.x == inputText.LOAD_MAP.widthFont + 15 then
-            GUI.imgFleche.x = inputText.DELETE_MAP.widthFont + 15
+            GUI.imgFleche.x = inputText.SAVE_MAP.widthFont + 15
             GUI.imgFleche.y = GUI.imgFleche.y + 20
-            inputTextActive = "DELETE_MAP"
+            inputTextActive = "SAVE_MAP"
            ---------BUG A PARTIR D ICI ------------
-        --[[elseif GUI.imgFleche.x == inputText.DELETE_MAP.widthFont + 15 then
+        --[[elseif GUI.imgFleche.x == inputText.SAVE_MAP.widthFont + 15 then
             GUI.imgFleche.x = inputText.backgroundColorRed.widthFont + 15
             GUI.imgFleche.y = GUI.imgFleche.y + 40
             inputTextActive = "backgroundColorRed"
@@ -837,7 +1040,7 @@ function tileMapsEditor.keypressed(key, isrepeat)
         local byteoffsetTILE_WIDTH = utf8.offset(inputText.TILE_WIDTH.txt, -1)
         local byteoffsetTILE_HEIGHT = utf8.offset(inputText.TILE_HEIGHT.txt, -1)
         local byteoffsetLOAD_MAP = utf8.offset(inputText.LOAD_MAP.txt, -1)
-        local byteoffsetDELETE_MAP = utf8.offset(inputText.DELETE_MAP.txt, -1)
+        local byteoffsetSAVE_MAP = utf8.offset(inputText.SAVE_MAP.txt, -1)
 
         -- remove the last UTF-8 character.
         if byteoffsetMAP_WIDTH and inputTextActive == "MAP_WIDTH" then
@@ -881,18 +1084,18 @@ function tileMapsEditor.keypressed(key, isrepeat)
                 inputText.LOAD_MAP.txt = ""
                 LOAD_MAP = inputText.LOAD_MAP.txt
             else
-                inputText.LOAD_MAP.txt = string.sub(inputText.LOAD_MAP.txt, 1, byteoffsetTILE_HEIGHT - 1)
+                inputText.LOAD_MAP.txt = string.sub(inputText.LOAD_MAP.txt, 1, byteoffsetLOAD_MAP - 1)
                 inputText.LOAD_MAP.txt = tonumber(inputText.LOAD_MAP.txt)
                 LOAD_MAP = inputText.LOAD_MAP.txt
             end
-        elseif byteoffsetDELETE_MAP and inputTextActive == "DELETE_MAP" then
-            if tonumber(inputText.DELETE_MAP.txt) <= 9 then
-                inputText.DELETE_MAP.txt = ""
-                DELETE_MAP = inputText.DELETE_MAP.txt
+        elseif byteoffsetDELETE_MAP and inputTextActive == "SAVE_MAP" then
+            if tonumber(inputText.SAVE_MAP.txt) <= 9 then
+                inputText.SAVE_MAP.txt = ""
+                SAVE_MAP = inputText.SAVE_MAP.txt
             else
-                inputText.DELETE_MAP.txt = string.sub(inputText.DELETE_MAP.txt, 1, byteoffsetTILE_HEIGHT - 1)
-                inputText.DELETE_MAP.txt = tonumber(inputText.DELETE_MAP.txt)
-                DELETE_MAP = inputText.DELETE_MAP.txt
+                inputText.SAVE_MAP.txt = string.sub(inputText.SAVE_MAP.txt, 1, byteoffsetSAVE_MAP - 1)
+                inputText.SAVE_MAP.txt = tonumber(inputText.SAVE_MAP.txt)
+                SAVE_MAP = inputText.SAVE_MAP.txt
             end
         end
 
@@ -911,14 +1114,15 @@ function tileMapsEditor.keypressed(key, isrepeat)
                 ORIENTATION_TILES = "Orthogonale"
             end
         elseif inputTextActive == "GENERATE_MAP" then 
-            generateMap()
+            if MAP_NIVEAU == "?" then
+                generateMap()
+            end
         elseif inputTextActive == "NEW_MAP" then 
             newMap()
         elseif inputTextActive == "LOAD_MAP" then 
             loadMap(inputText.LOAD_MAP.txt)
-        elseif inputTextActive == "DELETE_MAP" then 
-            print(inputTextActive)
-            deleteMap(inputText.DELETE_MAP.txt)
+        elseif inputTextActive == "SAVE_MAP" then 
+            saveMap(inputText.SAVE_MAP.txt)
         end
     end
 

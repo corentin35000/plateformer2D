@@ -29,6 +29,8 @@ scenesModule = require("scenes")
 animationsParticulesFXEffetsModule = require("animationsParticulesFXEffets")
 sauvegardeModule = require("sauvegarde")
 adaptImageToScreenSizeModule = require("adaptImageToScreenSize")
+utf8 = require("utf8")
+mapModule = require("map")
 
 
 -- Scènes de jeu différentes
@@ -49,7 +51,6 @@ sceneInGameplayActiver = false
 
 
 function love.load()
-  
   -- Set Title game
   love.window.setTitle("Unstable World")
   
@@ -76,7 +77,7 @@ function love.load()
 
 
   -- Module splashscreen.lua (Load)
-  --splashcreenModule.Load() 
+  splashcreenModule.Load() 
 
 
   -- Module menu.lua (Load)
@@ -104,7 +105,7 @@ end
 function love.update(dt)
   
   -- Le module splashscreen.lua de la fonction Update
-  --splashcreenModule.Update()
+  splashcreenModule.Update()
 
 
   -- Le module animationsCharacters.lua de la fonction Update
@@ -136,7 +137,7 @@ function love.draw()
 
   elseif playingVideo == true then
     -- Le module splashscreen.lua de la fonction Draw
-    --splashcreenModule.Draw()    
+    splashcreenModule.Draw()    
 
 
     -- Effet de transition d'écran
