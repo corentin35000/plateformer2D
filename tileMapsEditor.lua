@@ -1,20 +1,23 @@
---------------DOCUMENTATION DU FRAMEWORK------------------------
+--------------DOCUMENTATION DU FRAMEWORK-----------------------------------------
 
--- 1) Quand on lance l'éditeur on'as aucune map créer encore, le niveau de la map est affichée si c'est : 'MAP_NIVEAU : ?' c'est que c'est une nouvelle map non sauvegarder.
+-- 1) Quand on lance l'éditeur on'as aucune map créer encore, si le niveau de la map est affichée comme ceci : 'MAP_NIVEAU : ?' c'est que c'est une nouvelle map non sauvegarder.
 -- 2) Donc quand on n'as : '?' il faut configurer la LARGEUR/HAUTEUR de la MAP/TILES puis aller sur 'GENERATE MAP' et faire 'ENTER' pour générer la MAP.
 -- 3) Quand on créer un niveau de Map on'as normalement : 'MAP_NIVEAU' : 1.. 2.. avec le niveau actuelle de la TileMap du niveau.
 -- 4) Quand on n'es sur un niveau de map en cours sur l'éditeur de Map il faut faire : 'NEW MAP' ça va regénérer une nouvelle map VIDE et faut la reconfigurer et faire GENERATE_MAP.
--- 5) On peux Load une Map créer avant en la chargeant en mettant le numéro du niveau.
--- 6) On peux supprimer un niveau de Map qui a était créer et sauvegarder.
+-- 5) On peux Load une Map créer auparavant en la chargeant en mettant le numéro du niveau.
 
--- Créer au minimum un fichier : map.lua -> local map = {} return map : Puis faire un require("map") dans main.lua
 
--- BUGS : 
--- Impossible d'effacer quand dans l'input : SAVE_MAP (input)
--- Impossible de load la dernière map après sa création, obliger de relancer Love2D. (function loadMap())
--- Bug quand j'import le reste des maps dans la deuxième étape. (function saveMap())
+-- A FAIRE MANUELLEMENT : 
 
------------------------------------------------------------------
+-- 1) Il faudra charger manuellement les TileSheets a la ligne 742 comme ci-dessous a la suite des autres : 
+-- Description de la fonction : loadTileSheets(nomDuDossier, nomFichierImgTileSheet)
+-- Exemple : loadTileSheets('assets', 'tileSet')
+
+-- 2) Supprimer une map il faudra le faire manuellement dans le fichier : map.lua
+
+-- 3) Créer au minimum un fichier : map.lua à la racine du projet -> local map = {} return map : Puis faire un require("map") dans main.lua
+
+-----------------------------------------------------------------------------------
 
 
 local tileMapsEditor = {}
@@ -75,9 +78,9 @@ inputText.TILE_WIDTH = { txt = TILE_WIDTH, widthFont = font:getWidth('TILE_WIDTH
 inputText.TILE_HEIGHT = { txt = TILE_HEIGHT, widthFont = font:getWidth('TILE_HEIGHT : ' .. TILE_HEIGHT) }
 
 inputText.GENERATE_MAP = { widthFont = font:getWidth('GENERATE MAP :') }
-inputText.NEW_MAP = { widthFont = font:getWidth('NEW MAP :') }
+inputText.NEW_MAP = { widthFont = font:getWidth('NEW MAP') }
 inputText.LOAD_MAP = { txt = "", widthFont = font:getWidth('LOAD_MAP : ' .. LOAD_MAP) }
-inputText.SAVE_MAP = { txt = SAVE_MAP, widthFont = font:getWidth('SAVE_MAP : ' .. SAVE_MAP) }
+inputText.SAVE_MAP = { txt = SAVE_MAP, widthFont = font:getWidth('SAVE_MAP') }
 
 inputText.backgroundColorRed = { widthFont = font:getWidth('Background-color (r) : ' .. backgroundColor.red) }
 inputText.backgroundColorGreen = { widthFont = font:getWidth('Background-color (r) : ' .. backgroundColor.green) }
@@ -290,8 +293,8 @@ function guiTileMapEditor()
     love.graphics.print('GENERATE MAP', 0 - window.translate.x, 200 - window.translate.y)
     love.graphics.print('NEW MAP', 0 - window.translate.x, 220 - window.translate.y)
     love.graphics.printf('LOAD_MAP : ' .. inputText.LOAD_MAP.txt, 0 - window.translate.x, 240 - window.translate.y, love.graphics.getWidth())
-    love.graphics.printf('SAVE_MAP : '  .. inputText.SAVE_MAP.txt, 0 - window.translate.x, 260 - window.translate.y, love.graphics.getWidth())
-    
+    love.graphics.printf('SAVE_MAP'  .. inputText.SAVE_MAP.txt, 0 - window.translate.x, 260 - window.translate.y, love.graphics.getWidth())
+
     love.graphics.print('Background-color (r) : ' .. backgroundColor.red, 0 - window.translate.x, 300 - window.translate.y)
     love.graphics.print('Background-color (g) : ' .. backgroundColor.green, 0 - window.translate.x, 320 - window.translate.y)
     love.graphics.print('Background-color (b) : ' .. backgroundColor.blue, 0 - window.translate.x, 340 - window.translate.y)
@@ -299,23 +302,24 @@ function guiTileMapEditor()
 
     love.graphics.print('Opacity - Lines Grille Map : ' .. colorLinesGrilleMap.alpha, 0 - window.translate.x, 400 - window.translate.y)
 
-    love.graphics.print('MOUSE.X : ' .. mouse.posX, 0 - window.translate.x, 440 - window.translate.y)
-    love.graphics.print('MOUSE.Y : ' .. mouse.posY, 0 - window.translate.x, 460 - window.translate.y)
-    love.graphics.print('ZOOM : ' .. window.zoom, 0 - window.translate.x, 480 - window.translate.y)
+    love.graphics.print('MOUSE.X : ' .. mouse.posX, 0 - window.translate.x, 420 - window.translate.y)
+    love.graphics.print('MOUSE.Y : ' .. mouse.posY, 0 - window.translate.x, 440 - window.translate.y)
+    love.graphics.print('ZOOM : ' .. window.zoom, 0 - window.translate.x, 460 - window.translate.y)
 
-    love.graphics.print('F1 : Editor/Gameplay ', 0 - window.translate.x, 520 - window.translate.y)
-    love.graphics.print('F2 : Change la couleur des Lines/Pointiller de la GrilleMap', 0 - window.translate.x, 540 - window.translate.y)
-    love.graphics.print('F3 : Active/Désactive la Grille de la Map', 0 - window.translate.x, 560 - window.translate.y)
-    love.graphics.print('F4 : Camera + Zoom par défault', 0 - window.translate.x, 580 - window.translate.y)
-    love.graphics.print('F5 : Active/Désactive la GUI', 0 - window.translate.x, 600 - window.translate.y)
-    love.graphics.print('F6 : Remet par défault toute la GUI (background-color..)', 0 - window.translate.x, 620 - window.translate.y)
-    love.graphics.print('F7 : Les Lines/Pointiller de la Grille en mode doux/gras', 0 - window.translate.x, 640 - window.translate.y)
-    love.graphics.print('Boutton Molette : Remet le Zoom par défault', 0 - window.translate.x, 660 - window.translate.y)
+    love.graphics.print('F1 : Editor/Gameplay ', 0 - window.translate.x, 500 - window.translate.y)
+    love.graphics.print('F2 : Change la couleur des Lines/Pointiller de la GrilleMap', 0 - window.translate.x, 520 - window.translate.y)
+    love.graphics.print('F3 : Active/Désactive la Grille de la Map', 0 - window.translate.x, 540 - window.translate.y)
+    love.graphics.print('F4 : Camera + Zoom par défault', 0 - window.translate.x, 560 - window.translate.y)
+    love.graphics.print('F5 : Active/Désactive la GUI', 0 - window.translate.x, 580 - window.translate.y)
+    love.graphics.print('F6 : Remet par défault toute la GUI (background-color..)', 0 - window.translate.x, 600 - window.translate.y)
+    love.graphics.print('F7 : Les Lines/Pointiller de la Grille en mode doux/gras', 0 - window.translate.x, 620 - window.translate.y)
+    love.graphics.print('Boutton Molette : Remet le Zoom par défault', 0 - window.translate.x, 640 - window.translate.y)
 
-
-    --love.graphics.draw(GUI.imgGrilleMapActive, largeurEcran - GUI.imgGrilleMapActive:getWidth(), GUI.imgGrilleMapActive:getHeight(), 0, 1, 1, GUI.imgGrilleMapActive:getWidth() / 2, GUI.imgGrilleMapActive:getHeight() / 2)
-    --love.graphics.draw(GU    --love.graphics.draw(GUI.imgGrilleMapColor, largeurEcran - GUI.imgGrilleMapColor:getWidth(), GUI.imgGrilleMapColor:getHeight() + GUI.imgGrilleMapColor:getHeight() * 2, 0, 1, 1, GUI.imgGrilleMapColor:getWidth() / 2, GUI.imgGrilleMapColor:getHeight() / 2)
+    
+    --
     love.graphics.draw(GUI.imgFleche.img, GUI.imgFleche.x - window.translate.x, GUI.imgFleche.y - window.translate.y)
+    --
+    drawViewTiles()
 end
 
 
@@ -424,14 +428,6 @@ end
 
 -- Génere une Map avec largeur/hauteur de la Map et des Tiles souhaitée en changeant les valeurs et ensuite en cliquant sur le boutton "Generate Map".
 function generateMap()
-    -- Itere sur la table qui contient toute les TileSheets, puis découpe chaque images d'une TileSheet et les envoie dans la table : Game.TileTextures (tableaux a deux dimensions)
-    -- Decoupage une TileSheet en fonction des TILE_WIDTH et TILE_HEIGHT qui a était générer pour la map.
-    for nomTileSheet, imgTileSheet in pairs(Game.TileSheets) do
-        local tableTileSheetDecouper = decoupeSpriteSheet(0, 0, TILE_WIDTH, TILE_HEIGHT, 8, 14, 2, imgTileSheet) -- decoupeSpriteSheet() renvoie une table
-        Game.Tiles[nomTileSheet] = tableTileSheetDecouper
-    end
-
-
     -- Génére la Map.
     local map = {}
     map.MAP_WIDTH = tonumber(inputText.MAP_WIDTH.txt)
@@ -522,6 +518,9 @@ function generateMap()
         file:write(fileData)
         file:close()
     end
+
+    -- Après avoir générer une map, le fichier map.lua est modifier mais en mémoire dans Love2D rien n'est modifier donc on le charge a nouveau et on l'éxecute
+    love.filesystem.load("map.lua")()
 end
 
 
@@ -559,10 +558,7 @@ function saveMap(pNiveauMap)
         local lengthLigneMap = TileMaps[pNiveauMap].MAP_HEIGHT
         local lengthColonneMap = TileMaps[pNiveauMap].MAP_WIDTH
 
-        -- Test
         TileMaps[pNiveauMap][1][1] = 1
-        TileMaps[pNiveauMap][1][2] = 2
-
         --
         local data = nil
 
@@ -587,7 +583,7 @@ function saveMap(pNiveauMap)
         end
 
         dataMapChanger = "                {" .. "\n" ..
-                            data .. "\n" .. "\n" ..
+                                            data .. "\n" .. "\n" ..
                         "                    MAP_WIDTH = " .. MAP_WIDTH .. "," .. "\n" ..
                         "                    MAP_HEIGHT = " .. MAP_HEIGHT .. "," .. "\n" ..
                         "                    TILE_WIDTH = " .. TILE_WIDTH .. "," .. "\n" ..
@@ -602,10 +598,6 @@ function saveMap(pNiveauMap)
 
         dataDebutARecuperer = saveMapCurrent - 1 -- Le numéro du niveau - 1 pour récupèrer tout les niveaux avant 
         dataFinARecuperer = lengthMaps
-
-        print('MAPS A RECUPERER AU DEBUT : ' .. dataDebutARecuperer) 
-        print('MAP A METTRE A JOUR : ' .. saveMapCurrent) -- mapData
-        print('MAPS A RECUPERER A LA FIN : ' .. dataFinARecuperer)
         
         --
         file = io.open(pathCurrent .. '/map.lua', "r")
@@ -613,6 +605,24 @@ function saveMap(pNiveauMap)
         counterLines = 0
         counterLines2 = 0
 
+
+        leNumeroLigneACommencer = 6
+        leNumeroLigneDeFin = 0
+
+        -- Les données des maps a récupèrer au début
+        for n=1,dataDebutARecuperer do
+            leNumeroLigneDeFin = leNumeroLigneDeFin + (TileMaps[n].MAP_HEIGHT + 7)
+        end
+
+        -- Les données des maps a récupèrer après la map qui a était changer jusqu'a la fin du fichier.
+        leNumeroLigneACommencer2 = leNumeroLigneACommencer + leNumeroLigneDeFin + TileMaps[saveMapCurrent].MAP_HEIGHT + 7
+
+        if saveMapCurrent >= 3 then
+            leNumeroLigneDeFin = leNumeroLigneDeFin + saveMapCurrent - 2
+            leNumeroLigneACommencer2 = leNumeroLigneACommencer2 + saveMapCurrent - 2
+        end
+
+        --
         for line in file2:lines() do
             counterLines2 = counterLines2 + 1
         end
@@ -631,18 +641,9 @@ function saveMap(pNiveauMap)
                         dataMapsRestant = dataMapsRestant .. line .. "\n"
                     end
                 else
-                    leNumeroLigneACommencer = 7
-                    leNumeroLigneDeFin = 0
-
-                    for n=1,dataDebutARecuperer do
-                        leNumeroLigneDeFin = leNumeroLigneDeFin + (TileMaps[n].MAP_HEIGHT + 7)
-                    end
-
-                    leNumeroLigneACommencer2 = leNumeroLigneACommencer + leNumeroLigneDeFin + TileMaps[saveMapCurrent].MAP_HEIGHT + 7
-
-                    if counterLines < (leNumeroLigneACommencer + leNumeroLigneDeFin) then
+                    if counterLines <= (leNumeroLigneACommencer + leNumeroLigneDeFin) then
                         dataMapsRestant = dataMapsRestant .. line .. "\n"
-                    elseif counterLines >= leNumeroLigneACommencer2 then -- BUG POUR RECUPERER LE RESTE.
+                    elseif counterLines > leNumeroLigneACommencer2 then -- BUG POUR RECUPERER LE RESTE.
                         dataMapsRestant2 = dataMapsRestant2 .. line .. "\n"
                     end
                 end
@@ -653,17 +654,12 @@ function saveMap(pNiveauMap)
         end
 
 
-        --print(dataMapsRestant)
-        --print(dataMapChanger)
-        --print(dataMapsRestant2)
-
-
         if saveMapCurrent == 1 then -- Si c'est la map 1 de mon niveau.
             fileData = "local map = {}" .. "\n" .. "\n" ..
                         "ORIENTATION_TILES = " .. '"' .. ORIENTATION_TILES .. '"' .. "\n" ..
                         "TILE_OFFSETX = " .. 0 .. "\n" ..
                         "TILE_OFFSETY = " .. 0 .. "\n" ..
-                        "TileMaps = {" .. "\n" .. dataMapChanger .. "\n" ..dataMapsRestant
+                        "TileMaps = {" .. "\n" .. dataMapChanger .. "\n" .. dataMapsRestant
 
         elseif saveMapCurrent == lengthMaps then -- Si c'est la derniere de mon niveau.
             fileData = "local map = {}" .. "\n" .. "\n" ..
@@ -677,12 +673,16 @@ function saveMap(pNiveauMap)
                         "ORIENTATION_TILES = " .. '"' .. ORIENTATION_TILES .. '"' .. "\n" ..
                         "TILE_OFFSETX = " .. 0 .. "\n" ..
                         "TILE_OFFSETY = " .. 0 .. "\n" ..
-                        "TileMaps = {" .. "\n" .. dataMapsRestant .. "\n" .. dataMapChanger .. "\n" .. dataMapsRestant2
+                        "TileMaps = {" .. "\n" .. dataMapsRestant .. dataMapChanger .. "\n" .. dataMapsRestant2
         end
 
         file = io.open(pathCurrent .. '/map.lua', 'w+')
         file:write(fileData)
         file:close()
+
+        -- Après avoir sauvegarder les changement de la map, le fichier map.lua est modifier mais en mémoire dans Love2D rien n'est modifier 
+        -- Donc on le charge a nouveau et on l'éxecute
+        love.filesystem.load("map.lua")()
     end
 end
 
@@ -708,8 +708,48 @@ function newMap()
 end
 
 
+-- Charge les Tiles par rapport au TILE_WIDTH et TILE_HEIGHT de la map actuellement chargée.
+function loadTiles()
+    -- Reset la liste des Tiles a chaque nouveau chargement d'une nouvelle map si jamais les TILES_WIDTH et TILE_HEIGHT ne sont pas les mêmes
+    Game.Tiles = {}
+
+    -- Itere sur la table qui contient toute les TileSheets, puis découpe chaque images d'une TileSheet et les envoie dans la table : Game.TileTextures (tableaux a deux dimensions)
+    -- Decoupage une TileSheet en fonction des TILE_WIDTH et TILE_HEIGHT qui a était générer pour la map.
+    for nomTileSheet, imgTileSheet in pairs(Game.TileSheets) do
+        local tableTileSheetDecouper = decoupeSpriteSheet(0, 0, TILE_WIDTH, TILE_HEIGHT, 8, 14, 2, imgTileSheet) -- decoupeSpriteSheet() renvoie une table
+        Game.Tiles[nomTileSheet] = tableTileSheetDecouper
+    end
+end
 
 
+--
+function drawViewTiles()
+    if MAP_NIVEAU ~= "?" then
+            
+        local counterHeight = TILE_HEIGHT
+        for i=0,5 do
+            if i == 0 then
+                love.graphics.line(0, 0, NOMBRE_COLONNE, 0)
+                love.graphics.line(0, TILE_HEIGHT, NOMBRE_COLONNE, TILE_HEIGHT)
+            elseif i < MAP_HEIGHT then
+                counterHeight = counterHeight + TILE_HEIGHT
+                love.graphics.line(0, counterHeight, NOMBRE_COLONNE, counterHeight)
+            end
+        end 
+
+        local counterWidth = TILE_WIDTH
+        for i=0,5 do
+            if i == 0 then
+                love.graphics.line(0, 0, 0, NOMBRE_LIGNE)
+                love.graphics.line(TILE_WIDTH, 0, TILE_WIDTH, NOMBRE_LIGNE)
+            elseif i < MAP_WIDTH then
+                counterWidth = counterWidth + TILE_WIDTH
+                love.graphics.line(counterWidth, 0, counterWidth, NOMBRE_LIGNE)
+            end
+        end 
+
+    end 
+end
 
 
 
@@ -732,7 +772,7 @@ function tileMapsEditor.Load()
 
 
     -- Je charge toutes mes TileSheets (Une SpriteSheet qui contient des Tiles (Textures))
-    -- loadTileSheets(nomDuDossier, nomFichierImg)
+    -- loadTileSheets(nomDuDossier, nomFichierImgTileSheet)
     loadTileSheets('assets', 'tileSet')
                 
     
@@ -752,9 +792,6 @@ function tileMapsEditor.Load()
 
     --
     love.keyboard.setKeyRepeat(true)
-
-
-   
 end
 
 
@@ -878,8 +915,6 @@ function tileMapsEditor.textinput(event)
             inputText.TILE_HEIGHT.txt = inputText.TILE_HEIGHT.txt .. event
         elseif inputTextActive == "LOAD_MAP" then
             inputText.LOAD_MAP.txt = inputText.LOAD_MAP.txt .. event
-        elseif inputTextActive == "SAVE_MAP" and MAP_NIVEAU ~= "?" then
-            inputText.SAVE_MAP.txt = inputText.SAVE_MAP.txt .. event
         end
     end
 
@@ -891,7 +926,6 @@ function tileMapsEditor.textinput(event)
     NOMBRE_COLONNE = MAP_WIDTH * TILE_WIDTH
     MAP_PIXELS = NOMBRE_LIGNE .. ' x ' .. NOMBRE_COLONNE .. ' pixels'
     LOAD_MAP = tonumber(inputText.LOAD_MAP.txt)
-    SAVE_MAP = tonumber(inputText.SAVE_MAP.txt)
 end
 
 
@@ -1040,7 +1074,6 @@ function tileMapsEditor.keypressed(key, isrepeat)
         local byteoffsetTILE_WIDTH = utf8.offset(inputText.TILE_WIDTH.txt, -1)
         local byteoffsetTILE_HEIGHT = utf8.offset(inputText.TILE_HEIGHT.txt, -1)
         local byteoffsetLOAD_MAP = utf8.offset(inputText.LOAD_MAP.txt, -1)
-        local byteoffsetSAVE_MAP = utf8.offset(inputText.SAVE_MAP.txt, -1)
 
         -- remove the last UTF-8 character.
         if byteoffsetMAP_WIDTH and inputTextActive == "MAP_WIDTH" then
@@ -1088,15 +1121,6 @@ function tileMapsEditor.keypressed(key, isrepeat)
                 inputText.LOAD_MAP.txt = tonumber(inputText.LOAD_MAP.txt)
                 LOAD_MAP = inputText.LOAD_MAP.txt
             end
-        elseif byteoffsetDELETE_MAP and inputTextActive == "SAVE_MAP" then
-            if tonumber(inputText.SAVE_MAP.txt) <= 9 then
-                inputText.SAVE_MAP.txt = ""
-                SAVE_MAP = inputText.SAVE_MAP.txt
-            else
-                inputText.SAVE_MAP.txt = string.sub(inputText.SAVE_MAP.txt, 1, byteoffsetSAVE_MAP - 1)
-                inputText.SAVE_MAP.txt = tonumber(inputText.SAVE_MAP.txt)
-                SAVE_MAP = inputText.SAVE_MAP.txt
-            end
         end
 
         NOMBRE_LIGNE = MAP_HEIGHT * TILE_HEIGHT 
@@ -1117,12 +1141,18 @@ function tileMapsEditor.keypressed(key, isrepeat)
             if MAP_NIVEAU == "?" then
                 generateMap()
             end
-        elseif inputTextActive == "NEW_MAP" then 
+        elseif inputTextActive == "NEW_MAP" then
             newMap()
+            inputText.LOAD_MAP.txt = ""
+            LOAD_MAP = inputText.LOAD_MAP.txt
         elseif inputTextActive == "LOAD_MAP" then 
             loadMap(inputText.LOAD_MAP.txt)
-        elseif inputTextActive == "SAVE_MAP" then 
-            saveMap(inputText.SAVE_MAP.txt)
+            loadTiles()
+        
+            inputText.LOAD_MAP.txt = ""
+            LOAD_MAP = inputText.LOAD_MAP.txt
+        elseif inputTextActive == "SAVE_MAP" and MAP_NIVEAU ~= "?" then 
+            saveMap(MAP_NIVEAU)
         end
     end
 
@@ -1176,30 +1206,6 @@ end
 ]]
 
 function tileMapsEditor.mousepressed(x, y, button, isTouch)
-
-    -- Img boutton imgGrilleMap  / La map avec grille ou sans grille
-    --if x <= largeurEcran - GUI.imgGrilleMapActive:getWidth() / 2 and x >= largeurEcran - (GUI.imgGrilleMapActive:getWidth() + (GUI.imgGrilleMapActive:getWidth() / 2)) and
-       --y >= largeurEcran - GUI.imgGrilleMapActive:getHeight() / 2 and y <= GUI.imgGrilleMapActive:getHeight() + (GUI.imgGrilleMapActive:getHeight() / 2) and sceneTileMapEditor == true then
-    
-        --if GUI.grilleMapActive == true then 
-            --GUI.grilleMapActive = false
-        --else
-            --GUI.grilleMapActive = true
-       -- end
-    --end 
-    
-    
-    -- Img boutton GrilleMapColor  / Changer la couleur blanc ou noir 
-    --if x <= largeurEcran - GUI.imgGrilleMapColor:getWidth() / 2 and x >= largeurEcran - (GUI.imgGrilleMapColor:getWidth() + (GUI.imgGrilleMapColor:getWidth() / 2)) then
-    
-        --if GUI. == 'black' then 
-            --GUI.grilleMapColor = 'white'
-        --else
-           -- GUI.grilleMapColor = 'black'
-        --end
-    --end
-
-
     -- Appuie sur le boutton de la roulette = Remet le ZoomX et ZoomY par défault
     if button == 3 then
         window.zoom = 1
