@@ -22,7 +22,6 @@
 
 local tileMapsEditor = {}
 
---
 require("map")
   
 
@@ -45,6 +44,7 @@ SAVE_MAP = ""
 --
 Game = {}
 Game.TileSheets = {}
+Game.TileSheetsActive = {}
 Game.Tiles = {}
 Game.TileActive = nil
 Game.MapNiveau = {}
@@ -103,7 +103,8 @@ GUI.grilleMapChangedColorWhite = love.graphics.setColor(1, 1, 1)
 GUI.grilleMapChangedColorBlack = love.graphics.setColor(0, 0, 0)
 GUI.drawGUIandText = true
 GUI.imgFleche = { img = nil, x = inputText.ORIENTATION_TILES.widthFont + 15, y = 0 }
-
+GUI.imgButtonDessinerGrille = nil
+GUI.imgButtonGommeGrille = nil
 
 --
 local mouse = {}
@@ -270,13 +271,6 @@ function colorBackgroundMap(pRed, pGreen, pBlue, pAlpha)
 end
 
 
--- Je charge une TileSheets et l'envoie dans la table : Game.TileSheets
-function loadTileSheets(pNomDossierRessources, pNomFicherTileSheet)
-    local tileSheet = love.graphics.newImage(pNomDossierRessources .. "/" .. pNomFicherTileSheet .. ".png")
-    Game.TileSheets[pNomFicherTileSheet] = tileSheet
-end
-
-
 -- GUI tileMapsEditor
 function guiTileMapEditor()
     -- inputText + Affichage de certaines données
@@ -315,10 +309,12 @@ function guiTileMapEditor()
     love.graphics.print('F7 : Les Lines/Pointiller de la Grille en mode doux/gras', 0 - window.translate.x, 620 - window.translate.y)
     love.graphics.print('Boutton Molette : Remet le Zoom par défault', 0 - window.translate.x, 640 - window.translate.y)
 
-    
+
     --
     love.graphics.draw(GUI.imgFleche.img, GUI.imgFleche.x - window.translate.x, GUI.imgFleche.y - window.translate.y)
-    --
+    love.graphics.draw(GUI.imgButtonDessinerGrille, largeurEcran - GUI.imgButtonDessinerGrille:getWidth() - window.translate.x, GUI.imgButtonDessinerGrille:getHeight() - window.translate.y, 0, 1, 1, GUI.imgButtonDessinerGrille:getWidth() / 2, GUI.imgButtonDessinerGrille:getHeight() / 2)
+    love.graphics.draw(GUI.imgButtonGommeGrille, largeurEcran - GUI.imgButtonGommeGrille:getWidth() - window.translate.x, GUI.imgButtonGommeGrille:getHeight() + GUI.imgButtonGommeGrille:getHeight() - window.translate.y, 0, 1, 1, GUI.imgButtonGommeGrille:getWidth() / 2, GUI.imgButtonGommeGrille:getHeight() / 2)
+    
     drawViewTiles()
 end
 
@@ -558,7 +554,6 @@ function saveMap(pNiveauMap)
         local lengthLigneMap = TileMaps[pNiveauMap].MAP_HEIGHT
         local lengthColonneMap = TileMaps[pNiveauMap].MAP_WIDTH
 
-        TileMaps[pNiveauMap][1][1] = 1
         --
         local data = nil
 
@@ -708,47 +703,110 @@ function newMap()
 end
 
 
+-- Je charge une TileSheets et l'envoie dans la table : Game.TileSheets
+function loadTileSheets(pNomDossierRessources, pNomFicherTileSheet)
+    local tileSheet = love.graphics.newImage(pNomDossierRessources .. "/" .. pNomFicherTileSheet .. ".png")
+    table.insert(Game.TileSheets, tileSheet)
+end
+
+
 -- Charge les Tiles par rapport au TILE_WIDTH et TILE_HEIGHT de la map actuellement chargée.
 function loadTiles()
     -- Reset la liste des Tiles a chaque nouveau chargement d'une nouvelle map si jamais les TILES_WIDTH et TILE_HEIGHT ne sont pas les mêmes
     Game.Tiles = {}
+    Game.TileSheetsActive = {}
 
     -- Itere sur la table qui contient toute les TileSheets, puis découpe chaque images d'une TileSheet et les envoie dans la table : Game.TileTextures (tableaux a deux dimensions)
     -- Decoupage une TileSheet en fonction des TILE_WIDTH et TILE_HEIGHT qui a était générer pour la map.
     for nomTileSheet, imgTileSheet in pairs(Game.TileSheets) do
         local tableTileSheetDecouper = decoupeSpriteSheet(0, 0, TILE_WIDTH, TILE_HEIGHT, 8, 14, 2, imgTileSheet) -- decoupeSpriteSheet() renvoie une table
-        Game.Tiles[nomTileSheet] = tableTileSheetDecouper
+
+        for key, imgTile in pairs(tableTileSheetDecouper) do
+            table.insert(Game.Tiles, imgTile)
+        end 
+
+        table.insert(Game.TileSheetsActive, #Game.Tiles)
     end
 end
 
 
 --
 function drawViewTiles()
-    if MAP_NIVEAU ~= "?" then
-            
-        local counterHeight = TILE_HEIGHT
-        for i=0,5 do
-            if i == 0 then
-                love.graphics.line(0, 0, NOMBRE_COLONNE, 0)
-                love.graphics.line(0, TILE_HEIGHT, NOMBRE_COLONNE, TILE_HEIGHT)
-            elseif i < MAP_HEIGHT then
-                counterHeight = counterHeight + TILE_HEIGHT
-                love.graphics.line(0, counterHeight, NOMBRE_COLONNE, counterHeight)
+    if MAP_NIVEAU ~= "?" and TILE_HEIGHT ~= 0 and TILE_WIDTH ~= 0 then
+        --
+        local ligneViewTile = 5
+        local colonneViewTile = 5
+
+
+        -- La taille de la Grille de la View des Tiles
+        local grilleViewTilesWidth = ligneViewTile * TILE_WIDTH
+        local grilleViewTilesHeight = colonneViewTile * TILE_HEIGHT
+
+
+        -- Fond noir (rect)
+        love.graphics.setColor(0, 0, 0, 1)
+        love.graphics.rectangle("fill", largeurEcran - grilleViewTilesWidth - window.translate.x, hauteurEcran - grilleViewTilesWidth - window.translate.y, grilleViewTilesWidth, grilleViewTilesHeight)
+
+
+        -- Je set la couleur pour les lignes ci-dessous.
+        love.graphics.setColor(137, 137, 137, 1)
+
+
+        -- GrilleMap de la View des Tiles
+        local counterHeight = grilleViewTilesHeight - TILE_HEIGHT
+        for l=0,grilleViewTilesHeight do
+            if l == 0 then
+                love.graphics.line(largeurEcran - grilleViewTilesHeight - window.translate.x, hauteurEcran - grilleViewTilesHeight - window.translate.y, largeurEcran - window.translate.x, hauteurEcran - grilleViewTilesHeight - window.translate.y)
+                love.graphics.line(largeurEcran - grilleViewTilesHeight - window.translate.x, (hauteurEcran - counterHeight) - window.translate.y, largeurEcran - window.translate.x, (hauteurEcran - counterHeight) - window.translate.y)
+            elseif l <= MAP_HEIGHT then
+                counterHeight = counterHeight - TILE_HEIGHT
+                love.graphics.line(largeurEcran - grilleViewTilesHeight - window.translate.x, (hauteurEcran - counterHeight) - window.translate.y, largeurEcran - window.translate.x, (hauteurEcran - counterHeight) - window.translate.y)
             end
         end 
 
-        local counterWidth = TILE_WIDTH
-        for i=0,5 do
-            if i == 0 then
-                love.graphics.line(0, 0, 0, NOMBRE_LIGNE)
-                love.graphics.line(TILE_WIDTH, 0, TILE_WIDTH, NOMBRE_LIGNE)
-            elseif i < MAP_WIDTH then
-                counterWidth = counterWidth + TILE_WIDTH
-                love.graphics.line(counterWidth, 0, counterWidth, NOMBRE_LIGNE)
+        local counterWidth = grilleViewTilesWidth - TILE_WIDTH
+        for c=0,grilleViewTilesWidth do
+            if c == 0 then
+                love.graphics.line(largeurEcran - grilleViewTilesWidth - window.translate.x, hauteurEcran - grilleViewTilesWidth - window.translate.y, largeurEcran - grilleViewTilesWidth - window.translate.x, hauteurEcran - window.translate.y)
+                love.graphics.line((largeurEcran - counterWidth) - window.translate.x, hauteurEcran - grilleViewTilesWidth - window.translate.y, (largeurEcran - counterWidth) - window.translate.x, hauteurEcran - window.translate.y)
+            elseif c <= MAP_WIDTH then
+                counterWidth = counterWidth - TILE_WIDTH
+                love.graphics.line((largeurEcran - counterWidth) - window.translate.x, hauteurEcran - grilleViewTilesWidth - window.translate.y, (largeurEcran - counterWidth) - window.translate.x, hauteurEcran - window.translate.y)
             end
-        end 
+        end
 
-    end 
+
+        --
+        local ligneViewForTile = #Game.Tiles / ligneViewTile
+        local allTiles = #Game.Tiles
+
+        local counterTileWidth2 = 0
+        local counterTileHeight2 = 0
+
+        local counterTiles = 1
+        local currentTileSheet = 0
+
+        for l=1,ligneViewForTile do 
+            for c=1,colonneViewTile do
+                for i=1,#Game.TileSheetsActive do
+                    if counterTiles <= Game.TileSheetsActive[i] then
+                        currentTileSheet = i
+                    end
+                end
+
+                love.graphics.draw(Game.TileSheets[currentTileSheet], Game.Tiles[counterTiles], largeurEcran - (grilleViewTilesWidth - counterTileWidth2) - window.translate.x, hauteurEcran - (grilleViewTilesHeight + counterTileHeight2) - window.translate.y)
+
+                counterTileWidth2 = counterTileWidth2 + TILE_WIDTH -- remmettre +
+                counterTiles = counterTiles + 1
+            end
+
+            counterTileWidth2 = 0
+            counterTileHeight2 = counterTileHeight2 - TILE_HEIGHT -- remettre : -
+        end
+
+        --print(counterTiles)
+        love.graphics.setColor(1, 1, 1, 1)
+    end
 end
 
 
@@ -774,11 +832,12 @@ function tileMapsEditor.Load()
     -- Je charge toutes mes TileSheets (Une SpriteSheet qui contient des Tiles (Textures))
     -- loadTileSheets(nomDuDossier, nomFichierImgTileSheet)
     loadTileSheets('assets', 'tileSet')
-                
+    loadTileSheets('assets', 'tileSet')
+
     
     -- Je charge les images de la GUI de l'éditeur de Map
-    GUI.imgButtonGrilleMapActive = love.graphics.newImage("assets/grilleButton.png")
-    GUI.imgButtonGrilleMapColor = love.graphics.newImage("assets/grilleColorButton.png")
+    GUI.imgButtonDessinerGrille = love.graphics.newImage("assets/dessinerGrille.png")
+    GUI.imgButtonGommeGrille = love.graphics.newImage("assets/gommeGrille.png")
     GUI.imgFleche.img = love.graphics.newImage("assets/flecheGauche.png")
 
 
