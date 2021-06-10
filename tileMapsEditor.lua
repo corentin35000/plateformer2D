@@ -51,6 +51,16 @@ Game.MapNiveau = {}
 Game.MapNiveauActive = nil
 
 
+-- Données View Tiles
+ligneViewTile = 0
+colonneViewTile = 0
+grilleViewTilesWidth = 0
+grilleViewTilesHeight = 0
+inGrilleMapViewTiles = false
+clickInOneTile = false
+clickTileCurrentColonne = 0
+clickTileCurrentLigne = 0
+
 --
 local backgroundColor = {}
 backgroundColor.red = 137/255
@@ -296,18 +306,18 @@ function guiTileMapEditor()
 
     love.graphics.print('Opacity - Lines Grille Map : ' .. colorLinesGrilleMap.alpha, 0 - window.translate.x, 400 - window.translate.y)
 
-    love.graphics.print('MOUSE.X : ' .. mouse.posX, 0 - window.translate.x, 420 - window.translate.y)
-    love.graphics.print('MOUSE.Y : ' .. mouse.posY, 0 - window.translate.x, 440 - window.translate.y)
-    love.graphics.print('ZOOM : ' .. window.zoom, 0 - window.translate.x, 460 - window.translate.y)
+    love.graphics.print('MOUSE.X : ' .. mouse.posX, 0 - window.translate.x, 440 - window.translate.y)
+    love.graphics.print('MOUSE.Y : ' .. mouse.posY, 0 - window.translate.x, 460 - window.translate.y)
+    love.graphics.print('ZOOM : ' .. window.zoom, 0 - window.translate.x, 480 - window.translate.y)
 
-    love.graphics.print('F1 : Editor/Gameplay ', 0 - window.translate.x, 500 - window.translate.y)
-    love.graphics.print('F2 : Change la couleur des Lines/Pointiller de la GrilleMap', 0 - window.translate.x, 520 - window.translate.y)
-    love.graphics.print('F3 : Active/Désactive la Grille de la Map', 0 - window.translate.x, 540 - window.translate.y)
-    love.graphics.print('F4 : Camera + Zoom par défault', 0 - window.translate.x, 560 - window.translate.y)
-    love.graphics.print('F5 : Active/Désactive la GUI', 0 - window.translate.x, 580 - window.translate.y)
-    love.graphics.print('F6 : Remet par défault toute la GUI (background-color..)', 0 - window.translate.x, 600 - window.translate.y)
-    love.graphics.print('F7 : Les Lines/Pointiller de la Grille en mode doux/gras', 0 - window.translate.x, 620 - window.translate.y)
-    love.graphics.print('Boutton Molette : Remet le Zoom par défault', 0 - window.translate.x, 640 - window.translate.y)
+    love.graphics.print('F1 : Editor/Gameplay ', 0 - window.translate.x, 520 - window.translate.y)
+    love.graphics.print('F2 : Change la couleur des Lines/Pointiller de la GrilleMap', 0 - window.translate.x, 540 - window.translate.y)
+    love.graphics.print('F3 : Active/Désactive la Grille de la Map', 0 - window.translate.x, 560 - window.translate.y)
+    love.graphics.print('F4 : Camera + Zoom par défault', 0 - window.translate.x, 580 - window.translate.y)
+    love.graphics.print('F5 : Active/Désactive la GUI', 0 - window.translate.x, 600 - window.translate.y)
+    love.graphics.print('F6 : Remet par défault toute la GUI (background-color..)', 0 - window.translate.x, 620 - window.translate.y)
+    love.graphics.print('F7 : Les Lines/Pointiller de la Grille en mode doux/gras', 0 - window.translate.x, 640 - window.translate.y)
+    love.graphics.print('Boutton Molette : Remet le Zoom par défault', 0 - window.translate.x, 660 - window.translate.y)
 
 
     --
@@ -315,7 +325,12 @@ function guiTileMapEditor()
     love.graphics.draw(GUI.imgButtonDessinerGrille, largeurEcran - GUI.imgButtonDessinerGrille:getWidth() - window.translate.x, GUI.imgButtonDessinerGrille:getHeight() - window.translate.y, 0, 1, 1, GUI.imgButtonDessinerGrille:getWidth() / 2, GUI.imgButtonDessinerGrille:getHeight() / 2)
     love.graphics.draw(GUI.imgButtonGommeGrille, largeurEcran - GUI.imgButtonGommeGrille:getWidth() - window.translate.x, GUI.imgButtonGommeGrille:getHeight() + GUI.imgButtonGommeGrille:getHeight() - window.translate.y, 0, 1, 1, GUI.imgButtonGommeGrille:getWidth() / 2, GUI.imgButtonGommeGrille:getHeight() / 2)
     
+
     drawViewTiles()
+
+
+    --
+    getPositionCursorInGrilleMapViewTiles()
 end
 
 
@@ -733,24 +748,58 @@ end
 --
 function drawViewTiles()
     if MAP_NIVEAU ~= "?" and TILE_HEIGHT ~= 0 and TILE_WIDTH ~= 0 then
-        --
-        local ligneViewTile = 5
-        local colonneViewTile = 5
+        -- Nombre de lignes et colonne de la GrilleMap de la View des Tiles.
+        ligneViewTile = 5
+        colonneViewTile = 5
 
 
         -- La taille de la Grille de la View des Tiles
-        local grilleViewTilesWidth = ligneViewTile * TILE_WIDTH
-        local grilleViewTilesHeight = colonneViewTile * TILE_HEIGHT
+        grilleViewTilesWidth = ligneViewTile * TILE_WIDTH
+        grilleViewTilesHeight = colonneViewTile * TILE_HEIGHT
 
 
         -- Fond noir (rect)
         love.graphics.setColor(0, 0, 0, 1)
         love.graphics.rectangle("fill", largeurEcran - grilleViewTilesWidth - window.translate.x, hauteurEcran - grilleViewTilesWidth - window.translate.y, grilleViewTilesWidth, grilleViewTilesHeight)
+        love.graphics.setColor(1, 1, 1, 1)
 
 
-        -- Je set la couleur pour les lignes ci-dessous.
+
+        -- Dessine toute les Tiles des SpriteSheet dans la View Tiles.
+        local ligneViewForTile = #Game.Tiles / ligneViewTile
+        local allTiles = #Game.Tiles
+
+        local counterTileWidth2 = 0
+        local counterTileHeight2 = 0
+
+        local counterTiles = 1
+        local currentTileSheet = 0
+
+        -- Bug : Il y a 220 Tiles et sa boucle 221 fois
+        for l=1,ligneViewForTile do 
+            for c=1,colonneViewTile do
+                for i=1,#Game.TileSheetsActive do
+                    if counterTiles <= Game.TileSheetsActive[i] then
+                        currentTileSheet = i
+                    end
+                end
+
+                love.graphics.draw(Game.TileSheets[currentTileSheet], Game.Tiles[counterTiles], largeurEcran - (grilleViewTilesWidth - counterTileWidth2) - window.translate.x, hauteurEcran - (grilleViewTilesHeight + counterTileHeight2) - window.translate.y)
+
+                counterTileWidth2 = counterTileWidth2 + TILE_WIDTH -- remmettre +
+                counterTiles = counterTiles + 1
+            end
+
+            counterTileWidth2 = 0
+            counterTileHeight2 = counterTileHeight2 - TILE_HEIGHT -- remettre : -
+        end
+
+        --print(counterTiles)
+
+
+
+        -- Je set la couleur pour les lignes de la GrilleMap de la View des Tiles, pour ci-dessous.
         love.graphics.setColor(137, 137, 137, 1)
-
 
         -- GrilleMap de la View des Tiles
         local counterHeight = grilleViewTilesHeight - TILE_HEIGHT
@@ -775,39 +824,54 @@ function drawViewTiles()
             end
         end
 
-
-        --
-        local ligneViewForTile = #Game.Tiles / ligneViewTile
-        local allTiles = #Game.Tiles
-
-        local counterTileWidth2 = 0
-        local counterTileHeight2 = 0
-
-        local counterTiles = 1
-        local currentTileSheet = 0
-
-        for l=1,ligneViewForTile do 
-            for c=1,colonneViewTile do
-                for i=1,#Game.TileSheetsActive do
-                    if counterTiles <= Game.TileSheetsActive[i] then
-                        currentTileSheet = i
-                    end
-                end
-
-                love.graphics.draw(Game.TileSheets[currentTileSheet], Game.Tiles[counterTiles], largeurEcran - (grilleViewTilesWidth - counterTileWidth2) - window.translate.x, hauteurEcran - (grilleViewTilesHeight + counterTileHeight2) - window.translate.y)
-
-                counterTileWidth2 = counterTileWidth2 + TILE_WIDTH -- remmettre +
-                counterTiles = counterTiles + 1
-            end
-
-            counterTileWidth2 = 0
-            counterTileHeight2 = counterTileHeight2 - TILE_HEIGHT -- remettre : -
-        end
-
-        --print(counterTiles)
+        -- Remet la palette de couleur par défault.
         love.graphics.setColor(1, 1, 1, 1)
     end
 end
+
+
+-- 
+function getPositionCursorInGrilleMapViewTiles()
+    local mouseX = love.mouse.getX()
+    local mouseY = love.mouse.getY()
+    
+    colonnesCursorInGrilleMap2 = ((mouseX - largeurEcran) + grilleViewTilesWidth) / TILE_WIDTH
+    lignesCursorInGrilleMap2 = ((mouseY - hauteurEcran) + grilleViewTilesHeight) / TILE_HEIGHT
+
+    lignesCursorInGrilleMap2 = math.floor(lignesCursorInGrilleMap2)
+    colonnesCursorInGrilleMap2 = math.floor(colonnesCursorInGrilleMap2)
+
+    CURRENT_LIGNE2 = lignesCursorInGrilleMap2
+    CURRENT_COLONNE2 = colonnesCursorInGrilleMap2
+
+    if mouseX >= (largeurEcran - grilleViewTilesWidth) and mouseY >= (hauteurEcran - grilleViewTilesHeight) then
+        inGrilleMapViewTiles = true
+
+        --print("LIGNE : " .. CURRENT_LIGNE2)
+        --print("COLONNE : " .. CURRENT_COLONNE2)
+
+        if clickInOneTile == false then
+            love.graphics.setColor(255, 0, 0, 1)
+            love.graphics.rectangle("line", (CURRENT_COLONNE2 * TILE_WIDTH) + ((largeurEcran - grilleViewTilesWidth) - window.translate.x), (CURRENT_LIGNE2 * TILE_HEIGHT) + ((hauteurEcran - grilleViewTilesWidth) - window.translate.y), TILE_WIDTH, TILE_HEIGHT)
+        end
+    else
+        inGrilleMapViewTiles = false
+    end
+
+    if clickInOneTile == true then
+        love.graphics.setColor(255, 0, 0, 1)
+        love.graphics.rectangle("line", (clickTileCurrentColonne * TILE_WIDTH) + ((largeurEcran - grilleViewTilesWidth) - window.translate.x), (clickTileCurrentLigne * TILE_HEIGHT) + ((hauteurEcran - grilleViewTilesWidth) - window.translate.y), TILE_WIDTH, TILE_HEIGHT)
+    end
+
+    love.graphics.setColor(1, 1, 1, 1)
+end
+
+
+
+
+
+
+
 
 
 
@@ -831,7 +895,6 @@ function tileMapsEditor.Load()
 
     -- Je charge toutes mes TileSheets (Une SpriteSheet qui contient des Tiles (Textures))
     -- loadTileSheets(nomDuDossier, nomFichierImgTileSheet)
-    loadTileSheets('assets', 'tileSet')
     loadTileSheets('assets', 'tileSet')
 
     
@@ -1274,6 +1337,15 @@ function tileMapsEditor.mousepressed(x, y, button, isTouch)
     -- Récupère la position de la souris X et Y a partir du moment ou on fait un clique à la souris (clique gauche ou droite)
     mouseXClick = mouse.posX
     mouseYClick = mouse.posY
+
+
+    -- Click in GrilleMap for View Tiles
+    if inGrilleMapViewTiles == true and button == 1 then
+        clickInOneTile = true
+
+        clickTileCurrentColonne = CURRENT_COLONNE2
+        clickTileCurrentLigne = CURRENT_LIGNE2
+    end
 end
 
 
