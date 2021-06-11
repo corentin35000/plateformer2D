@@ -1,4 +1,4 @@
---------------DOCUMENTATION DU FRAMEWORK--------------------------------------------------------------------
+--------------DOCUMENTATION DU FRAMEWORK-----------------------------------------------------------------------------------------------------
 
 -- 1) Quand on lance l'éditeur on'as aucune map créer encore, si le niveau de la map est affichée comme ceci : 'MAP_NIVEAU : ?' c'est que c'est une nouvelle map non sauvegarder.
 -- 2) Donc quand on n'as : '?' il faut configurer la LARGEUR/HAUTEUR de la MAP/TILES puis aller sur 'GENERATE MAP' et faire 'ENTER' pour générer la MAP.
@@ -7,17 +7,23 @@
 -- 5) On peux Load une Map créer auparavant en la chargeant en mettant le numéro du niveau.
 
 
--- A FAIRE MANUELLEMENT : 
 
--- 1) Il faudra charger manuellement les TileSheets a la ligne 742 comme ci-dessous a la suite des autres : 
+
+-- A FAIRE MANUELLEMENT / IMPORTANT : 
+
+-- 1) Il faudra charger manuellement les TileSheets dans le LOAD a la ligne 940 comme ci-dessous a la suite des autres : 
 -- Description de la fonction : loadTileSheets(nomDuDossier, nomFichierImgTileSheet)
 -- Exemple : loadTileSheets('assets', 'tileSet')
+-- IMPORTANT : Toujours ajouter les TileSheets à la suite des autres
+-- IMPORTANT/PROBLEME : Si on supprime une TileSheet tout les numéro sont décaler dans les tableau a deux dimensions, donc ajouter les TileSheets a la suite des autres sans supprimer.
 
--- 2) Supprimer une map il faudra le faire manuellement dans le fichier : map.lua
+-- 2) Supprimer une map il faudra le faire manuellement dans le fichier : map.lua -> IMPORTANT IL FAUT BIEN LAISSER UN ESPACE ENTRE CHAQUE TABLEAU A DEUX DIMENSIONS.
 
--- 3) Créer au minimum un fichier : map.lua à la racine du projet -> local map = {} return map : Puis faire un require("map") dans main.lua
+-- 3) Créer au minimum un fichier : map.lua à la racine du projet -> local map = {} return map : Puis faire un -> require("map") dans main.lua
 
-------------------------------------------------------------------------------------------------------------
+-- 4) Les TileSet doivent être extremement bien faite, que chaque Tile sois bien coller entre eux et bien configurer la fonction pour découpé la SpriteSheet. 
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 local tileMapsEditor = {}
@@ -49,6 +55,8 @@ Game.Tiles = {}
 Game.TileActive = nil
 Game.MapNiveau = {}
 Game.MapNiveauActive = nil
+Game.Calques = {}
+Game.CalquesActive = nil
 
 
 -- Données View Tiles
@@ -60,6 +68,17 @@ inGrilleMapViewTiles = false
 clickInOneTile = false
 clickTileCurrentColonne = 0
 clickTileCurrentLigne = 0
+scrollY_ViewTile = 0
+scrollY_counterMax = 0
+scrollY_counter = 0
+scrollY_TileAlphaSortZone = 1
+
+
+-- L'outils actuellement activé (Pinceau, gomme...)
+pinceauAlpha = 1 -- alpha
+gommeAlpha = 1 -- alpha
+outilsActive = nil
+
 
 --
 local backgroundColor = {}
@@ -115,6 +134,8 @@ GUI.drawGUIandText = true
 GUI.imgFleche = { img = nil, x = inputText.ORIENTATION_TILES.widthFont + 15, y = 0 }
 GUI.imgButtonDessinerGrille = nil
 GUI.imgButtonGommeGrille = nil
+GUI.imgButtonNone = nil
+
 
 --
 local mouse = {}
@@ -203,27 +224,6 @@ function getPositionCursorInGrilleMap()
         resultColonnesCursorGrilleMap = colonnesCursorInGrilleMap
         if colonnesCursorInGrilleMap < 0 or colonnesCursorInGrilleMap > MAP_WIDTH - 1 then
             resultColonnesCursorGrilleMap = 'En dehors de la Grille Map'
-        end
-    end
-end
-
-
--- 
-function drawTileRedOrTexture()
-    local offsetXColonne = colonnesCursorInGrilleMap * TILE_WIDTH
-    local offsetYLigne = lignesCursorInGrilleMap * TILE_HEIGHT
-
-    if not love.mouse.isDown(2) then
-        -- Affiche la taille d'une Tile en rouge quand on veux poser la Tile avec de la transparence.
-        if resultLignesCursorGrilleMap == "En dehors de la Grille Map" or resultColonnesCursorGrilleMap == "En dehors de la Grille Map" then
-            love.graphics.setColor(255, 0, 0, 0.3)    
-            love.graphics.rectangle("fill", offsetXColonne, offsetYLigne, TILE_WIDTH, TILE_HEIGHT)
-            love.graphics.setColor(1, 1, 1, 1)
-        else
-            -- Affiche la taille d'une Tile a l'écrans sur la grille au survol on vois apparaitre la Tile en transparent qui a était choisi.
-            love.graphics.setColor(48, 140, 198, 0.3)    
-            love.graphics.rectangle("fill", offsetXColonne, offsetYLigne, TILE_WIDTH, TILE_HEIGHT)
-            love.graphics.setColor(1, 1, 1, 1)
         end
     end
 end
@@ -322,15 +322,24 @@ function guiTileMapEditor()
 
     --
     love.graphics.draw(GUI.imgFleche.img, GUI.imgFleche.x - window.translate.x, GUI.imgFleche.y - window.translate.y)
-    love.graphics.draw(GUI.imgButtonDessinerGrille, largeurEcran - GUI.imgButtonDessinerGrille:getWidth() - window.translate.x, GUI.imgButtonDessinerGrille:getHeight() - window.translate.y, 0, 1, 1, GUI.imgButtonDessinerGrille:getWidth() / 2, GUI.imgButtonDessinerGrille:getHeight() / 2)
-    love.graphics.draw(GUI.imgButtonGommeGrille, largeurEcran - GUI.imgButtonGommeGrille:getWidth() - window.translate.x, GUI.imgButtonGommeGrille:getHeight() + GUI.imgButtonGommeGrille:getHeight() - window.translate.y, 0, 1, 1, GUI.imgButtonGommeGrille:getWidth() / 2, GUI.imgButtonGommeGrille:getHeight() / 2)
-    
 
+    love.graphics.setColor(1, 1, 1, pinceauAlpha)
+    love.graphics.draw(GUI.imgButtonDessinerGrille, largeurEcran - GUI.imgButtonDessinerGrille:getWidth() - window.translate.x, GUI.imgButtonDessinerGrille:getHeight() - window.translate.y, 0, 1, 1, GUI.imgButtonDessinerGrille:getWidth() / 2, GUI.imgButtonDessinerGrille:getHeight() / 2)
+    love.graphics.setColor(1, 1, 1, 1)
+
+    love.graphics.setColor(1, 1, 1, gommeAlpha)
+    love.graphics.draw(GUI.imgButtonGommeGrille, largeurEcran - GUI.imgButtonGommeGrille:getWidth() - window.translate.x, GUI.imgButtonDessinerGrille:getHeight() + GUI.imgButtonGommeGrille:getHeight() - window.translate.y, 0, 1, 1, GUI.imgButtonGommeGrille:getWidth() / 2, GUI.imgButtonGommeGrille:getHeight() / 2)
+    love.graphics.setColor(1, 1, 1, 1)
+
+    love.graphics.draw(GUI.imgButtonNone, largeurEcran - (GUI.imgButtonNone:getWidth() - 5) - window.translate.x, GUI.imgButtonGommeGrille:getHeight() + GUI.imgButtonGommeGrille:getHeight() + GUI.imgButtonNone:getHeight() + - window.translate.y, 0, 1, 1, GUI.imgButtonNone:getWidth() / 2, GUI.imgButtonNone:getHeight() / 2)
+
+
+    --
     drawViewTiles()
 
 
     --
-    getPositionCursorInGrilleMapViewTiles()
+    getPositionCursorInGrilleMapViewTilesandDraw()
 end
 
 
@@ -423,16 +432,6 @@ function deplacerGrilleMapClickRight()
     if clickRightIsDown == true and not love.mouse.isDown(2) then
         GUI.drawGUIandText = true
         clickRightIsDown = false
-    end
-end
-
-
--- Draw Tiles in the GrilleMap / Mousepressed draw Tile
-function drawTilesInTheGrilleMap()
-    if CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) then
-        
-    else
-        --print("ENDEHORS DE LA GRILLE MAP")
     end
 end
 
@@ -715,6 +714,13 @@ function newMap()
     MAP_PIXELS = NOMBRE_LIGNE .. ' x ' .. NOMBRE_COLONNE .. ' pixels'
 
     MAP_NIVEAU = "?"
+
+    inGrilleMapViewTiles = false
+    clickInOneTile = false
+
+    pinceauAlpha = 1
+    gommeAlpha = 1
+    outilsActive = nil
 end
 
 
@@ -722,26 +728,6 @@ end
 function loadTileSheets(pNomDossierRessources, pNomFicherTileSheet)
     local tileSheet = love.graphics.newImage(pNomDossierRessources .. "/" .. pNomFicherTileSheet .. ".png")
     table.insert(Game.TileSheets, tileSheet)
-end
-
-
--- Charge les Tiles par rapport au TILE_WIDTH et TILE_HEIGHT de la map actuellement chargée.
-function loadTiles()
-    -- Reset la liste des Tiles a chaque nouveau chargement d'une nouvelle map si jamais les TILES_WIDTH et TILE_HEIGHT ne sont pas les mêmes
-    Game.Tiles = {}
-    Game.TileSheetsActive = {}
-
-    -- Itere sur la table qui contient toute les TileSheets, puis découpe chaque images d'une TileSheet et les envoie dans la table : Game.TileTextures (tableaux a deux dimensions)
-    -- Decoupage une TileSheet en fonction des TILE_WIDTH et TILE_HEIGHT qui a était générer pour la map.
-    for nomTileSheet, imgTileSheet in pairs(Game.TileSheets) do
-        local tableTileSheetDecouper = decoupeSpriteSheet(0, 0, TILE_WIDTH, TILE_HEIGHT, 8, 14, 2, imgTileSheet) -- decoupeSpriteSheet() renvoie une table
-
-        for key, imgTile in pairs(tableTileSheetDecouper) do
-            table.insert(Game.Tiles, imgTile)
-        end 
-
-        table.insert(Game.TileSheetsActive, #Game.Tiles)
-    end
 end
 
 
@@ -766,7 +752,7 @@ function drawViewTiles()
 
 
         -- Dessine toute les Tiles des SpriteSheet dans la View Tiles.
-        local ligneViewForTile = #Game.Tiles / ligneViewTile
+        local ligneViewForTile = #Game.Tiles / colonneViewTile
         local allTiles = #Game.Tiles
 
         local counterTileWidth2 = 0
@@ -775,8 +761,13 @@ function drawViewTiles()
         local counterTiles = 1
         local currentTileSheet = 0
 
-        -- Bug : Il y a 220 Tiles et sa boucle 221 fois
+
+        -- Dessine les Tiles dans la Grille de la ViewTiles  (Bug : Il y a 110 Tiles et sa boucle 111 fois)
         for l=1,ligneViewForTile do 
+            if l < scrollY_counter + 1 then
+                love.graphics.setColor(1, 1, 1, 0)
+            end
+
             for c=1,colonneViewTile do
                 for i=1,#Game.TileSheetsActive do
                     if counterTiles <= Game.TileSheetsActive[i] then
@@ -784,16 +775,18 @@ function drawViewTiles()
                     end
                 end
 
-                love.graphics.draw(Game.TileSheets[currentTileSheet], Game.Tiles[counterTiles], largeurEcran - (grilleViewTilesWidth - counterTileWidth2) - window.translate.x, hauteurEcran - (grilleViewTilesHeight + counterTileHeight2) - window.translate.y)
+                love.graphics.draw(Game.TileSheets[currentTileSheet], Game.Tiles[counterTiles], largeurEcran - (grilleViewTilesWidth - counterTileWidth2) - window.translate.x, hauteurEcran - (grilleViewTilesHeight + counterTileHeight2) - scrollY_ViewTile - window.translate.y)
 
-                counterTileWidth2 = counterTileWidth2 + TILE_WIDTH -- remmettre +
+                counterTileWidth2 = counterTileWidth2 + TILE_WIDTH
                 counterTiles = counterTiles + 1
             end
 
             counterTileWidth2 = 0
-            counterTileHeight2 = counterTileHeight2 - TILE_HEIGHT -- remettre : -
+            counterTileHeight2 = counterTileHeight2 - TILE_HEIGHT
+            love.graphics.setColor(1, 1, 1, 1)
         end
 
+        scrollY_counterMax = ligneViewForTile - ligneViewTile
         --print(counterTiles)
 
 
@@ -801,7 +794,7 @@ function drawViewTiles()
         -- Je set la couleur pour les lignes de la GrilleMap de la View des Tiles, pour ci-dessous.
         love.graphics.setColor(137, 137, 137, 1)
 
-        -- GrilleMap de la View des Tiles
+        -- Dessiner la GrilleMap de la ViewTiles
         local counterHeight = grilleViewTilesHeight - TILE_HEIGHT
         for l=0,grilleViewTilesHeight do
             if l == 0 then
@@ -831,7 +824,7 @@ end
 
 
 -- 
-function getPositionCursorInGrilleMapViewTiles()
+function getPositionCursorInGrilleMapViewTilesandDraw()
     mouseX = love.mouse.getX()
     mouseY = love.mouse.getY()
     
@@ -843,6 +836,8 @@ function getPositionCursorInGrilleMapViewTiles()
 
     CURRENT_LIGNE2 = lignesCursorInGrilleMap2
     CURRENT_COLONNE2 = colonnesCursorInGrilleMap2
+
+    
 
     if mouseX >= (largeurEcran - grilleViewTilesWidth) and mouseY >= (hauteurEcran - grilleViewTilesHeight) then
         inGrilleMapViewTiles = true
@@ -867,7 +862,94 @@ function getPositionCursorInGrilleMapViewTiles()
 end
 
 
+-- Draw Tiles in the GrilleMap / Mousepressed draw Tile
+function drawTilesInTheGrilleMap()
+    if CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Pinceau' then
+        
+    else
+        --print("ENDEHORS DE LA GRILLE MAP")
+    end
+end
 
+
+-- Draw Tiles in the GrilleMap / Mousepressed draw Tile
+function gommeTilesInTheGrilleMap()
+    if CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Gomme' then
+        
+    else
+        --print("ENDEHORS DE LA GRILLE MAP")
+    end
+end
+
+
+-- 
+function drawTileRedOrTexture()
+    local offsetXColonne = colonnesCursorInGrilleMap * TILE_WIDTH
+    local offsetYLigne = lignesCursorInGrilleMap * TILE_HEIGHT
+
+    if not love.mouse.isDown(2) then
+        -- Affiche la taille d'une Tile en rouge quand on veux poser la Tile avec de la transparence quand on'es en dehors de la GrilleMap
+        if resultLignesCursorGrilleMap == "En dehors de la Grille Map" or resultColonnesCursorGrilleMap == "En dehors de la Grille Map" then
+            love.graphics.setColor(255, 0, 0, 0.3)    
+            love.graphics.rectangle("fill", offsetXColonne, offsetYLigne, TILE_WIDTH, TILE_HEIGHT)
+            love.graphics.setColor(1, 1, 1, 1)
+
+        -- Affiche la taille d'une Tile a l'écrans sur la grille au survol on vois apparaitre la Tile en transparent si l'outils de la Gomme est selectionner
+        elseif resultLignesCursorGrilleMap ~= "En dehors de la Grille Map" and resultColonnesCursorGrilleMap ~= "En dehors de la Grille Map" and outilsActive == 'Gomme' then
+        love.graphics.setColor(48, 140, 198, 0.3)    
+        love.graphics.rectangle("fill", offsetXColonne, offsetYLigne, TILE_WIDTH, TILE_HEIGHT)
+        love.graphics.setColor(1, 1, 1, 1)
+
+        -- Affiche la taille d'une Tile a l'écrans sur la grille au survol on vois apparaitre la Tile en transparent si aucune Tile a était choisi.
+        elseif resultLignesCursorGrilleMap ~= "En dehors de la Grille Map" and resultColonnesCursorGrilleMap ~= "En dehors de la Grille Map" and clickInOneTile == false then
+            love.graphics.setColor(48, 140, 198, 0.3)    
+            love.graphics.rectangle("fill", offsetXColonne, offsetYLigne, TILE_WIDTH, TILE_HEIGHT)
+            love.graphics.setColor(1, 1, 1, 1)
+
+        -- Affiche la taille d'une Tile a l'écrans sur la grille au survol on vois apparaitre la Tile qui à était choisi dans la View Tile.
+        elseif resultLignesCursorGrilleMap ~= "En dehors de la Grille Map" and resultColonnesCursorGrilleMap ~= "En dehors de la Grille Map" and clickInOneTile == true and outilsActive ~= 'Gomme' then
+            love.graphics.setColor(48, 140, 198, 0.3)   
+            love.graphics.draw(Game.TileSheets[1], Game.Tiles[1], offsetXColonne, offsetYLigne) -- FAKE A REVOIR
+             love.graphics.setColor(1, 1, 1, 1)
+            
+        end
+    end
+end
+
+
+-- Charge les Tiles par rapport au TILE_WIDTH et TILE_HEIGHT de la map actuellement chargée.
+function loadTiles()
+    -- Reset la liste des Tiles a chaque nouveau chargement d'une nouvelle map si jamais les TILES_WIDTH et TILE_HEIGHT ne sont pas les mêmes
+    Game.Tiles = {}
+    Game.TileSheetsActive = {}
+
+    -- Itere sur la table qui contient toute les TileSheets, puis découpe chaque images d'une TileSheet et les envoie dans la table : Game.TileTextures (tableaux a deux dimensions)
+    -- Decoupage une TileSheet en fonction des TILE_WIDTH et TILE_HEIGHT qui a était générer pour la map.
+    local tablesTileSheetsDecouperAll = {}
+
+
+    -- C'est ici qu'il faut rajouter manuellement les SpriteSheets pour les TileSets : 
+    local tableTileSheetDecouper1 = decoupeSpriteSheet(0, 0, TILE_WIDTH, TILE_HEIGHT, 8, 14, 2, Game.TileSheets[1]) 
+    table.insert(tablesTileSheetsDecouperAll, tableTileSheetDecouper1)
+
+    --local tableTileSheetDecouper2 = decoupeSpriteSheet(0, 0, TILE_WIDTH, TILE_HEIGHT, 16, 5, 2, Game.TileSheets[2])
+    --table.insert(tablesTileSheetsDecouperAll, tableTileSheetDecouper2)
+
+
+    local currentTable = 1
+    for key, imgTile in pairs(tablesTileSheetsDecouperAll) do
+        for key, imgTile in pairs(tablesTileSheetsDecouperAll[currentTable]) do
+            table.insert(Game.Tiles, imgTile)
+        end 
+
+        currentTable = currentTable + 1
+        if currentTable > #Game.TileSheets then
+            break
+        end
+    end 
+
+    table.insert(Game.TileSheetsActive, #Game.Tiles)
+end
 
 
 
@@ -896,11 +978,13 @@ function tileMapsEditor.Load()
     -- Je charge toutes mes TileSheets (Une SpriteSheet qui contient des Tiles (Textures))
     -- loadTileSheets(nomDuDossier, nomFichierImgTileSheet)
     loadTileSheets('assets', 'tileSet')
+    --loadTileSheets('assets', 'tileSet2')
 
     
     -- Je charge les images de la GUI de l'éditeur de Map
     GUI.imgButtonDessinerGrille = love.graphics.newImage("assets/dessinerGrille.png")
     GUI.imgButtonGommeGrille = love.graphics.newImage("assets/gommeGrille.png")
+    GUI.imgButtonNone = love.graphics.newImage("assets/buttonNone.png")
     GUI.imgFleche.img = love.graphics.newImage("assets/flecheGauche.png")
 
 
@@ -946,7 +1030,7 @@ function tileMapsEditor.Update(dt)
     deplacerGrilleMapClickRight()
     
     
-    -- ASSOCIER LES FLECHES GUI A CES BOUTTONS CI DESSOUS
+    --
     deplacementInGrilleMapZQSD()
 
 
@@ -969,6 +1053,7 @@ function tileMapsEditor.Draw()
     -- Set un background color
     colorBackgroundMap(backgroundColor.red, backgroundColor.green, backgroundColor.blue, backgroundColor.alpha)    
 
+
     -- Change la couleur des Lines/Pointiller de la grille de la Map (noir ou blanc)
     colorGrilleMap()
 
@@ -983,6 +1068,10 @@ function tileMapsEditor.Draw()
 
     -- Le style des Lines/Pointiller de la GrilleMap -> fin/doux ou épais/gras.
     love.graphics.setLineStyle(GUI.grilleMapStyleLinesPointiller)
+
+
+    --
+    drawTilesInTheGrilleMap()
 
 
     -- Le tracer des Lines ou Pointillées -> des colonnes et lignes de la map : Grille Map
@@ -1346,6 +1435,45 @@ function tileMapsEditor.mousepressed(x, y, button, isTouch)
         clickTileCurrentColonne = CURRENT_COLONNE2
         clickTileCurrentLigne = CURRENT_LIGNE2
     end
+
+
+    -- Button du pinceau (Draw Tile)
+    if x <= largeurEcran - GUI.imgButtonDessinerGrille:getWidth() / 2 and x >= largeurEcran - (GUI.imgButtonDessinerGrille:getWidth() + (GUI.imgButtonDessinerGrille:getWidth() / 2)) and
+       y >= GUI.imgButtonDessinerGrille:getHeight() / 2 and y <= GUI.imgButtonDessinerGrille:getHeight() + (GUI.imgButtonDessinerGrille:getHeight() / 2) then
+    
+        outilsActive = 'Pinceau'
+        pinceauAlpha = 0.3
+        gommeAlpha = 1
+    end 
+    
+    
+    -- Button de la gomme (effacer une Tile)
+    if x <= largeurEcran - GUI.imgButtonGommeGrille:getWidth() / 2 and x >= largeurEcran - (GUI.imgButtonGommeGrille:getWidth() + (GUI.imgButtonGommeGrille:getWidth() / 2)) and
+       y >= GUI.imgButtonDessinerGrille:getHeight() / 2 + GUI.imgButtonDessinerGrille:getHeight() and y <= GUI.imgButtonDessinerGrille:getHeight() / 2 + GUI.imgButtonDessinerGrille:getHeight() + GUI.imgButtonGommeGrille:getHeight() then    
+        
+        outilsActive = 'Gomme'
+        pinceauAlpha = 1
+        gommeAlpha = 0.3
+    end
+
+
+    -- Button 'None', remet la variable -> outilsActive = nil (aucun outils sélectionner)
+    if x <= largeurEcran - GUI.imgButtonNone:getWidth() / 2 and x >= largeurEcran - (GUI.imgButtonNone:getWidth() + (GUI.imgButtonNone:getWidth() / 2)) and
+       y >= GUI.imgButtonDessinerGrille:getHeight() / 2 + GUI.imgButtonDessinerGrille:getHeight() + GUI.imgButtonGommeGrille:getHeight() and y <= GUI.imgButtonDessinerGrille:getHeight() / 2 + GUI.imgButtonDessinerGrille:getHeight() + GUI.imgButtonGommeGrille:getHeight() + GUI.imgButtonNone:getHeight() then    
+        
+        outilsActive = nil
+        pinceauAlpha = 1
+        gommeAlpha = 1
+    end
+
+
+    -- Récupère la Tile choisi - multiplier : (CURRENT_COLONNE2 * scrollY_counter) + CURRENT_COLONNE2
+    if mouseX >= (largeurEcran - grilleViewTilesWidth) and mouseY >= (hauteurEcran - grilleViewTilesHeight) then
+        numeroTileCurrent = ((CURRENT_LIGNE2 + scrollY_counter) * colonneViewTile) + (CURRENT_COLONNE2 + 1)
+
+        Game.TileActive = numeroTileCurrent
+        print("TILE ACTIVE : " .. Game.TileActive)
+    end
 end
 
 
@@ -1369,9 +1497,19 @@ function love.wheelmoved(x, y)
 		window.zoom = window.zoom * k
 		window.translate.x = math.floor(window.translate.x + mouse_x * (1-k))
 		window.translate.y = math.floor(window.translate.y + mouse_y * (1-k))
+
     -- Scrolling en Y de la View des Tiles
-    elseif not (y == 0) and inGrilleMapViewTiles == true then
-        --print("ROULETTE MOUSE IN GRILLEMAP")
+    elseif y > 0 and inGrilleMapViewTiles == true and MAP_NIVEAU ~= "?" then -- Molette de la souris avec le haut
+        if scrollY_counter <= scrollY_counterMax and scrollY_counter ~= 0 then
+            scrollY_ViewTile = scrollY_ViewTile - TILE_HEIGHT
+            scrollY_counter = scrollY_counter - 1
+        end
+        
+    elseif y < 0 and inGrilleMapViewTiles == true and MAP_NIVEAU ~= "?" then -- Molette de la souris avec le bas
+        if scrollY_counter < scrollY_counterMax then
+            scrollY_ViewTile = scrollY_ViewTile + TILE_HEIGHT
+            scrollY_counter = scrollY_counter + 1
+        end
     end
 end
 
