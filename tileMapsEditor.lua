@@ -1,4 +1,4 @@
---------------DOCUMENTATION DU FRAMEWORK-----------------------------------------
+--------------DOCUMENTATION DU FRAMEWORK--------------------------------------------------------------------
 
 -- 1) Quand on lance l'éditeur on'as aucune map créer encore, si le niveau de la map est affichée comme ceci : 'MAP_NIVEAU : ?' c'est que c'est une nouvelle map non sauvegarder.
 -- 2) Donc quand on n'as : '?' il faut configurer la LARGEUR/HAUTEUR de la MAP/TILES puis aller sur 'GENERATE MAP' et faire 'ENTER' pour générer la MAP.
@@ -17,7 +17,7 @@
 
 -- 3) Créer au minimum un fichier : map.lua à la racine du projet -> local map = {} return map : Puis faire un require("map") dans main.lua
 
------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------
 
 
 local tileMapsEditor = {}
@@ -832,8 +832,8 @@ end
 
 -- 
 function getPositionCursorInGrilleMapViewTiles()
-    local mouseX = love.mouse.getX()
-    local mouseY = love.mouse.getY()
+    mouseX = love.mouse.getX()
+    mouseY = love.mouse.getY()
     
     colonnesCursorInGrilleMap2 = ((mouseX - largeurEcran) + grilleViewTilesWidth) / TILE_WIDTH
     lignesCursorInGrilleMap2 = ((mouseY - hauteurEcran) + grilleViewTilesHeight) / TILE_HEIGHT
@@ -1360,8 +1360,8 @@ end
 ]]
 
 function love.wheelmoved(x, y)
-    -- Zoom avant sur un point ou Zoom arrière sur un point 
-    if not (y == 0) then
+    -- Zoom avant sur un point ou Zoom arrière sur un point sauf si on ce trouve sur la View Tile
+    if not (y == 0) and inGrilleMapViewTiles == false then
 		local mouse_x = mouse.posX
 		local mouse_y = mouse.posY
 		local k = dscale^y
@@ -1369,6 +1369,9 @@ function love.wheelmoved(x, y)
 		window.zoom = window.zoom * k
 		window.translate.x = math.floor(window.translate.x + mouse_x * (1-k))
 		window.translate.y = math.floor(window.translate.y + mouse_y * (1-k))
+    -- Scrolling en Y de la View des Tiles
+    elseif not (y == 0) and inGrilleMapViewTiles == true then
+        --print("ROULETTE MOUSE IN GRILLEMAP")
     end
 end
 
