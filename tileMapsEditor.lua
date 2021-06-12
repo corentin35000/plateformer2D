@@ -556,6 +556,12 @@ function loadMap(pNiveauMap)
 
         Game.MapNiveauActive = pNiveauMap
         MAP_NIVEAU = Game.MapNiveauActive
+
+        scrollY_counter = 0
+        scrollY_ViewTile = 0
+
+        clickInOneTile = false
+        Game.TileActive = nil
     end
 end
 
@@ -721,6 +727,12 @@ function newMap()
     pinceauAlpha = 1
     gommeAlpha = 1
     outilsActive = nil
+
+    scrollY_counter = 0
+    scrollY_ViewTile = 0
+    
+    clickInOneTile = false
+    Game.TileActive = nil
 end
 
 
@@ -750,10 +762,14 @@ function drawViewTiles()
         love.graphics.setColor(1, 1, 1, 1)
 
 
-
         -- Dessine toute les Tiles des SpriteSheet dans la View Tiles.
         local ligneViewForTile = #Game.Tiles / colonneViewTile
-        local allTiles = #Game.Tiles
+
+        -- BUG : si la grille est de 5 par 5, il faut que la totalité des Tiles sois un compte rond (5, 10, 15..etc)
+        if ligneViewForTile ~= math.floor(ligneViewForTile) then
+            ligneViewForTile = math.floor(ligneViewForTile)
+            ligneViewForTile = ligneViewForTile + 1
+        end
 
         local counterTileWidth2 = 0
         local counterTileHeight2 = 0
@@ -762,20 +778,24 @@ function drawViewTiles()
         local currentTileSheet = 0
 
 
-        -- Dessine les Tiles dans la Grille de la ViewTiles  (Bug : Il y a 110 Tiles et sa boucle 111 fois)
+        -- Dessine les Tiles dans la Grille de la ViewTiles
         for l=1,ligneViewForTile do 
             if l < scrollY_counter + 1 then
                 love.graphics.setColor(1, 1, 1, 0)
             end
 
             for c=1,colonneViewTile do
-                for i=1,#Game.TileSheetsActive do
-                    if counterTiles <= Game.TileSheetsActive[i] then
-                        currentTileSheet = i
+                for key, valeur in pairs(Game.TileSheetsActive) do
+                    if counterTiles <= valeur then
+                        currentTileSheet = key
+                        
+                        break
                     end
+                end 
+ 
+                if counterTiles <= #Game.Tiles then
+                    love.graphics.draw(Game.TileSheets[currentTileSheet], Game.Tiles[counterTiles], largeurEcran - (grilleViewTilesWidth - counterTileWidth2) - window.translate.x, hauteurEcran - (grilleViewTilesHeight + counterTileHeight2) - scrollY_ViewTile - window.translate.y)
                 end
-
-                love.graphics.draw(Game.TileSheets[currentTileSheet], Game.Tiles[counterTiles], largeurEcran - (grilleViewTilesWidth - counterTileWidth2) - window.translate.x, hauteurEcran - (grilleViewTilesHeight + counterTileHeight2) - scrollY_ViewTile - window.translate.y)
 
                 counterTileWidth2 = counterTileWidth2 + TILE_WIDTH
                 counterTiles = counterTiles + 1
@@ -787,9 +807,8 @@ function drawViewTiles()
         end
 
         scrollY_counterMax = ligneViewForTile - ligneViewTile
-        --print(counterTiles)
 
-
+        
 
         -- Je set la couleur pour les lignes de la GrilleMap de la View des Tiles, pour ci-dessous.
         love.graphics.setColor(137, 137, 137, 1)
@@ -837,7 +856,6 @@ function getPositionCursorInGrilleMapViewTilesandDraw()
     CURRENT_LIGNE2 = lignesCursorInGrilleMap2
     CURRENT_COLONNE2 = colonnesCursorInGrilleMap2
 
-    
 
     if mouseX >= (largeurEcran - grilleViewTilesWidth) and mouseY >= (hauteurEcran - grilleViewTilesHeight) then
         inGrilleMapViewTiles = true
@@ -853,7 +871,7 @@ function getPositionCursorInGrilleMapViewTilesandDraw()
         inGrilleMapViewTiles = false
     end
 
-    if clickInOneTile == true then
+    if clickInOneTile == true and Game.TileActive ~= nil then
         love.graphics.setColor(255, 0, 0, 1)
         love.graphics.rectangle("line", (clickTileCurrentColonne * TILE_WIDTH) + ((largeurEcran - grilleViewTilesWidth) - window.translate.x), (clickTileCurrentLigne * TILE_HEIGHT) + ((hauteurEcran - grilleViewTilesWidth) - window.translate.y), TILE_WIDTH, TILE_HEIGHT)
     end
@@ -908,10 +926,20 @@ function drawTileRedOrTexture()
 
         -- Affiche la taille d'une Tile a l'écrans sur la grille au survol on vois apparaitre la Tile qui à était choisi dans la View Tile.
         elseif resultLignesCursorGrilleMap ~= "En dehors de la Grille Map" and resultColonnesCursorGrilleMap ~= "En dehors de la Grille Map" and clickInOneTile == true and outilsActive ~= 'Gomme' then
-            love.graphics.setColor(48, 140, 198, 0.3)   
-            love.graphics.draw(Game.TileSheets[1], Game.Tiles[1], offsetXColonne, offsetYLigne) -- FAKE A REVOIR
-             love.graphics.setColor(1, 1, 1, 1)
-            
+            local currentTileSheet2 = 1
+            for key, valeur in pairs(Game.TileSheetsActive) do
+                if Game.TileActive <= valeur then
+                    currentTileSheet2 = key
+                    
+                    break
+                end
+            end 
+
+            if Game.TileActive ~= nil then
+                love.graphics.setColor(48, 140, 198, 0.3)   
+                love.graphics.draw(Game.TileSheets[currentTileSheet2], Game.Tiles[Game.TileActive], offsetXColonne, offsetYLigne)
+                love.graphics.setColor(1, 1, 1, 1)
+            end
         end
     end
 end
@@ -927,14 +955,12 @@ function loadTiles()
     -- Decoupage une TileSheet en fonction des TILE_WIDTH et TILE_HEIGHT qui a était générer pour la map.
     local tablesTileSheetsDecouperAll = {}
 
-
-    -- C'est ici qu'il faut rajouter manuellement les SpriteSheets pour les TileSets : 
+    -- IMPORTANT -> C'est ici qu'il faut rajouter manuellement les SpriteSheets pour les TileSets ci-dessous a la suite des autres : 
     local tableTileSheetDecouper1 = decoupeSpriteSheet(0, 0, TILE_WIDTH, TILE_HEIGHT, 8, 14, 2, Game.TileSheets[1]) 
     table.insert(tablesTileSheetsDecouperAll, tableTileSheetDecouper1)
 
-    --local tableTileSheetDecouper2 = decoupeSpriteSheet(0, 0, TILE_WIDTH, TILE_HEIGHT, 16, 5, 2, Game.TileSheets[2])
-    --table.insert(tablesTileSheetsDecouperAll, tableTileSheetDecouper2)
-
+    local tableTileSheetDecouper2 = decoupeSpriteSheet(0, 0, TILE_WIDTH, TILE_HEIGHT, 16, 6, 12, Game.TileSheets[2])
+    table.insert(tablesTileSheetsDecouperAll, tableTileSheetDecouper2)
 
     local currentTable = 1
     for key, imgTile in pairs(tablesTileSheetsDecouperAll) do
@@ -942,13 +968,16 @@ function loadTiles()
             table.insert(Game.Tiles, imgTile)
         end 
 
+        table.insert(Game.TileSheetsActive, #Game.Tiles)
+
         currentTable = currentTable + 1
         if currentTable > #Game.TileSheets then
             break
         end
     end 
 
-    table.insert(Game.TileSheetsActive, #Game.Tiles)
+    print("\n")
+    print("Nombre de Tiles : " .. #Game.Tiles)
 end
 
 
@@ -978,9 +1007,9 @@ function tileMapsEditor.Load()
     -- Je charge toutes mes TileSheets (Une SpriteSheet qui contient des Tiles (Textures))
     -- loadTileSheets(nomDuDossier, nomFichierImgTileSheet)
     loadTileSheets('assets', 'tileSet')
-    --loadTileSheets('assets', 'tileSet2')
+    loadTileSheets('assets', 'tileSet2')
 
-    
+
     -- Je charge les images de la GUI de l'éditeur de Map
     GUI.imgButtonDessinerGrille = love.graphics.newImage("assets/dessinerGrille.png")
     GUI.imgButtonGommeGrille = love.graphics.newImage("assets/gommeGrille.png")
@@ -1471,8 +1500,13 @@ function tileMapsEditor.mousepressed(x, y, button, isTouch)
     if mouseX >= (largeurEcran - grilleViewTilesWidth) and mouseY >= (hauteurEcran - grilleViewTilesHeight) then
         numeroTileCurrent = ((CURRENT_LIGNE2 + scrollY_counter) * colonneViewTile) + (CURRENT_COLONNE2 + 1)
 
-        Game.TileActive = numeroTileCurrent
-        print("TILE ACTIVE : " .. Game.TileActive)
+        if numeroTileCurrent <= #Game.Tiles then
+            Game.TileActive = numeroTileCurrent
+            print("TILE ACTIVE : " .. Game.TileActive)
+        else
+            Game.TileActive = nil
+            clickInOneTile = false
+        end
     end
 end
 
@@ -1503,12 +1537,18 @@ function love.wheelmoved(x, y)
         if scrollY_counter <= scrollY_counterMax and scrollY_counter ~= 0 then
             scrollY_ViewTile = scrollY_ViewTile - TILE_HEIGHT
             scrollY_counter = scrollY_counter - 1
+
+            clickInOneTile = false
+            Game.TileActive = nil
         end
         
     elseif y < 0 and inGrilleMapViewTiles == true and MAP_NIVEAU ~= "?" then -- Molette de la souris avec le bas
         if scrollY_counter < scrollY_counterMax then
             scrollY_ViewTile = scrollY_ViewTile + TILE_HEIGHT
             scrollY_counter = scrollY_counter + 1
+
+            clickInOneTile = false
+            Game.TileActive = nil
         end
     end
 end
