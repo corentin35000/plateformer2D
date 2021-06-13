@@ -1,4 +1,4 @@
---------------DOCUMENTATION DU FRAMEWORK-----------------------------------------------------------------------------------------------------
+----------------------------------------------DOCUMENTATION DU FRAMEWORK-----------------------------------------------------------------------------------------------------
 
 -- 1) Quand on lance l'éditeur on'as aucune map créer encore, si le niveau de la map est affichée comme ceci : 'MAP_NIVEAU : ?' c'est que c'est une nouvelle map non sauvegarder.
 -- 2) Donc quand on n'as : '?' il faut configurer la LARGEUR/HAUTEUR de la MAP/TILES puis aller sur 'GENERATE MAP' et faire 'ENTER' pour générer la MAP.
@@ -8,22 +8,27 @@
 
 
 
-
 -- A FAIRE MANUELLEMENT / IMPORTANT : 
 
--- 1) Il faudra charger manuellement les TileSheets dans le LOAD a la ligne 940 comme ci-dessous a la suite des autres : 
+-- 1) Il faudra charger manuellement les TileSheets dans la fonction de LOVE qui est LOAD, a la ligne 940 comme ci-dessous a la suite des autres : 
 -- Description de la fonction : loadTileSheets(nomDuDossier, nomFichierImgTileSheet)
 -- Exemple : loadTileSheets('assets', 'tileSet')
 -- IMPORTANT : Toujours ajouter les TileSheets à la suite des autres
 -- IMPORTANT/PROBLEME : Si on supprime une TileSheet tout les numéro sont décaler dans les tableau a deux dimensions, donc ajouter les TileSheets a la suite des autres sans supprimer.
 
--- 2) Supprimer une map il faudra le faire manuellement dans le fichier : map.lua -> IMPORTANT IL FAUT BIEN LAISSER UN ESPACE ENTRE CHAQUE TABLEAU A DEUX DIMENSIONS.
 
--- 3) Créer au minimum un fichier : map.lua à la racine du projet -> local map = {} return map : Puis faire un -> require("map") dans main.lua
+-- 2) Il faudra ensuite aller dans la fonction : loadTiles() pour choisir la configuration du découpage de la TileSheet comme ci-dessous comme exemple :
+    --local tableTileSheetDecouper2 = decoupeSpriteSheet(0, 0, TILE_WIDTH, TILE_HEIGHT, 16, 6, 12, Game.TileSheets[2])
+    --table.insert(tablesTileSheetsDecouperAll, tableTileSheetDecouper2)
 
--- 4) Les TileSet doivent être extremement bien faite, que chaque Tile sois bien coller entre eux et bien configurer la fonction pour découpé la SpriteSheet. 
 
------------------------------------------------------------------------------------------------------------------------------------------------
+-- 3) Supprimer une map il faudra le faire manuellement dans le fichier : map.lua -> IMPORTANT IL FAUT BIEN LAISSER UN ESPACE ENTRE CHAQUE TABLEAU A DEUX DIMENSIONS.
+
+-- 4) Créer au minimum un fichier : map.lua à la racine du projet -> local map = {} return map : Puis faire un -> require("map") dans main.lua
+
+-- 5) Les TileSet doivent être extremement bien faite, que chaque Tile sois bien coller entre eux et bien configurer la fonction pour découpé la SpriteSheet. 
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 local tileMapsEditor = {}
@@ -538,7 +543,7 @@ end
 function loadMap(pNiveauMap)
     pNiveauMap = tonumber(pNiveauMap)
     
-    if TileMaps[pNiveauMap] ~= nil then -- BUG QUAND JE CREE UNE MAP, ET QUE J ESSAYE DE LOAD LA DERNIERE MAP SA MARCHE PAS
+    if TileMaps[pNiveauMap] ~= nil then
         MAP_WIDTH = TileMaps[pNiveauMap].MAP_WIDTH 
         MAP_HEIGHT = TileMaps[pNiveauMap].MAP_HEIGHT 
 
@@ -882,10 +887,35 @@ end
 
 -- Draw Tiles in the GrilleMap / Mousepressed draw Tile
 function drawTilesInTheGrilleMap()
-    if CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Pinceau' then
-        
-    else
-        --print("ENDEHORS DE LA GRILLE MAP")
+    testTILE_WIDTH = 0
+    testTILE_HEIGHT = 0
+
+    love.graphics.setColor(1, 1, 1, 1)
+
+    if MAP_NIVEAU ~= "?" then 
+        for l=1,MAP_HEIGHT do
+            for c=1,MAP_WIDTH do
+                tileCurrent = TileMaps[MAP_NIVEAU][l][c]
+
+                local currentTileSheet = 1
+                for key, valeur in pairs(Game.TileSheetsActive) do
+                    if TileMaps[MAP_NIVEAU][l][c] <= valeur then
+                        currentTileSheet = key
+                        
+                        break
+                    end
+                end 
+
+                if tileCurrent ~= 0 then
+                    love.graphics.draw(Game.TileSheets[currentTileSheet], Game.Tiles[tileCurrent], testTILE_WIDTH, testTILE_HEIGHT)
+                end
+
+                testTILE_WIDTH = testTILE_WIDTH + TILE_WIDTH
+            end
+
+            testTILE_WIDTH = 0
+            testTILE_HEIGHT = testTILE_HEIGHT + TILE_HEIGHT
+        end
     end
 end
 
@@ -1055,16 +1085,21 @@ function tileMapsEditor.Update(dt)
     end
 
 
+    -- REFAIRE UNE FONCTION - DESSINER GRILLE MAP BOUTTON SOURIS EN CONTINUE
+    if love.mouse.isDown(1) and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Pinceau' and Game.TileActive ~= nil and MAP_NIVEAU ~= "?" then
+        LIGNE = CURRENT_LIGNE + 1 
+        COLONNE = CURRENT_COLONNE + 1 
+
+        TileMaps[MAP_NIVEAU][LIGNE][COLONNE] = Game.TileActive 
+    end
+
+
     --
     deplacerGrilleMapClickRight()
     
     
     --
     deplacementInGrilleMapZQSD()
-
-
-    --
-    drawTilesInTheGrilleMap()
 end
 
 
@@ -1082,11 +1117,7 @@ function tileMapsEditor.Draw()
     -- Set un background color
     colorBackgroundMap(backgroundColor.red, backgroundColor.green, backgroundColor.blue, backgroundColor.alpha)    
 
-
-    -- Change la couleur des Lines/Pointiller de la grille de la Map (noir ou blanc)
-    colorGrilleMap()
-
-
+    
     -- Translation par rapport au Zoom. 
     -- Initialiser la mise a l'échelle (Scale). 
     -- Puis je défini le Scale pour X et Y à la fois.
@@ -1101,6 +1132,10 @@ function tileMapsEditor.Draw()
 
     --
     drawTilesInTheGrilleMap()
+
+
+    --
+    colorGrilleMap()
 
 
     -- Le tracer des Lines ou Pointillées -> des colonnes et lignes de la map : Grille Map
@@ -1380,6 +1415,7 @@ function tileMapsEditor.keypressed(key, isrepeat)
         elseif inputTextActive == "GENERATE_MAP" then 
             if MAP_NIVEAU == "?" then
                 generateMap()
+                loadTiles()
             end
         elseif inputTextActive == "NEW_MAP" then
             newMap()
@@ -1508,6 +1544,15 @@ function tileMapsEditor.mousepressed(x, y, button, isTouch)
             clickInOneTile = false
         end
     end
+
+
+    --  Click sur la Grille Map avec la Tile qui a était choisi.
+    if button == 1 and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Pinceau' and Game.TileActive ~= nil and MAP_NIVEAU ~= "?" then
+        LIGNE = CURRENT_LIGNE + 1 
+        COLONNE = CURRENT_COLONNE + 1 
+
+        TileMaps[MAP_NIVEAU][LIGNE][COLONNE] = Game.TileActive 
+    end
 end
 
 
@@ -1553,4 +1598,4 @@ function love.wheelmoved(x, y)
     end
 end
 
-return tileMapsEditor 
+return tileMapsEditor
