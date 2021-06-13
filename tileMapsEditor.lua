@@ -1094,6 +1094,15 @@ function tileMapsEditor.Update(dt)
     end
 
 
+    -- REFAIRE UNE FONCTION - GOMMER GRILLE MAP BOUTTON SOURIS EN CONTINUE
+    if love.mouse.isDown(1) and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Gomme' and MAP_NIVEAU ~= "?" then
+        LIGNE = CURRENT_LIGNE + 1 
+        COLONNE = CURRENT_COLONNE + 1 
+
+        TileMaps[MAP_NIVEAU][LIGNE][COLONNE] = 0 
+    end
+
+
     --
     deplacerGrilleMapClickRight()
     
@@ -1552,6 +1561,15 @@ function tileMapsEditor.mousepressed(x, y, button, isTouch)
         COLONNE = CURRENT_COLONNE + 1 
 
         TileMaps[MAP_NIVEAU][LIGNE][COLONNE] = Game.TileActive 
+    end
+
+
+    --  Click sur la Grille Map pour gommer sur la Map.
+     if button == 1 and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Gomme' and MAP_NIVEAU ~= "?" then
+        LIGNE = CURRENT_LIGNE + 1 
+        COLONNE = CURRENT_COLONNE + 1 
+
+        TileMaps[MAP_NIVEAU][LIGNE][COLONNE] = 0 
     end
 end
 
