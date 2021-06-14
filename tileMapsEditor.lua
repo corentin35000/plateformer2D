@@ -885,7 +885,7 @@ function getPositionCursorInGrilleMapViewTilesandDraw()
 end
 
 
--- Draw Tiles in the GrilleMap / Mousepressed draw Tile
+-- Dessine les Tiles qui a était ajouter dans les tableaux des maps.
 function drawTilesInTheGrilleMap()
     testTILE_WIDTH = 0
     testTILE_HEIGHT = 0
@@ -920,17 +920,29 @@ function drawTilesInTheGrilleMap()
 end
 
 
--- Draw Tiles in the GrilleMap / Mousepressed draw Tile
-function gommeTilesInTheGrilleMap()
-    if CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Gomme' then
-        
-    else
-        --print("ENDEHORS DE LA GRILLE MAP")
+-- Pinceau GrilleMap button de la souris en continue
+function pinceauTilesInTheGrilleMap()
+    if love.mouse.isDown(1) and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Pinceau' and Game.TileActive ~= nil and MAP_NIVEAU ~= "?" then
+        LIGNE = CURRENT_LIGNE + 1 
+        COLONNE = CURRENT_COLONNE + 1 
+
+        TileMaps[MAP_NIVEAU][LIGNE][COLONNE] = Game.TileActive 
     end
 end
 
 
--- 
+-- Gommer GrilleMap button de la souris en continue
+function gommeTilesInTheGrilleMap()
+    if love.mouse.isDown(1) and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Gomme' and MAP_NIVEAU ~= "?" then
+        LIGNE = CURRENT_LIGNE + 1 
+        COLONNE = CURRENT_COLONNE + 1 
+
+        TileMaps[MAP_NIVEAU][LIGNE][COLONNE] = 0 
+    end
+end
+
+
+-- Au survol de souris la Tile qui a était choisi suis le pointeur de la souris en trasparent et rouge si il est en-dehors de la Map.
 function drawTileRedOrTexture()
     local offsetXColonne = colonnesCursorInGrilleMap * TILE_WIDTH
     local offsetYLigne = lignesCursorInGrilleMap * TILE_HEIGHT
@@ -1085,22 +1097,12 @@ function tileMapsEditor.Update(dt)
     end
 
 
-    -- REFAIRE UNE FONCTION - DESSINER GRILLE MAP BOUTTON SOURIS EN CONTINUE
-    if love.mouse.isDown(1) and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Pinceau' and Game.TileActive ~= nil and MAP_NIVEAU ~= "?" then
-        LIGNE = CURRENT_LIGNE + 1 
-        COLONNE = CURRENT_COLONNE + 1 
-
-        TileMaps[MAP_NIVEAU][LIGNE][COLONNE] = Game.TileActive 
-    end
+    --
+    pinceauTilesInTheGrilleMap()
 
 
-    -- REFAIRE UNE FONCTION - GOMMER GRILLE MAP BOUTTON SOURIS EN CONTINUE
-    if love.mouse.isDown(1) and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Gomme' and MAP_NIVEAU ~= "?" then
-        LIGNE = CURRENT_LIGNE + 1 
-        COLONNE = CURRENT_COLONNE + 1 
-
-        TileMaps[MAP_NIVEAU][LIGNE][COLONNE] = 0 
-    end
+    --
+    gommeTilesInTheGrilleMap()
 
 
     --
@@ -1542,7 +1544,7 @@ function tileMapsEditor.mousepressed(x, y, button, isTouch)
 
 
     -- Récupère la Tile choisi - multiplier : (CURRENT_COLONNE2 * scrollY_counter) + CURRENT_COLONNE2
-    if mouseX >= (largeurEcran - grilleViewTilesWidth) and mouseY >= (hauteurEcran - grilleViewTilesHeight) then
+    if MAP_NIVEAU ~= "?" and mouseX >= (largeurEcran - grilleViewTilesWidth) and mouseY >= (hauteurEcran - grilleViewTilesHeight) then
         numeroTileCurrent = ((CURRENT_LIGNE2 + scrollY_counter) * colonneViewTile) + (CURRENT_COLONNE2 + 1)
 
         if numeroTileCurrent <= #Game.Tiles then
@@ -1555,7 +1557,7 @@ function tileMapsEditor.mousepressed(x, y, button, isTouch)
     end
 
 
-    --  Click sur la Grille Map avec la Tile qui a était choisi.
+    --  Click une fois sur la Grille Map avec la Tile qui a était choisi.
     if button == 1 and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Pinceau' and Game.TileActive ~= nil and MAP_NIVEAU ~= "?" then
         LIGNE = CURRENT_LIGNE + 1 
         COLONNE = CURRENT_COLONNE + 1 
@@ -1564,7 +1566,7 @@ function tileMapsEditor.mousepressed(x, y, button, isTouch)
     end
 
 
-    --  Click sur la Grille Map pour gommer sur la Map.
+    --  Click une fois sur la Grille Map pour gommer sur la Map.
      if button == 1 and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Gomme' and MAP_NIVEAU ~= "?" then
         LIGNE = CURRENT_LIGNE + 1 
         COLONNE = CURRENT_COLONNE + 1 
@@ -1615,5 +1617,6 @@ function love.wheelmoved(x, y)
         end
     end
 end
+
 
 return tileMapsEditor
