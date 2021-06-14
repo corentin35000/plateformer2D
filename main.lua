@@ -31,6 +31,8 @@ sauvegardeModule = require("sauvegarde")
 adaptImageToScreenSizeModule = require("adaptImageToScreenSize")
 utf8 = require("utf8")
 mapModule = require("map")
+mapObjectsModule = require("mapObjects")
+mapCollisionModule = require("mapCollision")
 
 
 -- Scènes de jeu différentes
