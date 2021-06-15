@@ -144,8 +144,8 @@ function animationsCharacters.Load()
   player.loopAnimation = true -- Animation en boucle (true or false)
   player.width = animationsPlayer[player.activeAnimation]['state']['data']['skeletonData'].width
   player.height = animationsPlayer[player.activeAnimation]['state']['data']['skeletonData'].height
-  player.scaleX = 0.5
-	player.scaleY = -0.5 -- Bug sur le ScaleY il es a : -1, il devrais être a l'envers alors qu'il dans le bon sens avec -1 donc mettre à l'envers le Sprite/Animation : 1
+  player.scaleX = 0.3
+	player.scaleY = -0.3 -- Bug sur le ScaleY il es a : -1, il devrais être a l'envers alors qu'il dans le bon sens avec -1 donc mettre à l'envers le Sprite/Animation : 1
   player.offsetX = nil 
   player.offsetY = 2 + (10 - (player.scaleX * 10)) / 0.5 * 0.2 -- Pour avoir l'offsetY au centre du Sprite/Anim : + player.height / player.offsetY
 	player.x = largeurEcran / 2

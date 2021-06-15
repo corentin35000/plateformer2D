@@ -98,6 +98,9 @@ function love.load()
   -- Module tileMapsEditor.lua (Load)
   tileMapsEditorModule.Load()
 
+
+  -- Module mapsInGame.lua (Load)
+  mapsInGameModule.Load()
 end
 
 
@@ -155,6 +158,10 @@ function love.draw()
     ecransTransitionsModule.Draw.Menu()
  
   elseif sceneGameplay == true then
+    -- Test Map
+    mapsInGameModule.Draw()
+
+
     -- Le module player.lua de la fonction Draw
     playerModule.Draw()
 

@@ -207,18 +207,6 @@ dscale = 2^(1/6) -- Le mouvement de la roue six fois change le zoom deux fois (z
 ]]
 
 
-function drawDrawCallAndFPS()
-    --
-    if MAP_NIVEAU ~= "?" then 
-        stats = love.graphics.getStats()
-        --drawcalls = stats['drawcalls']
-        drawcallsbatched = stats['drawcallsbatched']
-        love.graphics.print("DrawCalls : " .. drawcallsbatched - 33, largeurEcran - 110 - window.translate.x, hauteurEcran - grilleViewTilesHeight - 80 - window.translate.y)
-        love.graphics.print("FPS : " .. love.timer.getFPS(), largeurEcran - 110 - window.translate.x, hauteurEcran - grilleViewTilesHeight - 50 - window.translate.y)
-    end
-end
-
-
 --
 function updateMouseXandY()
     if MAP_NIVEAU ~= "?" then
@@ -416,9 +404,6 @@ function guiTileMapEditor()
 
     --
     calquesViewOeil()
-
-    --
-    drawDrawCallAndFPS()
 end
 
 
@@ -1200,13 +1185,6 @@ function newMap()
 end
 
 
--- Je charge une TileSheets et l'envoie dans la table : Game.TileSheets
-function loadTileSheets(pNomDossierRessources, pNomFicherTileSheet)
-    local tileSheet = love.graphics.newImage(pNomDossierRessources .. "/" .. pNomFicherTileSheet .. ".png")
-    table.insert(Game.TileSheets, tileSheet)
-end
-
-
 --
 function drawViewTiles()
     if MAP_NIVEAU ~= "?" and TILE_HEIGHT ~= 0 and TILE_WIDTH ~= 0 then
@@ -1583,7 +1561,7 @@ function loadTiles()
     Game.Tiles = {}
     Game.TileSheetsActive = {}
 
-    -- Itere sur la table qui contient toute les TileSheets, puis découpe chaque images d'une TileSheet et les envoie dans la table : Game.TileTextures (tableaux a deux dimensions)
+    -- Itere sur la table qui contient toute les TileSheets, puis découpe chaque images d'une TileSheet et les envoie dans la table : Game.Tiles (tableaux a deux dimensions)
     -- Decoupage une TileSheet en fonction des TILE_WIDTH et TILE_HEIGHT qui a était générer pour la map.
     local tablesTileSheetsDecouperAll = {}
 
@@ -1609,10 +1587,18 @@ function loadTiles()
     end 
 
     print("\n")
-    print("Nombre de Tiles : " .. #Game.Tiles)
+    print("Nombre de Tiles IN EDITOR : " .. #Game.Tiles)
+    for key, valeur in pairs(Game.TileSheetsActive) do
+        print(key, valeur)
+    end
 end
 
 
+-- Je charge une TileSheets et l'envoie dans la table : Game.TileSheets
+function loadTileSheets(pNomDossierRessources, pNomFicherTileSheet)
+    local tileSheet = love.graphics.newImage(pNomDossierRessources .. "/" .. pNomFicherTileSheet .. ".png")
+    table.insert(Game.TileSheets, tileSheet)
+end
 
 
 
@@ -1732,11 +1718,6 @@ end
 ]]
 
 function tileMapsEditor.Draw()
-    --
-    love.graphics.draw(SpriteBatch[1])
-    love.graphics.draw(SpriteBatch[2])
-
-    
     -- Set un background color
     colorBackgroundMap(backgroundColor.red, backgroundColor.green, backgroundColor.blue, backgroundColor.alpha)    
 
