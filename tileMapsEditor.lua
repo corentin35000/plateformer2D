@@ -63,6 +63,10 @@ CalquesActive.Collision = "OFF"
 
 
 --
+SpriteBatch = {}
+
+
+--
 Game = {}
 Game.TileSheets = {}
 Game.TileSheetsActive = {}
@@ -201,6 +205,18 @@ dscale = 2^(1/6) -- Le mouvement de la roue six fois change le zoom deux fois (z
 ██      ██    ██ ██  ██ ██ ██         ██    ██ ██    ██ ██  ██ ██      ██     ██      ██   ██ ██    ██    ██    ██ ██   ██ ██  ██  ██ ██   ██ ██      
 ██       ██████  ██   ████  ██████    ██    ██  ██████  ██   ████ ███████     ███████ ██████  ██    ██     ██████  ██   ██ ██      ██ ██   ██ ██                                                                                                                                                                                                                                                                                                                 
 ]]
+
+
+function drawDrawCallAndFPS()
+    --
+    if MAP_NIVEAU ~= "?" then 
+        stats = love.graphics.getStats()
+        --drawcalls = stats['drawcalls']
+        drawcallsbatched = stats['drawcallsbatched']
+        love.graphics.print("DrawCalls : " .. drawcallsbatched - 33, largeurEcran - 110 - window.translate.x, hauteurEcran - grilleViewTilesHeight - 80 - window.translate.y)
+        love.graphics.print("FPS : " .. love.timer.getFPS(), largeurEcran - 110 - window.translate.x, hauteurEcran - grilleViewTilesHeight - 50 - window.translate.y)
+    end
+end
 
 
 --
@@ -400,6 +416,9 @@ function guiTileMapEditor()
 
     --
     calquesViewOeil()
+
+    --
+    drawDrawCallAndFPS()
 end
 
 
@@ -1203,7 +1222,7 @@ function drawViewTiles()
 
         -- Fond noir (rect)
         love.graphics.setColor(0, 0, 0, 1)
-        love.graphics.rectangle("fill", largeurEcran - grilleViewTilesWidth - window.translate.x, hauteurEcran - grilleViewTilesWidth - window.translate.y, grilleViewTilesWidth, grilleViewTilesHeight)
+        love.graphics.rectangle("fill", largeurEcran - grilleViewTilesWidth - window.translate.x, hauteurEcran - grilleViewTilesHeight - window.translate.y, grilleViewTilesWidth, grilleViewTilesHeight)
         love.graphics.setColor(1, 1, 1, 1)
 
 
@@ -1623,9 +1642,11 @@ function tileMapsEditor.Load()
     loadTileSheets('assets', 'tileSet2')
 
 
-    --
+    --  
     tilesetBatch = love.graphics.newSpriteBatch(Game.TileSheets[1])
+    table.insert(SpriteBatch, tilesetBatch)
     tilesetBatch2 = love.graphics.newSpriteBatch(Game.TileSheets[2])
+    table.insert(SpriteBatch, tilesetBatch2)
 
 
     -- Je charge les images de la GUI de l'éditeur de Map
@@ -1711,10 +1732,11 @@ end
 ]]
 
 function tileMapsEditor.Draw()
-     --
-     love.graphics.draw(tilesetBatch)
+    --
+    love.graphics.draw(SpriteBatch[1])
+    love.graphics.draw(SpriteBatch[2])
 
-     
+    
     -- Set un background color
     colorBackgroundMap(backgroundColor.red, backgroundColor.green, backgroundColor.blue, backgroundColor.alpha)    
 
@@ -1761,14 +1783,6 @@ function tileMapsEditor.Draw()
     if GUI.drawGUIandText == true then
         guiTileMapEditor()
     end
-
-
-    --
-    stats = love.graphics.getStats()
-    --drawcalls = stats['drawcalls']
-    drawcallsbatched = stats['drawcallsbatched']
-    love.graphics.print("DrawCalls : " .. drawcallsbatched, largeurEcran - 200 - window.translate.x, 10 - window.translate.y)
-    love.graphics.print("FPS : " .. love.timer.getFPS(), largeurEcran - 200 - window.translate.x, 30 - window.translate.y)
 end
 
 
