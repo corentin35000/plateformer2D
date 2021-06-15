@@ -675,10 +675,10 @@ function generateMap()
         fileDataCurrent = string.sub(fileDataCurrent, 1, fileDataLength - 15)
         fileData = fileDataCurrent .. "\n" .. dataMap .. "\n" .. "           }" .. "\n" .. "\n" .. "return map"
 
-        fileDataCurrent2 = string.sub(fileDataCurrent2, 1, fileDataLength2 - 20)
+        fileDataCurrent2 = string.sub(fileDataCurrent2, 1, fileDataLength2 - 21)
         fileData2 = fileDataCurrent2 .. "\n" .. dataMap2 .. "\n" .. "                  }" .. "\n" .. "\n" .. "return mapObjects"
 
-        fileDataCurrent3 = string.sub(fileDataCurrent3, 1, fileDataLength3 - 22)
+        fileDataCurrent3 = string.sub(fileDataCurrent3, 1, fileDataLength3 - 23)
         fileData3 = fileDataCurrent3 .. "\n" .. dataMap3 .. "\n" .. "                    }" .. "\n" .. "\n" .. "return mapCollision"
 
         -- Map qui contient les Tiles
@@ -2234,7 +2234,7 @@ function tileMapsEditor.mousepressed(x, y, button, isTouch)
 
     -- Click sur l'image de l'oeil de la GUI pour afficher / enlever l'affichage des Collision
     if x <= largeurEcran - GUI.imgButtonCalqueOeilOuvert:getWidth() / 2 + GUI.imgButtonCalqueOeilOuvert2:getWidth() / 2 - 20 and x >= largeurEcran - (GUI.imgButtonCalqueOeilOuvert2:getWidth() + (GUI.imgButtonCalqueOeilOuvert2:getWidth() / 2)) - 10 and
-       y >= hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilOuvert2:getHeight() + GUI.imgButtonCalqueOeilOuvert3:getHeight() + 15 and y <= hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilOuvert:getHeight() + GUI.imgButtonCalqueOeilOuvert2:getHeight() + GUI.imgButtonCalqueOeilOuvert3:getHeight() + 15 then    
+       y >= hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilOuvert2:getHeight() + GUI.imgButtonCalqueOeilOuvert3:getHeight() + 20 and y <= hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilOuvert:getHeight() + GUI.imgButtonCalqueOeilOuvert2:getHeight() + GUI.imgButtonCalqueOeilOuvert3:getHeight() + 25 then    
         
         if CalquesActive.Collision == "ON" then
             CalquesActive.Collision = "OFF"
