@@ -59,7 +59,7 @@ CALQUES = 'Tiles'
 CalquesActive = {}
 CalquesActive.Tiles = "ON"
 CalquesActive.Objects = "ON"
-CalquesActive.Collision = "ON"
+CalquesActive.Collision = "OFF"
 
 
 --
@@ -315,13 +315,28 @@ function calquesViewOeil()
         love.graphics.print('Calque Objects : ', largeurEcran - 150 - window.translate.x, hauteurEcran - grilleViewTilesWidth - 170 - window.translate.y)
         love.graphics.print('Calque Collision : ', largeurEcran - 150 - window.translate.x, hauteurEcran - grilleViewTilesWidth - 140 - window.translate.y)
 
-        love.graphics.draw(GUI.imgButtonCalqueOeilOuvert, largeurEcran - GUI.imgButtonCalqueOeilOuvert:getWidth() - 10 - window.translate.x, hauteurEcran - grilleViewTilesWidth - 200 + GUI.imgButtonDessinerGrille:getHeight() / 2 - window.translate.y, 0, 1, 1, GUI.imgButtonDessinerGrille:getWidth() / 2, GUI.imgButtonDessinerGrille:getHeight() / 2)
-        love.graphics.draw(GUI.imgButtonCalqueOeilOuvert2, largeurEcran - GUI.imgButtonCalqueOeilOuvert:getWidth() + 5 - window.translate.x, hauteurEcran - grilleViewTilesWidth - 200 + GUI.imgButtonDessinerGrille:getHeight() - window.translate.y, 0, 1, 1, GUI.imgButtonDessinerGrille:getWidth() / 2, GUI.imgButtonDessinerGrille:getHeight() / 2)
-        love.graphics.draw(GUI.imgButtonCalqueOeilOuvert3, largeurEcran - GUI.imgButtonCalqueOeilOuvert:getWidth() + 10 - window.translate.x, hauteurEcran - grilleViewTilesWidth - 200 + GUI.imgButtonDessinerGrille:getHeight() + GUI.imgButtonDessinerGrille:getWidth() / 2 - window.translate.y, 0, 1, 1, GUI.imgButtonDessinerGrille:getWidth() / 2, GUI.imgButtonDessinerGrille:getHeight() / 2)
+        --
+        if CalquesActive.Tiles == "ON" then
+            love.graphics.draw(GUI.imgButtonCalqueOeilOuvert, largeurEcran - GUI.imgButtonCalqueOeilOuvert:getWidth() - 20 - window.translate.x, hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilOuvert:getHeight() / 2 - window.translate.y, 0, 1, 1, GUI.imgButtonCalqueOeilOuvert:getWidth() / 2, GUI.imgButtonCalqueOeilOuvert:getHeight() / 2)
+        else
+            love.graphics.draw(GUI.imgButtonCalqueOeilFermer, largeurEcran - GUI.imgButtonCalqueOeilFermer:getWidth() - 20 - window.translate.x, hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilFermer:getHeight() / 2 - window.translate.y, 0, 1, 1, GUI.imgButtonCalqueOeilFermer:getWidth() / 2, GUI.imgButtonCalqueOeilFermer:getHeight() / 2)
+        end
+
+        if CalquesActive.Objects == "ON" then
+            love.graphics.draw(GUI.imgButtonCalqueOeilOuvert2, largeurEcran - GUI.imgButtonCalqueOeilOuvert2:getWidth() - 5 - window.translate.x, hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilOuvert2:getHeight() + 20 - window.translate.y, 0, 1, 1, GUI.imgButtonCalqueOeilOuvert2:getWidth() / 2, GUI.imgButtonCalqueOeilOuvert2:getHeight() / 2)
+        else
+            love.graphics.draw(GUI.imgButtonCalqueOeilFermer2, largeurEcran - GUI.imgButtonCalqueOeilFermer2:getWidth() - 5 - window.translate.x, hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilFermer2:getHeight() + 20 - window.translate.y, 0, 1, 1, GUI.imgButtonCalqueOeilFermer2:getWidth() / 2, GUI.imgButtonCalqueOeilFermer2:getHeight() / 2)
+        end
+
+        if CalquesActive.Collision == "ON" then
+            love.graphics.draw(GUI.imgButtonCalqueOeilOuvert3, largeurEcran - GUI.imgButtonCalqueOeilOuvert3:getWidth() - window.translate.x, hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilOuvert3:getHeight() + GUI.imgButtonCalqueOeilOuvert3:getWidth() / 2 + 37 - window.translate.y, 0, 1, 1, GUI.imgButtonCalqueOeilOuvert3:getWidth() / 2, GUI.imgButtonCalqueOeilOuvert3:getHeight() / 2)
+        else
+            love.graphics.draw(GUI.imgButtonCalqueOeilFermer3, largeurEcran - GUI.imgButtonCalqueOeilFermer3:getWidth() - window.translate.x, hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilFermer3:getHeight() + GUI.imgButtonCalqueOeilFermer3:getWidth() / 2 + 37 - window.translate.y, 0, 1, 1, GUI.imgButtonCalqueOeilFermer3:getWidth() / 2, GUI.imgButtonCalqueOeilFermer3:getHeight() / 2)
+        end
     end
 end
 
-
+ 
 -- GUI tileMapsEditor
 function guiTileMapEditor()
     -- inputText + Affichage de certaines données
@@ -2188,6 +2203,44 @@ function tileMapsEditor.mousepressed(x, y, button, isTouch)
         COLONNE = CURRENT_COLONNE + 1 
 
         TileMapsCollision[MAP_NIVEAU][LIGNE][COLONNE] = 0 
+    end
+
+
+    -- Click sur l'image de l'oeil de la GUI pour afficher / enlever l'affichage des Tiles    
+    if x <= largeurEcran - GUI.imgButtonCalqueOeilOuvert:getWidth() / 2 - 25 and x >= largeurEcran - (GUI.imgButtonCalqueOeilOuvert:getWidth() + (GUI.imgButtonCalqueOeilOuvert:getWidth() / 2)) - 25 and
+       y >= hauteurEcran - grilleViewTilesHeight - 200 and y <= hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilOuvert:getHeight() then    
+        
+        --print("CLICK CALQUE TILES")
+
+        if CalquesActive.Tiles == "ON" then
+            CalquesActive.Tiles = "OFF"
+        else
+            CalquesActive.Tiles = "ON"
+        end
+    end
+
+    -- Click sur l'image de l'oeil de la GUI pour afficher / enlever l'affichage des Objects
+    if x <= largeurEcran - GUI.imgButtonCalqueOeilOuvert:getWidth() / 2 + GUI.imgButtonCalqueOeilOuvert2:getWidth() / 2 - 25 and x >= largeurEcran - (GUI.imgButtonCalqueOeilOuvert2:getWidth() + (GUI.imgButtonCalqueOeilOuvert2:getWidth() / 2)) - 10 and
+       y >= hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilOuvert2:getHeight() + 10 and y <= hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilOuvert:getHeight() + GUI.imgButtonCalqueOeilOuvert2:getHeight() + 10 then    
+        
+        print("CLICK OEIL OBJECTS")
+
+        if CalquesActive.Objects == "ON" then
+            CalquesActive.Objects = "OFF"
+        else
+            CalquesActive.Objects = "ON"
+        end
+    end
+
+    -- Click sur l'image de l'oeil de la GUI pour afficher / enlever l'affichage des Collision
+    if x <= largeurEcran - GUI.imgButtonCalqueOeilOuvert:getWidth() / 2 + GUI.imgButtonCalqueOeilOuvert2:getWidth() / 2 - 20 and x >= largeurEcran - (GUI.imgButtonCalqueOeilOuvert2:getWidth() + (GUI.imgButtonCalqueOeilOuvert2:getWidth() / 2)) - 10 and
+       y >= hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilOuvert2:getHeight() + GUI.imgButtonCalqueOeilOuvert3:getHeight() + 15 and y <= hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilOuvert:getHeight() + GUI.imgButtonCalqueOeilOuvert2:getHeight() + GUI.imgButtonCalqueOeilOuvert3:getHeight() + 15 then    
+        
+        if CalquesActive.Collision == "ON" then
+            CalquesActive.Collision = "OFF"
+        else
+            CalquesActive.Collision = "ON"
+        end
     end
 end
 

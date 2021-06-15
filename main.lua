@@ -79,7 +79,7 @@ function love.load()
 
 
   -- Module splashscreen.lua (Load)
-  splashcreenModule.Load() 
+  --splashcreenModule.Load() 
 
 
   -- Module menu.lua (Load)
@@ -107,7 +107,7 @@ end
 function love.update(dt)
   
   -- Le module splashscreen.lua de la fonction Update
-  splashcreenModule.Update()
+  --splashcreenModule.Update()
 
 
   -- Le module animationsCharacters.lua de la fonction Update
@@ -139,7 +139,7 @@ function love.draw()
 
   elseif playingVideo == true then
     -- Le module splashscreen.lua de la fonction Draw
-    splashcreenModule.Draw()    
+    --splashcreenModule.Draw()    
 
 
     -- Effet de transition d'écran
