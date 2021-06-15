@@ -33,6 +33,7 @@ utf8 = require("utf8")
 mapModule = require("map")
 mapObjectsModule = require("mapObjects")
 mapCollisionModule = require("mapCollision")
+mapsInGameModule = require("mapsInGame")
 
 
 -- Scènes de jeu différentes
