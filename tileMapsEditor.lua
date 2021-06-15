@@ -1624,8 +1624,8 @@ function tileMapsEditor.Load()
 
 
     --
-    tilesetBatch = love.graphics.newSpriteBatch(tileSet)
-    tilesetBatch2 = love.graphics.newSpriteBatch(tileSet2)
+    tilesetBatch = love.graphics.newSpriteBatch(Game.TileSheets[1])
+    tilesetBatch2 = love.graphics.newSpriteBatch(Game.TileSheets[2])
 
 
     -- Je charge les images de la GUI de l'éditeur de Map
@@ -1665,10 +1665,6 @@ end
 ]]
 
 function tileMapsEditor.Update(dt)
-    --
-    love.graphics.draw(tilesetBatch)
-
-
     -- Mise à jour de la position X et Y de la souris en continue. 
     updateMouseXandY()
 
@@ -1715,6 +1711,10 @@ end
 ]]
 
 function tileMapsEditor.Draw()
+     --
+     love.graphics.draw(tilesetBatch)
+
+     
     -- Set un background color
     colorBackgroundMap(backgroundColor.red, backgroundColor.green, backgroundColor.blue, backgroundColor.alpha)    
 
