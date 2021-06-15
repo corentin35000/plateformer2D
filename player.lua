@@ -139,8 +139,8 @@ function detailsStatsPlayer()
   
   
   -- Le timer des skills du Player
-  love.graphics.print('currentTimerDash (Couldown skills - Dash) : ' .. currentTimerDash, 1, 56)
-  love.graphics.print('currentTimerJump (Couldown skills - Jump) : ' .. currentTimerJump, 1, 80)
+  --love.graphics.print('currentTimerDash (Couldown skills - Dash) : ' .. currentTimerDash, 1, 56)
+  --love.graphics.print('currentTimerJump (Couldown skills - Jump) : ' .. currentTimerJump, 1, 80)
   
   
   -- Position x, y for Player 
@@ -149,11 +149,11 @@ function detailsStatsPlayer()
   
 
   -- Affichage du nombre de FPS
-  love.graphics.print("FPS: " .. tostring(love.timer.getFPS()), 1, 176)
+  love.graphics.print("FPS : " .. love.timer.getFPS(), largeurEcran - 70, 10)
   
   
   -- Affichage du bouton pour reload le jeu
-  love.graphics.print("Controls (resetGame) : W", 1, 224)
+  --love.graphics.print("Controls (resetGame) : W", 1, 224)
 
 end
 

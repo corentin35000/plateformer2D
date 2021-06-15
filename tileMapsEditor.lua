@@ -1541,12 +1541,16 @@ function drawTileRedOrTexture()
             end
         else
             -- Couleur pour dessiner les Collision
-            if resultLignesCursorGrilleMap ~= "En dehors de la Grille Map" and resultColonnesCursorGrilleMap ~= "En dehors de la Grille Map" then
+            if resultLignesCursorGrilleMap ~= "En dehors de la Grille Map" and resultColonnesCursorGrilleMap ~= "En dehors de la Grille Map" and outilsActive ~= 'Gomme' then
                 love.graphics.setColor(255, 165, 0, 0.3)
                 love.graphics.rectangle("fill", offsetXColonne, offsetYLigne, TILE_WIDTH, TILE_HEIGHT)
                 love.graphics.setColor(1, 1, 1, 1)
             elseif resultLignesCursorGrilleMap == "En dehors de la Grille Map" or resultColonnesCursorGrilleMap == "En dehors de la Grille Map" then
                 love.graphics.setColor(255, 0, 0, 0.3)    
+                love.graphics.rectangle("fill", offsetXColonne, offsetYLigne, TILE_WIDTH, TILE_HEIGHT)
+                love.graphics.setColor(1, 1, 1, 1)
+            else
+                love.graphics.setColor(48, 140, 198, 0.3)    
                 love.graphics.rectangle("fill", offsetXColonne, offsetYLigne, TILE_WIDTH, TILE_HEIGHT)
                 love.graphics.setColor(1, 1, 1, 1)
             end

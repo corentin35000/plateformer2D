@@ -86,7 +86,7 @@ end
 
 -- Charge les Tiles par rapport au TILE_WIDTH et TILE_HEIGHT de la map actuellement chargée.
 function loadTilesInGame()
-    -- Itere sur la table qui contient toute les TileSheets, puis découpe chaque images d'une TileSheet et les envoie dans la table : Game.Tiles (tableaux a deux dimensions)
+    -- Itere sur la table qui contient toute les TileSheets, puis découpe chaque images d'une TileSheet et les envoie dans la table : InGame.Tiles (tableaux a deux dimensions)
     -- Decoupage une TileSheet en fonction des TILE_WIDTH et TILE_HEIGHT qui a était générer pour la map.
     local tablesTileSheetsDecouperAll = {}
 
@@ -119,7 +119,7 @@ function loadTilesInGame()
 end
 
 
--- Je charge une TileSheets et l'envoie dans la table : Game.TileSheets
+-- Je charge une TileSheets et l'envoie dans la table : InGame.TileSheets
 function loadTileSheetsInGame(pNomDossierRessources, pNomFicherTileSheet)
     local tileSheet = love.graphics.newImage(pNomDossierRessources .. "/" .. pNomFicherTileSheet .. ".png")
     table.insert(InGame.TileSheets, tileSheet)
