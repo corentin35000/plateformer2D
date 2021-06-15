@@ -1373,7 +1373,7 @@ function drawobjectsInTheGrilleMap()
 
                     local currentTileSheet = 1
                     for key, valeur in pairs(Game.TileSheetsActive) do
-                        if TileMaps[MAP_NIVEAU][l][c] <= valeur then
+                        if TileMapsObjects[MAP_NIVEAU][l][c] <= valeur then
                             currentTileSheet = key
                             
                             break
@@ -1623,6 +1623,11 @@ function tileMapsEditor.Load()
     loadTileSheets('assets', 'tileSet2')
 
 
+    --
+    tilesetBatch = love.graphics.newSpriteBatch(tileSet)
+    tilesetBatch2 = love.graphics.newSpriteBatch(tileSet2)
+
+
     -- Je charge les images de la GUI de l'éditeur de Map
     GUI.imgButtonDessinerGrille = love.graphics.newImage("assets/dessinerGrille.png")
     GUI.imgButtonGommeGrille = love.graphics.newImage("assets/gommeGrille.png")
@@ -1660,6 +1665,10 @@ end
 ]]
 
 function tileMapsEditor.Update(dt)
+    --
+    love.graphics.draw(tilesetBatch)
+
+
     -- Mise à jour de la position X et Y de la souris en continue. 
     updateMouseXandY()
 
@@ -1752,6 +1761,14 @@ function tileMapsEditor.Draw()
     if GUI.drawGUIandText == true then
         guiTileMapEditor()
     end
+
+
+    --
+    stats = love.graphics.getStats()
+    --drawcalls = stats['drawcalls']
+    drawcallsbatched = stats['drawcallsbatched']
+    love.graphics.print("DrawCalls : " .. drawcallsbatched, largeurEcran - 200 - window.translate.x, 10 - window.translate.y)
+    love.graphics.print("FPS : " .. love.timer.getFPS(), largeurEcran - 200 - window.translate.x, 30 - window.translate.y)
 end
 
 
@@ -2210,8 +2227,6 @@ function tileMapsEditor.mousepressed(x, y, button, isTouch)
     if x <= largeurEcran - GUI.imgButtonCalqueOeilOuvert:getWidth() / 2 - 25 and x >= largeurEcran - (GUI.imgButtonCalqueOeilOuvert:getWidth() + (GUI.imgButtonCalqueOeilOuvert:getWidth() / 2)) - 25 and
        y >= hauteurEcran - grilleViewTilesHeight - 200 and y <= hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilOuvert:getHeight() then    
         
-        --print("CLICK CALQUE TILES")
-
         if CalquesActive.Tiles == "ON" then
             CalquesActive.Tiles = "OFF"
         else
@@ -2223,8 +2238,6 @@ function tileMapsEditor.mousepressed(x, y, button, isTouch)
     if x <= largeurEcran - GUI.imgButtonCalqueOeilOuvert:getWidth() / 2 + GUI.imgButtonCalqueOeilOuvert2:getWidth() / 2 - 25 and x >= largeurEcran - (GUI.imgButtonCalqueOeilOuvert2:getWidth() + (GUI.imgButtonCalqueOeilOuvert2:getWidth() / 2)) - 10 and
        y >= hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilOuvert2:getHeight() + 10 and y <= hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilOuvert:getHeight() + GUI.imgButtonCalqueOeilOuvert2:getHeight() + 10 then    
         
-        print("CLICK OEIL OBJECTS")
-
         if CalquesActive.Objects == "ON" then
             CalquesActive.Objects = "OFF"
         else
