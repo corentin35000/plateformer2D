@@ -69,7 +69,7 @@ function love.load()
   -- Un plus spécifique -> highdpi = active le mode haute résolution doit être utilisé sur les écrans Retina sous macOS et iOS.
   -- Un plus spécifique -> usedpiscale  = active le mode haute résolution doit être utilisé sur les écrans Retina sous macOS et iOS.
   -- display = Lancez le jeu sur le moniteur principale 1, 2 ou 3..
-  love.window.setMode(0, 0, {fullscreen = false, fullscreentype = ("desktop"), vsync = -1, resizable = false, 
+  love.window.setMode(0, 0, {fullscreen = false, fullscreentype = ("desktop"), vsync = 1, resizable = false, 
                       borderless = false, centered = true, highdpi = true, usedpiscale = true, display = 1}
                      )
 
@@ -204,7 +204,24 @@ function love.keypressed(key, isrepeat)
     love.event.quit('restart')
   end
 
-  tileMapsEditorModule.keypressed(key, isrepeat)
+  -- En mode Editeur ou Gameplay (Change de Scenes)
+  if key == "f1" then 
+    if sceneTileMapEditor == false then
+        sceneMenu = false
+        sceneGameplay = false
+        sceneGameOver = false
+        sceneTileMapEditor = true
+    else
+        sceneMenu = false
+        sceneGameplay = true
+        sceneGameOver = false
+        sceneTileMapEditor = false
+    end
+  end
+
+  if sceneTileMapEditor == true then
+    tileMapsEditorModule.keypressed(key, isrepeat)
+  end
 
   --print(key)
 
@@ -221,7 +238,9 @@ function love.mousepressed(x, y, button, isTouch)
     sceneGameplayActiver = true
   end
 
-  tileMapsEditorModule.mousepressed(x, y, button, isTouch)
+  if sceneTileMapEditor == true then
+    tileMapsEditorModule.mousepressed(x, y, button, isTouch)
+  end
 
   --print ("x : " .. x .. " - y : " .. y)
 

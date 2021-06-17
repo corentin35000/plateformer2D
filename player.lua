@@ -149,7 +149,7 @@ function detailsStatsPlayer()
   
 
   -- Affichage du nombre de FPS
-  love.graphics.print("FPS : " .. love.timer.getFPS(), largeurEcran - 70, 10)
+  --love.graphics.print("FPS : " .. love.timer.getFPS(), largeurEcran - 70, 10)
   
   
   -- Affichage du bouton pour reload le jeu

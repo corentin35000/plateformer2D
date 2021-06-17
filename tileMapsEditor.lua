@@ -28,6 +28,8 @@
 
 -- 5) Les TileSet doivent être extremement bien faite, que chaque Tile sois bien coller entre eux et bien configurer la fonction pour découpé la SpriteSheet. 
 
+
+-- sceneTileMapEditor == true sera obligatoire pour certaine condition ne pas oublier quand je change de jeu
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -63,10 +65,6 @@ CalquesActive.Collision = "OFF"
 
 
 --
-SpriteBatch = {}
-
-
---
 Game = {}
 Game.TileSheets = {}
 Game.TileSheetsActive = {}
@@ -95,6 +93,7 @@ scrollY_TileAlphaSortZone = 1
 pinceauAlpha = 1 -- alpha
 gommeAlpha = 1 -- alpha
 outilsActive = nil
+mouseOnTheOutils = false
 
 
 --
@@ -212,6 +211,23 @@ function updateMouseXandY()
     if MAP_NIVEAU ~= "?" then
         mouse.posX = love.mouse.getX() - window.translate.x
         mouse.posY = love.mouse.getY() - window.translate.y
+    end
+end
+
+
+-- Empeche de dessiner ou gommer derrière la GUI du pinceau et gomme quand on selectionne un Outils.
+function empecheDessinerGommerDerriereGUIOutils()
+    local mouseX = love.mouse.getX()
+    local mouseY = love.mouse.getY()
+
+    if mouseX <= largeurEcran - GUI.imgButtonDessinerGrille:getWidth() / 2 and mouseX >= largeurEcran - (GUI.imgButtonDessinerGrille:getWidth() + (GUI.imgButtonDessinerGrille:getWidth() / 2)) and
+       mouseY >= GUI.imgButtonDessinerGrille:getHeight() / 2 and mouseY <= GUI.imgButtonDessinerGrille:getHeight() + (GUI.imgButtonDessinerGrille:getHeight() / 2) or
+       mouseX <= largeurEcran - GUI.imgButtonGommeGrille:getWidth() / 2 and mouseX >= largeurEcran - (GUI.imgButtonGommeGrille:getWidth() + (GUI.imgButtonGommeGrille:getWidth() / 2)) and
+       mouseY >= GUI.imgButtonDessinerGrille:getHeight() / 2 + GUI.imgButtonDessinerGrille:getHeight() and mouseY <= GUI.imgButtonDessinerGrille:getHeight() / 2 + GUI.imgButtonDessinerGrille:getHeight() + GUI.imgButtonGommeGrille:getHeight() then
+    
+        mouseOnTheOutils = true
+    else
+        mouseOnTheOutils = false
     end
 end
 
@@ -420,44 +436,46 @@ end
 
 -- 
 function deplacementInGrilleMapZQSD()
-    if love.keyboard.isDown('z') and love.keyboard.isDown('d') then -- Déplacement : Haut Droite
-        cursorPersoActive = true
-        love.mouse.setCursor(cursorImg.mouvementHautDroiteBasGaucheInMapEditor)
-        window.translate.y = window.translate.y + 5
-        window.translate.x = window.translate.x + -5
-    elseif love.keyboard.isDown('z') and love.keyboard.isDown('q') then -- Déplacement : Haut Gauche
-        cursorPersoActive = true
-        love.mouse.setCursor(cursorImg.mouvementHautGaucheBasDroiteInMapEditor)
-        window.translate.y = window.translate.y + 5
-        window.translate.x = window.translate.x + 5
-    elseif love.keyboard.isDown('s') and love.keyboard.isDown('q') then -- Déplacement : Bas Gauche
-        cursorPersoActive = true
-        love.mouse.setCursor(cursorImg.mouvementHautDroiteBasGaucheInMapEditor)
-        window.translate.y = window.translate.y + -5
-        window.translate.x = window.translate.x + 5
-    elseif love.keyboard.isDown('s') and love.keyboard.isDown('d') then -- Déplacement : Bas Droite
-        cursorPersoActive = true
-        love.mouse.setCursor(cursorImg.mouvementHautGaucheBasDroiteInMapEditor)
-        window.translate.y = window.translate.y + -5
-        window.translate.x = window.translate.x + -5
-    elseif love.keyboard.isDown('q') then -- Déplacement : Gauche
-        cursorPersoActive = true
-        love.mouse.setCursor(cursorImg.mouvementGaucheDroiteInMapEditor)
-        window.translate.x = window.translate.x + 5
-    elseif love.keyboard.isDown('d') then -- Déplacement : Droite
-        cursorPersoActive = true
-        love.mouse.setCursor(cursorImg.mouvementGaucheDroiteInMapEditor)
-        window.translate.x = window.translate.x + -5
-    elseif love.keyboard.isDown('z') then -- Déplacement : Haut
-        cursorPersoActive = true
-        love.mouse.setCursor(cursorImg.mouvementHautBasInMapEditor)
-        window.translate.y = window.translate.y + 5
-    elseif love.keyboard.isDown('s') then -- Déplacement : Bas
-        cursorPersoActive = true
-        love.mouse.setCursor(cursorImg.mouvementHautBasInMapEditor)
-        window.translate.y = window.translate.y + -5
-    elseif not love.mouse.isDown(2) then
-        cursorPersoActive = false
+    if sceneTileMapEditor == true then
+        if love.keyboard.isDown('z') and love.keyboard.isDown('d') then -- Déplacement : Haut Droite
+            cursorPersoActive = true
+            love.mouse.setCursor(cursorImg.mouvementHautDroiteBasGaucheInMapEditor)
+            window.translate.y = window.translate.y + 5
+            window.translate.x = window.translate.x + -5
+        elseif love.keyboard.isDown('z') and love.keyboard.isDown('q') then -- Déplacement : Haut Gauche
+            cursorPersoActive = true
+            love.mouse.setCursor(cursorImg.mouvementHautGaucheBasDroiteInMapEditor)
+            window.translate.y = window.translate.y + 5
+            window.translate.x = window.translate.x + 5
+        elseif love.keyboard.isDown('s') and love.keyboard.isDown('q') then -- Déplacement : Bas Gauche
+            cursorPersoActive = true
+            love.mouse.setCursor(cursorImg.mouvementHautDroiteBasGaucheInMapEditor)
+            window.translate.y = window.translate.y + -5
+            window.translate.x = window.translate.x + 5
+        elseif love.keyboard.isDown('s') and love.keyboard.isDown('d') then -- Déplacement : Bas Droite
+            cursorPersoActive = true
+            love.mouse.setCursor(cursorImg.mouvementHautGaucheBasDroiteInMapEditor)
+            window.translate.y = window.translate.y + -5
+            window.translate.x = window.translate.x + -5
+        elseif love.keyboard.isDown('q') then -- Déplacement : Gauche
+            cursorPersoActive = true
+            love.mouse.setCursor(cursorImg.mouvementGaucheDroiteInMapEditor)
+            window.translate.x = window.translate.x + 5
+        elseif love.keyboard.isDown('d') then -- Déplacement : Droite
+            cursorPersoActive = true
+            love.mouse.setCursor(cursorImg.mouvementGaucheDroiteInMapEditor)
+            window.translate.x = window.translate.x + -5
+        elseif love.keyboard.isDown('z') then -- Déplacement : Haut
+            cursorPersoActive = true
+            love.mouse.setCursor(cursorImg.mouvementHautBasInMapEditor)
+            window.translate.y = window.translate.y + 5
+        elseif love.keyboard.isDown('s') then -- Déplacement : Bas
+            cursorPersoActive = true
+            love.mouse.setCursor(cursorImg.mouvementHautBasInMapEditor)
+            window.translate.y = window.translate.y + -5
+        elseif not love.mouse.isDown(2) then
+            cursorPersoActive = false
+        end
     end
 end
 
@@ -466,7 +484,7 @@ end
 function deplacerGrilleMapClickRight()
     -- BUG : QUAND LES 4 IF SONT ACTIF LE DEPLACEMENT EST BUG, SI DEUX IF LE DEPLACEMENT EST OK -> ?? / REFAIRE EN 8 DIRECTION PEU ETRE
     -- Clique droit enfoncée en continue 
-    if love.mouse.isDown(2) then
+    if love.mouse.isDown(2) and sceneTileMapEditor == true then
         cursorPersoActive = true
         love.mouse.setCursor(cursorImg.deplacementMapEditor)
 
@@ -1433,7 +1451,7 @@ end
 
 -- Pinceau GrilleMap pour les Tiles, button de la souris en continue
 function pinceauTilesInTheGrilleMap()
-    if love.mouse.isDown(1) and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Pinceau' and Game.TileActive ~= nil and MAP_NIVEAU ~= "?" and CALQUES == "Tiles" then
+    if love.mouse.isDown(1) and sceneTileMapEditor == true and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Pinceau' and Game.TileActive ~= nil and MAP_NIVEAU ~= "?" and CALQUES == "Tiles" and mouseOnTheOutils == false then
         LIGNE = CURRENT_LIGNE + 1 
         COLONNE = CURRENT_COLONNE + 1 
 
@@ -1444,7 +1462,7 @@ end
 
 -- Pinceau GrilleMap pour les Objects, button de la souris en continue
 function pinceauObjectsInTheGrilleMap()
-    if love.mouse.isDown(1) and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Pinceau' and Game.TileActive ~= nil and MAP_NIVEAU ~= "?" and CALQUES == "Objects" then
+    if love.mouse.isDown(1) and sceneTileMapEditor == true and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Pinceau' and Game.TileActive ~= nil and MAP_NIVEAU ~= "?" and CALQUES == "Objects" and mouseOnTheOutils == false then
         LIGNE = CURRENT_LIGNE + 1 
         COLONNE = CURRENT_COLONNE + 1 
 
@@ -1455,7 +1473,7 @@ end
 
 -- Pinceau GrilleMap pour les Objects, button de la souris en continue
 function pinceauCollisionInTheGrilleMap()
-    if love.mouse.isDown(1) and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Pinceau' and MAP_NIVEAU ~= "?" and CALQUES == "Collision" then
+    if love.mouse.isDown(1) and sceneTileMapEditor == true and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Pinceau' and MAP_NIVEAU ~= "?" and CALQUES == "Collision" and mouseOnTheOutils == false then
         LIGNE = CURRENT_LIGNE + 1 
         COLONNE = CURRENT_COLONNE + 1 
         
@@ -1466,7 +1484,7 @@ end
 
 -- Gommer GrilleMap button de la souris en continue
 function gommeTilesInTheGrilleMap()
-    if love.mouse.isDown(1) and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Gomme' and MAP_NIVEAU ~= "?" and CALQUES == "Tiles" then
+    if love.mouse.isDown(1) and sceneTileMapEditor == true and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Gomme' and MAP_NIVEAU ~= "?" and CALQUES == "Tiles" and mouseOnTheOutils == false then
         LIGNE = CURRENT_LIGNE + 1 
         COLONNE = CURRENT_COLONNE + 1 
 
@@ -1477,7 +1495,7 @@ end
 
 -- Gommer GrilleMap pour les Objects, button de la souris en continue
 function gommeObjectsInTheGrilleMap()
-    if love.mouse.isDown(1) and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Gomme' and MAP_NIVEAU ~= "?" and CALQUES == "Objects" then
+    if love.mouse.isDown(1) and sceneTileMapEditor == true and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Gomme' and MAP_NIVEAU ~= "?" and CALQUES == "Objects" and mouseOnTheOutils == false then
         LIGNE = CURRENT_LIGNE + 1 
         COLONNE = CURRENT_COLONNE + 1 
 
@@ -1488,7 +1506,7 @@ end
 
 -- Gommer GrilleMap pour les Objects, button de la souris en continue
 function gommeCollisionInTheGrilleMap()
-    if love.mouse.isDown(1) and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Gomme' and MAP_NIVEAU ~= "?" and CALQUES == "Collision" then
+    if love.mouse.isDown(1) and sceneTileMapEditor == true and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Gomme' and MAP_NIVEAU ~= "?" and CALQUES == "Collision" and mouseOnTheOutils == false then
         LIGNE = CURRENT_LIGNE + 1 
         COLONNE = CURRENT_COLONNE + 1 
 
@@ -1592,9 +1610,6 @@ function loadTiles()
 
     print("\n")
     print("Nombre de Tiles IN EDITOR : " .. #Game.Tiles)
-    for key, valeur in pairs(Game.TileSheetsActive) do
-        print(key, valeur)
-    end
 end
 
 
@@ -1630,13 +1645,6 @@ function tileMapsEditor.Load()
     -- loadTileSheets(nomDuDossier, nomFichierImgTileSheet)
     loadTileSheets('assets', 'tileSet')
     loadTileSheets('assets', 'tileSet2')
-
-
-    --  
-    tilesetBatch = love.graphics.newSpriteBatch(Game.TileSheets[1])
-    table.insert(SpriteBatch, tilesetBatch)
-    tilesetBatch2 = love.graphics.newSpriteBatch(Game.TileSheets[2])
-    table.insert(SpriteBatch, tilesetBatch2)
 
 
     -- Je charge les images de la GUI de l'éditeur de Map
@@ -1708,6 +1716,10 @@ function tileMapsEditor.Update(dt)
     
     --
     deplacementInGrilleMapZQSD()
+
+
+    -- Empeche de dessiner ou gommer derrière la GUI du pinceau et gomme quand on selectionne un Outils.
+    empecheDessinerGommerDerriereGUIOutils()
 end
 
 
@@ -1826,22 +1838,6 @@ end
 
 function tileMapsEditor.keypressed(key, isrepeat)
   
-    -- En mode Editeur ou Gameplay (Change de Scenes)
-    if key == "f1" then 
-        if sceneTileMapEditor == false then
-            sceneMenu = false
-            sceneGameplay = false
-            sceneGameOver = false
-            sceneTileMapEditor = true
-        else
-            sceneMenu = false
-            sceneGameplay = true
-            sceneGameOver = false
-            sceneTileMapEditor = false
-        end
-    end
-
-
     -- Change la couleur des Lines/Pointiller de la GrilleMap. (noir ou blanc)
     if key == "f2" then
         if GUI.grilleMapColor == 'black' then 
@@ -2154,7 +2150,7 @@ function tileMapsEditor.mousepressed(x, y, button, isTouch)
     end
 
 
-    -- Récupère la Tile choisi - multiplier : (CURRENT_COLONNE2 * scrollY_counter) + CURRENT_COLONNE2
+    -- Récupère la Tile choisi
     if MAP_NIVEAU ~= "?" and mouseX >= (largeurEcran - grilleViewTilesWidth) and mouseY >= (hauteurEcran - grilleViewTilesHeight) then
         numeroTileCurrent = ((CURRENT_LIGNE2 + scrollY_counter) * colonneViewTile) + (CURRENT_COLONNE2 + 1)
 
@@ -2169,7 +2165,7 @@ function tileMapsEditor.mousepressed(x, y, button, isTouch)
 
 
     --  Click une fois sur la Grille Map avec la Tile qui a était choisi.
-    if button == 1 and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Pinceau' and Game.TileActive ~= nil and MAP_NIVEAU ~= "?" and CALQUES == "Tiles" then
+    if button == 1 and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Pinceau' and Game.TileActive ~= nil and MAP_NIVEAU ~= "?" and CALQUES == "Tiles" and mouseOnTheOutils == false and sceneTileMapEditor == true then
         LIGNE = CURRENT_LIGNE + 1 
         COLONNE = CURRENT_COLONNE + 1 
 
@@ -2178,7 +2174,7 @@ function tileMapsEditor.mousepressed(x, y, button, isTouch)
 
 
     --  Click une fois sur la Grille Map pour gommer sur la Map.
-     if button == 1 and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Gomme' and MAP_NIVEAU ~= "?" and CALQUES == "Tiles" then
+     if button == 1 and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Gomme' and MAP_NIVEAU ~= "?" and CALQUES == "Tiles" and mouseOnTheOutils == false and sceneTileMapEditor == true then
         LIGNE = CURRENT_LIGNE + 1 
         COLONNE = CURRENT_COLONNE + 1 
 
@@ -2187,7 +2183,7 @@ function tileMapsEditor.mousepressed(x, y, button, isTouch)
 
 
     --  Click une fois sur la Grille Map avec l'Objects qui a était choisi 
-    if button == 1 and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Pinceau' and Game.TileActive ~= nil and MAP_NIVEAU ~= "?" and CALQUES == "Objects" then
+    if button == 1 and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Pinceau' and Game.TileActive ~= nil and MAP_NIVEAU ~= "?" and CALQUES == "Objects" and mouseOnTheOutils == false and sceneTileMapEditor == true then
         LIGNE = CURRENT_LIGNE + 1 
         COLONNE = CURRENT_COLONNE + 1 
 
@@ -2196,7 +2192,7 @@ function tileMapsEditor.mousepressed(x, y, button, isTouch)
 
 
     --  Click une fois sur la Grille Map pour gommer sur la Map les Objects
-     if button == 1 and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Gomme' and MAP_NIVEAU ~= "?" and CALQUES == "Objects" then
+     if button == 1 and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Gomme' and MAP_NIVEAU ~= "?" and CALQUES == "Objects" and mouseOnTheOutils == false and sceneTileMapEditor == true then
         LIGNE = CURRENT_LIGNE + 1 
         COLONNE = CURRENT_COLONNE + 1 
 
@@ -2205,7 +2201,7 @@ function tileMapsEditor.mousepressed(x, y, button, isTouch)
 
 
     --  Click une fois sur la Grille Map pour les Collision
-    if button == 1 and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Pinceau' and Game.TileActive ~= nil and MAP_NIVEAU ~= "?" and CALQUES == "Collision" then
+    if button == 1 and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Pinceau' and Game.TileActive ~= nil and MAP_NIVEAU ~= "?" and CALQUES == "Collision" and mouseOnTheOutils == false and sceneTileMapEditor == true then
         LIGNE = CURRENT_LIGNE + 1 
         COLONNE = CURRENT_COLONNE + 1 
 
@@ -2214,7 +2210,7 @@ function tileMapsEditor.mousepressed(x, y, button, isTouch)
 
 
     --  Click une fois sur la Grille Map pour gommer sur la Map les Collisions
-     if button == 1 and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Gomme' and MAP_NIVEAU ~= "?" and CALQUES == "Collision" then
+     if button == 1 and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Gomme' and MAP_NIVEAU ~= "?" and CALQUES == "Collision" and mouseOnTheOutils == false and sceneTileMapEditor == true then
         LIGNE = CURRENT_LIGNE + 1 
         COLONNE = CURRENT_COLONNE + 1 
 

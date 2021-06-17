@@ -15,11 +15,16 @@ InGame.MapNiveauActive = 1
 
 
 --
-local MAP_WIDTH = TileMaps[InGame.MapNiveauActive].MAP_WIDTH
-local MAP_HEIGHT = TileMaps[InGame.MapNiveauActive].MAP_HEIGHT
-local TILE_WIDTH = TileMaps[InGame.MapNiveauActive].TILE_WIDTH
-local TILE_HEIGHT = TileMaps[InGame.MapNiveauActive].TILE_HEIGHT
+SpriteBatch = {}
 
+
+--
+if TileMaps ~= nil then
+    MAP_WIDTH = TileMaps[InGame.MapNiveauActive].MAP_WIDTH
+    MAP_HEIGHT = TileMaps[InGame.MapNiveauActive].MAP_HEIGHT
+    TILE_WIDTH = TileMaps[InGame.MapNiveauActive].TILE_WIDTH
+    TILE_HEIGHT = TileMaps[InGame.MapNiveauActive].TILE_HEIGHT
+end
 
 
 -- Dessine les Tiles qui a était ajouter dans le tableaux à deux dimensions des maps dans le fichier : map.lua
@@ -41,7 +46,8 @@ function drawTilesInTheGrilleMapInGame()
             end 
 
             if tileCurrent ~= 0 then
-                love.graphics.draw(InGame.TileSheets[currentTileSheet], InGame.Tiles[tileCurrent], total_TILE_WIDTH, total_TILE_HEIGHT)
+                SpriteBatch[currentTileSheet]:add(InGame.Tiles[tileCurrent], total_TILE_WIDTH, total_TILE_HEIGHT)
+                --love.graphics.draw(InGame.TileSheets[currentTileSheet], InGame.Tiles[tileCurrent], total_TILE_WIDTH, total_TILE_HEIGHT)
             end
 
             total_TILE_WIDTH = total_TILE_WIDTH + TILE_WIDTH
@@ -72,7 +78,8 @@ function drawObjectsInTheGrilleMapInGame()
             end 
 
             if tileCurrent ~= 0 then
-                love.graphics.draw(InGame.TileSheets[currentTileSheet], InGame.Tiles[tileCurrent], total_TILE_WIDTH, total_TILE_HEIGHT)
+                SpriteBatch[currentTileSheet]:add(InGame.Tiles[tileCurrent], total_TILE_WIDTH, total_TILE_HEIGHT)
+                --love.graphics.draw(InGame.TileSheets[currentTileSheet], InGame.Tiles[tileCurrent], total_TILE_WIDTH, total_TILE_HEIGHT)
             end
 
             total_TILE_WIDTH = total_TILE_WIDTH + TILE_WIDTH
@@ -105,7 +112,7 @@ function loadTilesInGame()
 
         table.insert(InGame.TileSheetsActive, #InGame.Tiles)
 
-        local currentTable = currentTable + 1
+        currentTable = currentTable + 1
         if currentTable > #InGame.TileSheets then
             break
         end
@@ -113,9 +120,6 @@ function loadTilesInGame()
 
     print("\n")
     print("Nombre de Tiles IN GAME : " .. #InGame.Tiles)
-    for key, valeur in pairs(InGame.TileSheetsActive) do
-        print(key, valeur)
-    end
 end
 
 
@@ -125,6 +129,16 @@ function loadTileSheetsInGame(pNomDossierRessources, pNomFicherTileSheet)
     table.insert(InGame.TileSheets, tileSheet)
 end
 
+
+function printDrawCallandFPS()
+    stats = love.graphics.getStats()
+    drawcalls = stats['drawcalls']
+    drawcallsbatched = stats['drawcallsbatched']
+
+    love.graphics.print("FPS : " .. love.timer.getFPS(), largeurEcran - 70, 10)
+    love.graphics.print("DrawCalls : " .. drawcalls, largeurEcran - 100, 30)
+    love.graphics.print("DrawCallsBatched : " .. drawcallsbatched, largeurEcran - 150, 50)
+end
 
 
 
@@ -143,6 +157,22 @@ function mapsInGame.Load()
 
     --
     loadTilesInGame()
+    
+        
+    --  
+    tilesetBatch = love.graphics.newSpriteBatch(InGame.TileSheets[1])
+    table.insert(SpriteBatch, tilesetBatch)
+    tilesetBatch2 = love.graphics.newSpriteBatch(InGame.TileSheets[2])
+    table.insert(SpriteBatch, tilesetBatch2)
+
+
+    if TileMaps ~= nil then
+        drawTilesInTheGrilleMapInGame()
+        drawObjectsInTheGrilleMapInGame()
+
+        SpriteBatch[1]:flush()
+        SpriteBatch[2]:flush()
+    end
 end
 
 function mapsInGame.Update()
@@ -150,8 +180,12 @@ function mapsInGame.Update()
 end
 
 function mapsInGame.Draw()
-    drawTilesInTheGrilleMapInGame()
-    drawObjectsInTheGrilleMapInGame()
+    if TileMaps ~= nil then
+        love.graphics.draw(SpriteBatch[1])
+        love.graphics.draw(SpriteBatch[2]) 
+    end
+
+    printDrawCallandFPS()
 end
 
 return mapsInGame
