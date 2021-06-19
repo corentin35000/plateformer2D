@@ -2,7 +2,7 @@ local mapsInGame = {}
 
 -- Charge les fichiers que j'ai besoins.
 require("map")
-require("mapObjects")
+require("map2")
 require("mapCollision")
 
 
@@ -46,8 +46,8 @@ function drawTilesInTheGrilleMapInGame()
             end 
 
             if tileCurrent ~= 0 then
-                SpriteBatch[currentTileSheet]:add(InGame.Tiles[tileCurrent], total_TILE_WIDTH, total_TILE_HEIGHT)
-                --love.graphics.draw(InGame.TileSheets[currentTileSheet], InGame.Tiles[tileCurrent], total_TILE_WIDTH, total_TILE_HEIGHT)
+                --SpriteBatch[currentTileSheet]:add(InGame.Tiles[tileCurrent], total_TILE_WIDTH, total_TILE_HEIGHT)
+                love.graphics.draw(InGame.TileSheets[currentTileSheet], InGame.Tiles[tileCurrent], total_TILE_WIDTH, total_TILE_HEIGHT)
             end
 
             total_TILE_WIDTH = total_TILE_WIDTH + TILE_WIDTH
@@ -60,17 +60,17 @@ end
 
 
 -- Dessine les Objects qui a était ajouter dans le tableaux à deux dimensions des maps dans le fichier : mapObjects.lua
-function drawObjectsInTheGrilleMapInGame()
+function drawTiles2InTheGrilleMapInGame()
     local total_TILE_WIDTH = 0
     local total_TILE_HEIGHT = 0
 
     for l=1,MAP_HEIGHT do
         for c=1,MAP_WIDTH do
-            local tileCurrent = TileMapsObjects[InGame.MapNiveauActive][l][c]
+            local tileCurrent = TileMaps2[InGame.MapNiveauActive][l][c]
 
             local currentTileSheet = 1
             for key, valeur in pairs(InGame.TileSheetsActive) do
-                if TileMapsObjects[InGame.MapNiveauActive][l][c] <= valeur then
+                if TileMaps2[InGame.MapNiveauActive][l][c] <= valeur then
                     currentTileSheet = key
                     
                     break
@@ -78,8 +78,8 @@ function drawObjectsInTheGrilleMapInGame()
             end 
 
             if tileCurrent ~= 0 then
-                SpriteBatch[currentTileSheet]:add(InGame.Tiles[tileCurrent], total_TILE_WIDTH, total_TILE_HEIGHT)
-                --love.graphics.draw(InGame.TileSheets[currentTileSheet], InGame.Tiles[tileCurrent], total_TILE_WIDTH, total_TILE_HEIGHT)
+                --SpriteBatch[currentTileSheet]:add(InGame.Tiles[tileCurrent], total_TILE_WIDTH, total_TILE_HEIGHT)
+                love.graphics.draw(InGame.TileSheets[currentTileSheet], InGame.Tiles[tileCurrent], total_TILE_WIDTH, total_TILE_HEIGHT)
             end
 
             total_TILE_WIDTH = total_TILE_WIDTH + TILE_WIDTH
@@ -166,13 +166,13 @@ function mapsInGame.Load()
     table.insert(SpriteBatch, tilesetBatch2)
 
 
-    if TileMaps ~= nil then
+    --[[if TileMaps ~= nil then
         drawTilesInTheGrilleMapInGame()
-        drawObjectsInTheGrilleMapInGame()
+        drawTiles2InTheGrilleMapInGame()
 
         SpriteBatch[1]:flush()
         SpriteBatch[2]:flush()
-    end
+    end]]
 end
 
 function mapsInGame.Update()
@@ -183,6 +183,11 @@ function mapsInGame.Draw()
     if TileMaps ~= nil then
         love.graphics.draw(SpriteBatch[1])
         love.graphics.draw(SpriteBatch[2]) 
+    end
+
+    if TileMaps ~= nil then
+        drawTilesInTheGrilleMapInGame()
+        drawTiles2InTheGrilleMapInGame()
     end
 
     printDrawCallandFPS()

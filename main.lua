@@ -31,7 +31,7 @@ sauvegardeModule = require("sauvegarde")
 adaptImageToScreenSizeModule = require("adaptImageToScreenSize")
 utf8 = require("utf8")
 mapModule = require("map")
-mapObjectsModule = require("mapObjects")
+map2Module = require("map2")
 mapCollisionModule = require("mapCollision")
 mapsInGameModule = require("mapsInGame")
 
@@ -69,7 +69,7 @@ function love.load()
   -- Un plus spécifique -> highdpi = active le mode haute résolution doit être utilisé sur les écrans Retina sous macOS et iOS.
   -- Un plus spécifique -> usedpiscale  = active le mode haute résolution doit être utilisé sur les écrans Retina sous macOS et iOS.
   -- display = Lancez le jeu sur le moniteur principale 1, 2 ou 3..
-  love.window.setMode(0, 0, {fullscreen = false, fullscreentype = ("desktop"), vsync = 1, resizable = false, 
+  love.window.setMode(0, 0, {fullscreen = false, fullscreentype = ("desktop"), vsync = 0, resizable = false, 
                       borderless = false, centered = true, highdpi = true, usedpiscale = true, display = 1}
                      )
 
@@ -158,6 +158,10 @@ function love.draw()
     ecransTransitionsModule.Draw.Menu()
  
   elseif sceneGameplay == true then
+    --
+    love.graphics.setBackgroundColor(0, 0, 0, 1)
+
+
     -- Test Map
     mapsInGameModule.Draw()
 
