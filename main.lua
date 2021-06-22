@@ -32,6 +32,7 @@ adaptImageToScreenSizeModule = require("adaptImageToScreenSize")
 utf8 = require("utf8")
 mapModule = require("map")
 map2Module = require("map2")
+mapObjectsModule = require("mapObjects")
 mapCollisionModule = require("mapCollision")
 mapsInGameModule = require("mapsInGame")
 
@@ -227,7 +228,7 @@ function love.keypressed(key, isrepeat)
     tileMapsEditorModule.keypressed(key, isrepeat)
   end
 
-  --print(key)
+  print(key)
 
 end
 

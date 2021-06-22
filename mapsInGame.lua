@@ -3,6 +3,7 @@ local mapsInGame = {}
 -- Charge les fichiers que j'ai besoins.
 require("map")
 require("map2")
+require("mapObjects")
 require("mapCollision")
 
 

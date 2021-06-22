@@ -37,6 +37,7 @@ local tileMapsEditor = {}
 
 require("map")
 require("map2")
+require("mapObjects")
 require("mapCollision")
 
 
@@ -58,6 +59,16 @@ CALQUES = 'Tiles'
 
 
 --
+Game = {}
+Game.TileSheets = {}
+Game.TileSheetsActive = {}
+Game.Tiles = {}
+Game.TileActive = nil
+Game.MapNiveau = {}
+Game.MapNiveauActive = nil
+
+
+--
 CalquesActive = {}
 CalquesActive.Tiles = "ON"
 CalquesActive.Tiles2 = "ON"
@@ -68,14 +79,12 @@ CalquesActive.IDTiles2 = "OFF"
 CalquesActive.IDObjects = "OFF"
 
 
---
-Game = {}
-Game.TileSheets = {}
-Game.TileSheetsActive = {}
-Game.Tiles = {}
-Game.TileActive = nil
-Game.MapNiveau = {}
-Game.MapNiveauActive = nil
+-- Permet de revenir en arrière ou en avant après modification de la Map.
+Historique = {}
+Historique.ArriereDonnees = {}
+Historique.AvantDonnees = {}
+Historique.Counter = 0
+
 
 
 -- Données View Tiles
@@ -216,7 +225,6 @@ dscale = 2^(1/6) -- Le mouvement de la roue six fois change le zoom deux fois (z
 ██      ██    ██ ██  ██ ██ ██         ██    ██ ██    ██ ██  ██ ██      ██     ██      ██   ██ ██    ██    ██    ██ ██   ██ ██  ██  ██ ██   ██ ██      
 ██       ██████  ██   ████  ██████    ██    ██  ██████  ██   ████ ███████     ███████ ██████  ██    ██     ██████  ██   ██ ██      ██ ██   ██ ██                                                                                                                                                                                                                                                                                                                 
 ]]
-
 
 --
 function updateMouseXandY()
@@ -476,7 +484,7 @@ end
 
 -- 
 function deplacementInGrilleMapZQSD()
-    if sceneTileMapEditor == true then
+    if sceneTileMapEditor == true and not love.keyboard.isDown('lctrl') then
         if love.keyboard.isDown('z') and love.keyboard.isDown('d') then -- Déplacement : Haut Droite
             cursorPersoActive = true
             love.mouse.setCursor(cursorImg.mouvementHautDroiteBasGaucheInMapEditor)
@@ -815,6 +823,10 @@ function loadMap(pNiveauMap)
         Game.TileActive = nil
 
         CALQUES = "Tiles"
+
+        Historique.ArriereDonnees = {}
+        Historique.AvantDonnees = {}
+        Historique.Counter = 0
     end
 end
 
@@ -1241,6 +1253,10 @@ function newMap()
     Game.TileActive = nil
 
     CALQUES = "Tiles"
+
+    Historique.ArriereDonnees = {}
+    Historique.AvantDonnees = {}
+    Historique.Counter = 0
 end
 
 
@@ -1530,7 +1546,19 @@ function pinceauTilesInTheGrilleMap()
         LIGNE = CURRENT_LIGNE + 1 
         COLONNE = CURRENT_COLONNE + 1 
 
-        TileMaps[MAP_NIVEAU][LIGNE][COLONNE] = Game.TileActive 
+        if TileMaps[MAP_NIVEAU][LIGNE][COLONNE] ~= Game.TileActive then
+            -- Historique Arriere
+            local tab = { MAP_NIVEAU = MAP_NIVEAU, LIGNE = LIGNE, COLONNE = COLONNE, MAP = "TileMaps", DATAMAP = TileMaps[MAP_NIVEAU][LIGNE][COLONNE] }
+            table.insert(Historique.ArriereDonnees, tab)
+
+            TileMaps[MAP_NIVEAU][LIGNE][COLONNE] = Game.TileActive
+
+            -- Historique Avant
+            local tab2 = { MAP_NIVEAU = MAP_NIVEAU, LIGNE = LIGNE, COLONNE = COLONNE, MAP = "TileMaps", DATAMAP = TileMaps[MAP_NIVEAU][LIGNE][COLONNE] }
+            table.insert(Historique.AvantDonnees, tab2)
+
+            Historique.Counter = Historique.Counter + 1
+        end
     end
 end
 
@@ -2169,7 +2197,65 @@ function tileMapsEditor.keypressed(key, isrepeat)
             end
         end
     end
-      
+
+
+    -- Permet de revenir en arrière après modification de la Map.
+    if key == "lctrl" and Historique.Counter ~= 0 then      
+        local VALUE_DATAMAP = Historique.ArriereDonnees[Historique.Counter].DATAMAP
+        local LIGNE = Historique.ArriereDonnees[Historique.Counter].LIGNE
+        local COLONNE = Historique.ArriereDonnees[Historique.Counter].COLONNE
+        local MAP_NIVEAU = Historique.ArriereDonnees[Historique.Counter].MAP_NIVEAU
+        local MAP = Historique.ArriereDonnees[Historique.Counter].MAP
+
+        print("\n")
+        print("VALUE DATA MAP : " .. VALUE_DATAMAP)
+        print("LIGNE : " .. LIGNE)
+        print("COLONNE : " .. COLONNE)
+        print("MAP NIVEAU : " .. MAP_NIVEAU)
+        print("MAP : " .. MAP)
+        print("HISTORIQUE COUNTER : " .. Historique.Counter)
+
+        if MAP == "TileMaps" then
+            print("changer")
+            TileMaps[MAP_NIVEAU][LIGNE][COLONNE] = VALUE_DATAMAP
+            --table.remove(Historique.ArriereDonnees, Historique.Counter)
+            Historique.Counter = Historique.Counter - 1
+        elseif MAP == "TileMaps2" then
+            TileMaps2[MAP_NIVEAU][LIGNE][COLONNE] = VALUE_DATAMAP
+            --table.remove(Historique.ArriereDonnees, Historique.Counter)
+            Historique.Counter = Historique.Counter - 1
+        end
+    end
+
+
+    -- Permet de revenir avant après modification de la Map.
+    if key == "lalt" and Historique.Counter ~= 0 and Historique.Counter <= #Historique.AvantDonnees then      
+        local VALUE_DATAMAP = Historique.AvantDonnees[Historique.Counter].DATAMAP
+        local LIGNE = Historique.AvantDonnees[Historique.Counter].LIGNE
+        local COLONNE = Historique.AvantDonnees[Historique.Counter].COLONNE
+        local MAP_NIVEAU = Historique.AvantDonnees[Historique.Counter].MAP_NIVEAU
+        local MAP = Historique.AvantDonnees[Historique.Counter].MAP
+
+        print("\n")
+        print("VALUE DATA MAP : " .. VALUE_DATAMAP)
+        print("LIGNE : " .. LIGNE)
+        print("COLONNE : " .. COLONNE)
+        print("MAP NIVEAU : " .. MAP_NIVEAU)
+        print("MAP : " .. MAP)
+        print("HISTORIQUE COUNTER : " .. Historique.Counter)
+
+        if MAP == "TileMaps" then
+            print("changer")
+            TileMaps[MAP_NIVEAU][LIGNE][COLONNE] = VALUE_DATAMAP
+            --table.remove(Historique.ArriereDonnees, Historique.Counter)
+            Historique.Counter = Historique.Counter + 1
+        elseif MAP == "TileMaps2" then
+            TileMaps2[MAP_NIVEAU][LIGNE][COLONNE] = VALUE_DATAMAP
+            --table.remove(Historique.ArriereDonnees, Historique.Counter)
+            Historique.Counter = Historique.Counter + 1
+        end
+    end
+
 end
 
 
@@ -2253,7 +2339,19 @@ function tileMapsEditor.mousepressed(x, y, button, isTouch)
         LIGNE = CURRENT_LIGNE + 1 
         COLONNE = CURRENT_COLONNE + 1 
 
-        TileMaps[MAP_NIVEAU][LIGNE][COLONNE] = Game.TileActive 
+        if TileMaps[MAP_NIVEAU][LIGNE][COLONNE] ~= Game.TileActive then
+            -- Historique Arriere
+            local tab = { MAP_NIVEAU = MAP_NIVEAU, LIGNE = LIGNE, COLONNE = COLONNE, MAP = "TileMaps", DATAMAP = TileMaps[MAP_NIVEAU][LIGNE][COLONNE] }
+            table.insert(Historique.ArriereDonnees, tab)
+
+            TileMaps[MAP_NIVEAU][LIGNE][COLONNE] = Game.TileActive
+
+            -- Historique Avant
+            local tab2 = { MAP_NIVEAU = MAP_NIVEAU, LIGNE = LIGNE, COLONNE = COLONNE, MAP = "TileMaps", DATAMAP = TileMaps[MAP_NIVEAU][LIGNE][COLONNE] }
+            table.insert(Historique.AvantDonnees, tab2)
+
+            Historique.Counter = Historique.Counter + 1
+        end
     end
 
 
