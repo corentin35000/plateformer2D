@@ -2199,7 +2199,7 @@ function tileMapsEditor.keypressed(key, isrepeat)
     end
 
 
-    -- Permet de revenir en arrière après modification de la Map.
+    -- Permet de revenir en Arrière après modification de la Map.
     if key == "lctrl" and Historique.Counter ~= 0 then      
         local VALUE_DATAMAP = Historique.ArriereDonnees[Historique.Counter].DATAMAP
         local LIGNE = Historique.ArriereDonnees[Historique.Counter].LIGNE
@@ -2228,7 +2228,7 @@ function tileMapsEditor.keypressed(key, isrepeat)
     end
 
 
-    -- Permet de revenir avant après modification de la Map.
+    -- Permet de revenir en Avant après modification de la Map.
     if key == "lalt" and Historique.Counter ~= 0 and Historique.Counter <= #Historique.AvantDonnees then      
         local VALUE_DATAMAP = Historique.AvantDonnees[Historique.Counter].DATAMAP
         local LIGNE = Historique.AvantDonnees[Historique.Counter].LIGNE
