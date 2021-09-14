@@ -1,11 +1,11 @@
 local sceneManager = {}
 
 
-stateScene = "SplashScreen"
+stateScene = "Editor"
 
 
 function sceneManager.load()
-    sceneSplashScreenModule.load()
+    --sceneSplashScreenModule.load()
     sceneKeyAccessModule.load()
     sceneMenuModule.load()
     sceneGameplayModule.load()
@@ -100,15 +100,15 @@ end
 
 function sceneManager.wheelmoved(x, y)
     if stateScene == "SplashScreen" then
-
+        sceneSplashScreenModule.wheelmoved(x, y)
     elseif stateScene == "KeyAccess" then
-
+        sceneKeyAccessModule.wheelmoved(x, y)
     elseif stateScene == "Menu" then
-
+        sceneMenuModule.wheelmoved(x, y)
     elseif stateScene == "Gameplay" then
-
+        sceneGameplayModule.wheelmoved(x, y)
     elseif stateScene == "Gameover" then
-
+        sceneGameoverModule.wheelmoved(x, y)
     elseif stateScene == "Editor" then
         sceneEditorMapsModule.wheelmoved(x, y)
     end

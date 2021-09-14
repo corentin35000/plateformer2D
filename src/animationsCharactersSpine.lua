@@ -1,9 +1,6 @@
 local animationsCharactersSpine = {}
 
 
--- Charge la bibliothèque Spine - Lua/Love2D
-local spine = require("spine-love.spine")
-
 -- Tableau a deux dimensions qui contient toute les animations du Player (jump, walk..)
 animationsCharactersPlayer = {}
 animationsCharactersAll = {}

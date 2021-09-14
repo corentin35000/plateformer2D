@@ -24,7 +24,7 @@ end
 
 function sceneKeyAccess.keypressed(key, isrepeat)
     if key == "space" then
-        if inputClient == keyOfficiel then
+        if inputClient == keyAccessOfficiel then
             print("KEY BETA VALID !")
         else
             print("KEY BETA NO VALID !")
@@ -40,6 +40,11 @@ end
 
 function sceneKeyAccess.textinput(event)
     inputClient = inputClient .. event
+end
+
+
+function sceneKeyAccess.wheelmoved(x, y)
+   
 end
 
 

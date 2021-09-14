@@ -65,4 +65,9 @@ function sceneSplashScreen.textinput(event)
 end
 
 
+function sceneSplashScreen.wheelmoved(x, y)
+   
+end
+
+
 return sceneSplashScreen

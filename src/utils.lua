@@ -1,9 +1,9 @@
 -- Pour adapter une image a la taille d'écran actuel du joueur, grâce au scaleX et scaleY (background menu ...)
 -- Load : imageScaleX, imageScaleY = adaptImageToScreenSize(image)
 -- Draw : love.graphics.draw(img, x, y, 0, imageScaleX, imageScaleY)
-function adaptImageToScreenSize(image)
-	local imgWidth = image:getWidth()
-	local imgHeight = image:getHeight()
+function adaptImageToScreenSize(pImage)
+	local imgWidth = pImage:getWidth()
+	local imgHeight = pImage:getHeight()
 
 	local scaleX = largeurEcran / imgWidth
 	local scaleY = hauteurEcran / imgHeight
@@ -53,10 +53,8 @@ end
 -- Timer / Minuteur
 timer = {}
 timer.minuteur = 0
-timer.onMouse = 2 -- Décrémenter jusqu'a 0 et afficher l'image en preview / test
 
 function timerr(dt)
     timer.minuteur = timer.minuteur + dt
-
     --print("TEMPS : " .. timer.minuteur)
 end

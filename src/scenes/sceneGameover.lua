@@ -31,4 +31,9 @@ function sceneGameover.textinput(event)
 end
 
 
+function sceneGameover.wheelmoved(x, y)
+   
+end
+
+
 return sceneGameover

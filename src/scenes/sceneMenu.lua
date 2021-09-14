@@ -58,4 +58,9 @@ function sceneMenu.textinput(event)
 end
 
 
+function sceneMenu.wheelmoved(x, y)
+   
+end
+
+
 return sceneMenu

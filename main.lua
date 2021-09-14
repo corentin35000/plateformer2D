@@ -1,4 +1,4 @@
--- Cette ligne permet de déboguer pas à pas
+-- Cette ligne permet de déboguer pas à pas (plugin Lua)
 if pcall(require, "lldebugger") then
   require("lldebugger").start()
 end
@@ -35,6 +35,8 @@ utf8 = require("utf8")
 json = require("src/libs/json")
 socket = require("socket")
 http = require("socket.http")
+ltn12 = require("ltn12")
+spine = require("spine-love.spine")
 
 
 
@@ -89,7 +91,6 @@ function love.keypressed(key, isrepeat)
     love.event.quit('restart')
   end
 
-  -- En mode Editeur ou Gameplay (Change de Scenes)
   if key == "f1" then 
     if stateScene ~= "Editor" then
       stateScene = "Editor"

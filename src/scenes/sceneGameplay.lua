@@ -66,4 +66,9 @@ function sceneGameplay.textinput(event)
 end
 
 
+function sceneGameplay.wheelmoved(x, y)
+   
+end
+
+
 return sceneGameplay
