@@ -21,6 +21,7 @@ function sceneSplashScreen.update(dt)
   -- Counter pour la video
   playingVideo = video:isPlaying()
   
+  -- Utiliser le deltaTime sinon risque de pas avoir la même vitesse sur tout les PC (A REVOIR)
   if playingVideo == true then
     counterTimeSplashScreen = counterTimeSplashScreen + 1
   end
@@ -44,29 +45,90 @@ function sceneSplashScreen.draw()
     -- Effet de transition d'ecran
     ecransTransitionsModule.Draw.SplashScreen()
   elseif playingVideo == false then
-    stateScene = "KeyBeta"
+    stateScene = "Menu"
   end
 
 end
 
 
-function sceneSplashScreen.keypressed(key, isrepeat)
 
+
+
+-- Fonction de rappel déclenchée lorsqu'une touche est enfoncée.
+function sceneSplashScreen.keypressed(key, scancode, isrepeat)
+
+end
+  
+
+-- Fonction de rappel déclenchée lorsqu'une touche du clavier est relâchée.
+function sceneSplashScreen.keyreleased(key, scancode, isrepeat)
+ 
 end
 
 
-function sceneSplashScreen.mousepressed(x, y, button)
-
-end
-
-
+-- Appelé lorsque du texte est saisi par l'utilisateur.
 function sceneSplashScreen.textinput(event)
+ 
+end
+
+
+-- Fonction de rappel déclenchée lorsqu'un bouton de la souris est enfoncé.
+function sceneSplashScreen.mousepressed(x, y, button, istouch, presses)
+ 
+end
+
+
+-- Fonction de rappel déclenchée lorsqu'un bouton de la souris est relâché.
+function sceneSplashScreen.mousereleased(x, y, button, istouch, presses)
+ 
+end
+
+
+-- Fonction de rappel déclenchée lorsque la souris est déplacée.
+function sceneSplashScreen.mousemoved(x, y, dx, dy)
 
 end
 
 
+-- Fonction de rappel déclenchée lorsque la molette de la souris est déplacer.
 function sceneSplashScreen.wheelmoved(x, y)
-   
+ 
+end
+
+
+-- Appelé lorsque le bouton de la manette de jeu virtuelle d'un joystick est enfoncé.
+function sceneSplashScreen.gamepadpressed(joystick, button)
+  
+end
+
+
+-- Appelé lorsque le bouton de la manette de jeu virtuelle d'un joystick est relâché.
+function sceneSplashScreen.gamepadreleased(joystick, button)
+ 
+end
+
+
+-- Appelé lorsqu'un bouton du joystick est enfoncé.
+function sceneSplashScreen.joystickpressed(joystick, button)
+ 
+end
+
+
+-- Appelé lorsqu'un bouton du joystick est relâché.
+function sceneSplashScreen.joystickreleased(joystick, button)
+ 
+end
+
+
+-- Appelé lorsqu'un joystick est connecté.
+function sceneSplashScreen.joystickadded(joystick)
+
+end
+
+
+-- Appelé lorsqu'un joystick est déconnecté.
+function sceneSplashScreen.joystickremoved(joystick)
+
 end
 
 

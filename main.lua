@@ -80,7 +80,7 @@ function love.draw()
 end
 
 
-function love.keypressed(key, isrepeat)
+function love.keypressed(key, scancode, isrepeat)
   sceneManagerModule.keypressed(key, isrepeat)
 
   if key == "escape" then 
@@ -101,8 +101,8 @@ function love.keypressed(key, isrepeat)
 end
 
 
-function love.mousepressed(x, y, button)
-  sceneManagerModule.mousepressed(x, y, button)
+function love.keyreleased(key, scancode, isrepeat)
+  sceneManagerModule.keyreleased(key)
 end
 
 
@@ -111,6 +111,51 @@ function love.textinput(event)
 end
 
 
+function love.mousepressed(x, y, button, istouch, presses)
+  sceneManagerModule.mousepressed(x, y, button)
+end
+
+
+function love.mousereleased(x, y, button, istouch, presses)
+  sceneManagerModule.mousereleased(x, y, button)
+end
+
+
+function love.mousemoved(x, y, dx, dy)
+  sceneManagerModule.mousemoved(x, y)
+end
+
+
 function love.wheelmoved(x, y)
   sceneManagerModule.wheelmoved(x, y)
+end
+
+
+function love.gamepadpressed(joystick, button)
+  sceneManagerModule.gamepadpressed(joystick, button)
+end
+
+
+function love.gamepadreleased(joystick, button)
+  sceneManagerModule.gamepadreleased(joystick, button)
+end
+
+
+function love.joystickpressed(joystick, button)
+  sceneManagerModule.joystickpressed(joystick, button)
+end
+
+
+function love.joystickreleased(joystick, button)
+  sceneManagerModule.joystickreleased(joystick, button)
+end
+
+
+function love.joystickadded(joystick)
+  sceneManagerModule.joystickadded(joystick)
+end
+
+
+function love.joystickremoved(joystick)
+  sceneManagerModule.joystickremoved(joystick)
 end

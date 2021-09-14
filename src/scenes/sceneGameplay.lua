@@ -51,23 +51,84 @@ function sceneGameplay.draw()
 end
 
 
-function sceneGameplay.keypressed(key, isrepeat)
 
+
+
+-- Fonction de rappel déclenchée lorsqu'une touche est enfoncée.
+function sceneGameplay.keypressed(key, scancode, isrepeat)
+
+end
+  
+
+-- Fonction de rappel déclenchée lorsqu'une touche du clavier est relâchée.
+function sceneGameplay.keyreleased(key, scancode, isrepeat)
+ 
 end
 
 
-function sceneGameplay.mousepressed(x, y, button)
-
-end
-
-
+-- Appelé lorsque du texte est saisi par l'utilisateur.
 function sceneGameplay.textinput(event)
+ 
+end
+
+
+-- Fonction de rappel déclenchée lorsqu'un bouton de la souris est enfoncé.
+function sceneGameplay.mousepressed(x, y, button, istouch, presses)
+ 
+end
+
+
+-- Fonction de rappel déclenchée lorsqu'un bouton de la souris est relâché.
+function sceneGameplay.mousereleased(x, y, button, istouch, presses)
+ 
+end
+
+
+-- Fonction de rappel déclenchée lorsque la souris est déplacée.
+function sceneGameplay.mousemoved(x, y, dx, dy)
 
 end
 
 
+-- Fonction de rappel déclenchée lorsque la molette de la souris est déplacer.
 function sceneGameplay.wheelmoved(x, y)
-   
+ 
+end
+
+
+-- Appelé lorsque le bouton de la manette de jeu virtuelle d'un joystick est enfoncé.
+function sceneGameplay.gamepadpressed(joystick, button)
+  
+end
+
+
+-- Appelé lorsque le bouton de la manette de jeu virtuelle d'un joystick est relâché.
+function sceneGameplay.gamepadreleased(joystick, button)
+ 
+end
+
+
+-- Appelé lorsqu'un bouton du joystick est enfoncé.
+function sceneGameplay.joystickpressed(joystick, button)
+ 
+end
+
+
+-- Appelé lorsqu'un bouton du joystick est relâché.
+function sceneGameplay.joystickreleased(joystick, button)
+ 
+end
+
+
+-- Appelé lorsqu'un joystick est connecté.
+function sceneGameplay.joystickadded(joystick)
+
+end
+
+
+-- Appelé lorsqu'un joystick est déconnecté.
+function sceneGameplay.joystickremoved(joystick)
+
 end
 
 

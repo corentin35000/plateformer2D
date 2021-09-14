@@ -1690,7 +1690,7 @@ end
 ██   ██ ███████    ██        ██      ██   ██ ███████ ███████ ███████ ███████ ██████                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
 ]]
 
-function sceneEditorMaps.keypressed(key, isrepeat)
+function sceneEditorMaps.keypressed(key, scancode, isrepeat)
   
     -- Change la couleur des Lines de la GrilleMap
     if key == "f2" then
@@ -2037,7 +2037,7 @@ end
 ██      ██  ██████   ██████  ███████ ███████     ██      ██   ██ ███████ ███████ ███████ ███████ ██████                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
 ]]
 
-function sceneEditorMaps.mousepressed(x, y, button)
+function sceneEditorMaps.mousepressed(x, y, button, istouch, presses)
     -- Appuie sur le boutton de la roulette = Remet le ZoomX et ZoomY par défault
     if button == 3 then
         window.zoom = 1

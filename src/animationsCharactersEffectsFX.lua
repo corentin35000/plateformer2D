@@ -2,8 +2,8 @@ local animationsCharactersEffectsFX = {}
 
 
 -- Une table qui contient toutes les Spritesheets des animations de Particules/FX/Effets/Characters..
-SpriteSheetsEffectsFX = {}
-SpriteSheetsCharacters = {}
+spriteSheetsEffectsFX = {}
+spriteSheetsCharacters = {}
 
 -- Tableau à deux dimensions contenant toute les animations de Particules/FX/Effets/Characters image par image.
 animationsEffectsFX = {}
