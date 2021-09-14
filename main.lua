@@ -1,4 +1,4 @@
--- Cette ligne permet de déboguer pas à pas (plugin Lua)
+-- Cette ligne permet de déboguer pas à pas
 if pcall(require, "lldebugger") then
   require("lldebugger").start()
 end
@@ -11,46 +11,30 @@ io.stdout:setvbuf('no')
 -- Indispensable pour des effets de Pixels Shaders
 love.graphics.setDefaultFilter("nearest")
 
+-- Les Modules / Requires
+sceneManagerModule = require("src/scenes/sceneManager")
+sceneSplashScreenModule = require("src/scenes/sceneSplashScreen")
+sceneKeyAccessModule = require("src/scenes/sceneKeyAccess")
+sceneMenuModule = require("src/scenes/sceneMenu")
+sceneGameplayModule = require("src/scenes/sceneGameplay")
+sceneGameoverModule = require("src/scenes/sceneGameover")
+sceneEditorMapsModule = require("src/scenes/sceneEditorMaps")
+controlesModule = require("src/controles")
+animationsCharactersSpinesModule = require("src/animationsCharactersSpine")
+ecransTransitionsModule = require("src/ecransTransitions")
+playerModule = require("src/player")
+cameraModule = require("src/camera")
+animationsParticulesFXEffetsModule = require("src/animationsCharactersEffectsFX")
+sauvegardeModule = require("src/sauvegarde")
+mapsInGameModule = require("src/mapsInGame")
+reseauModule = require("src/reseau")
+require("src/utils")
 
--- Les Modules
-ecransTransitionsModule = require("ecransTransitions")
-playerModule = require("player")
-splashcreenModule = require("splashscreen")
-menuModule = require("menu")
-gameoverModule = require("gameover")
-gameplayModule = require("gameplay")
-controlesModule = require("controles")
-collisionsModule = require("collisions")
-animationsCharactersModule = require("animationsCharacters")
-decoupageSpriteSheetModule = require("decoupageSpriteSheet")
-cameraModule = require("camera")
-tileMapsEditorModule = require("tileMapsEditor")
-scenesModule = require("scenes")
-animationsParticulesFXEffetsModule = require("animationsParticulesFXEffets")
-sauvegardeModule = require("sauvegarde")
-adaptImageToScreenSizeModule = require("adaptImageToScreenSize")
+-- Librairies externes / Requires
 utf8 = require("utf8")
-mapModule = require("map")
-map2Module = require("map2")
-mapObjectsModule = require("mapObjects")
-mapCollisionModule = require("mapCollision")
-mapsInGameModule = require("mapsInGame")
-
-
--- Scènes de jeu différentes
-sceneMenu = false
-sceneGameplay = true
-sceneGameOver = false
-sceneTileMapEditor = false
-
-
--- Par rapport au click et au Menu.
-sceneGameplayActiver = false
-sceneInGameplayActiver = false
-
-
-
-
+json = require("src/libs/json")
+socket = require("socket")
+http = require("socket.http")
 
 
 
@@ -80,129 +64,25 @@ function love.load()
   hauteurEcran = love.graphics.getHeight()
 
 
-  -- Module splashscreen.lua (Load)
-  --splashcreenModule.Load() 
-
-
-  -- Module menu.lua (Load)
-  menuModule.Load()
-
-  
-  -- Module animationsCharacter.lua (Load)
-  animationsCharactersModule.Load()
-
-
-  -- Module player.lua (Load)
-  playerModule.Load()
-
-
-  -- Module tileMapsEditor.lua (Load)
-  tileMapsEditorModule.Load()
-
-
-  -- Module mapsInGame.lua (Load)
-  mapsInGameModule.Load()
+  sceneManagerModule.load()
 end
-
-
-
-
 
 
 function love.update(dt)
-  
-  -- Le module splashscreen.lua de la fonction Update
-  --splashcreenModule.Update()
-
-
-  -- Le module animationsCharacters.lua de la fonction Update
-  animationsCharactersModule.Update(dt)
-  
-
-  -- Le module player.lua de la fonction Update
-  playerModule.Update(dt)
-
-
-  -- Le module tileMapsEditor.lua de la fonction Update
-  tileMapsEditorModule.Update(dt)
-
-
-  -- Le module ecransTransitions.lua de la fonction Update
-  ecransTransitionsModule.Update(dt)
+  sceneManagerModule.update(dt)
 end
-
-
-
-
 
 
 function love.draw()
-
-  if sceneTileMapEditor == true then
-  -- Le module tileMapEditor.lua de la fonction Draw
-  tileMapsEditorModule.Draw()
-
-  elseif playingVideo == true then
-    -- Le module splashscreen.lua de la fonction Draw
-    --splashcreenModule.Draw()    
-
-
-    -- Effet de transition d'écran
-    ecransTransitionsModule.Draw.SplashScreen()
-
-  elseif playingVideo == false and sceneMenu == true then
-    -- Le module menu.lua de la fonction Draw
-    menuModule.Draw()
-    
-
-    -- Effet de transition d'écran
-    ecransTransitionsModule.Draw.Menu()
- 
-  elseif sceneGameplay == true then
-    --
-    love.graphics.setBackgroundColor(0, 0, 0, 1)
-
-
-    -- Test Map
-    mapsInGameModule.Draw()
-
-
-    -- Le module player.lua de la fonction Draw
-    playerModule.Draw()
-
-
-    -- Le module animationsCharacters.lua de la fonction Draw
-    animationsCharactersModule.Draw()
-  
-    
-    -- Effet de transition d'écran
-    ecransTransitionsModule.Draw.GamePlay()
-    
-  elseif sceneGameOver == true then
-
-    love.graphics.graphics("PERDU", largeurEcran / 2, hauteurEcran / 2)
-
-  end
-
+  sceneManagerModule.draw()
 end
 
 
-
-
-
-
 function love.keypressed(key, isrepeat)
-  
+  sceneManagerModule.keypressed(key, isrepeat)
+
   if key == "escape" then 
 	  love.event.quit() 
-  end
-  
-  if key == "space" then 
-    keySpace = true
-  end
-  
-  if key == "z" then 
-    keyZ = true
   end
   
   if key == "w" then 
@@ -211,52 +91,25 @@ function love.keypressed(key, isrepeat)
 
   -- En mode Editeur ou Gameplay (Change de Scenes)
   if key == "f1" then 
-    if sceneTileMapEditor == false then
-        sceneMenu = false
-        sceneGameplay = false
-        sceneGameOver = false
-        sceneTileMapEditor = true
-    else
-        sceneMenu = false
-        sceneGameplay = true
-        sceneGameOver = false
-        sceneTileMapEditor = false
+    if stateScene ~= "Editor" then
+      stateScene = "Editor"
+    elseif stateScene == "Editor" then
+      stateScene = "Gameplay"
     end
   end
-
-  if sceneTileMapEditor == true then
-    tileMapsEditorModule.keypressed(key, isrepeat)
-  end
-
-  print(key)
-
 end
 
 
-
-
-
-
-function love.mousepressed(x, y, button, isTouch)
-  
-  if x >= largeurEcran / 2  and sceneMenu == true then
-    sceneGameplayActiver = true
-  end
-
-  if sceneTileMapEditor == true then
-    tileMapsEditorModule.mousepressed(x, y, button, isTouch)
-  end
-
-  --print ("x : " .. x .. " - y : " .. y)
-
+function love.mousepressed(x, y, button)
+  sceneManagerModule.mousepressed(x, y, button)
 end
-
-
-
 
 
 function love.textinput(event)
+  sceneManagerModule.textinput(event)
+end
 
-  tileMapsEditorModule.textinput(event)
 
+function love.wheelmoved(x, y)
+  sceneManagerModule.wheelmoved(x, y)
 end

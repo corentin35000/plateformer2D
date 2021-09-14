@@ -1,10 +1,12 @@
-local animationsCharacters = {}
+local animationsCharactersSpine = {}
+
 
 -- Charge la bibliothèque Spine - Lua/Love2D
 local spine = require("spine-love.spine")
 
 -- Tableau a deux dimensions qui contient toute les animations du Player (jump, walk..)
-animationsPlayer = {}
+animationsCharactersPlayer = {}
+animationsCharactersAll = {}
 
 -- Création AnimationsCharacters : animationLoad(jsonFile, atlasFile, nomAnimation(jump..), nomDuSkin, nomDuDossierRessource)
 function animationLoad(jsonFile, atlasFile, animation, skin, nameDossier)
@@ -32,8 +34,8 @@ end
 
 function animationUpdate(dt)
   -- Mise à jour des os du squelette en cours d'animations
-	local state = animationsPlayer[player.activeAnimation].state
-	local skeleton = animationsPlayer[player.activeAnimation].skeleton
+	local state = animationsCharactersPlayer[player.activeAnimation].state
+	local skeleton = animationsCharactersPlayer[player.activeAnimation].skeleton
 	
 	state:update(dt)
 	state:apply(skeleton)
@@ -42,98 +44,21 @@ end
 
 function animationDraw()
     -- Récupère l'instance de 'skeleton' et affiche le Sprite/Animation
-    local skeleton = animationsPlayer[player.activeAnimation].skeleton
+    local skeleton = animationsCharactersPlayer[player.activeAnimation].skeleton
     skeletonRenderer:draw(skeleton)
 end
 
 
-function mouvementPlayer(dt)
-  -- Inertie
-  player.x = player.x + player.vx
-  player.vx = player.vx * 0.88
 
-  if math.abs(player.vx) < 0.1 then
-    player.vx = 0
-  end
-
-
-  -- Gravité
-  --player.vy = player.vy + (0.7 * dt)
-
-
-  -- Mise a jour pour lui set la Gravité / Inertie en continue
-  player.x = player.x + player.vx
-  player.y = player.y + player.vy
-
-
-  -- Déplacement GAUCHE
-  if love.keyboard.isDown('left') == true then
-    testLeft = true;
-
-    if player.scaleX == math.abs(player.scaleX)  then
-      player.scaleX = -player.scaleX
-    end
-
-    if player.activeAnimation ~= player.activeAnimation then
-      player.activeAnimation = player.activeAnimation
-    end
-
-    if player.vx > -4 then
-      player.vx = player.vx - (60 * dt)
-    end
-  end
-
-
-  -- Déplacement DROITE
-  if love.keyboard.isDown('right') == true then
-    testRight = true
-
-    if player.scaleX == player.scaleX  then
-      player.scaleX = math.abs(player.scaleX) -- math.abs() pour convertir le nombre négatif en positif
-    end
-
-    if player.activeAnimation ~= player.activeAnimation then
-      player.activeAnimation = player.activeAnimation²
-    end
-
-    if player.vx < 4 then
-      player.vx = player.vx + (60 * dt)
-    end
-  end
-  
-  
-  -- Déplacement SAUTER vers le HAUT
-  if keySpace == true then
-    
-    testSpace = true
-    bonusJump = true
-
-    if currentTimerJump < 0.1 then
-      player.y = player.y - 250 + dt;
-    else
-      player.y = player.y + 0
-    end
-    
-    keySpace = false
-  end
-  
-end
-
-
-
-
-
-
-
-function animationsCharacters.Load()
+function animationsCharactersSpine.load()
 	-- Pour activer la teinte bicolore (true or false)
 	skeletonRenderer = spine.SkeletonRenderer.new(true)
 
 	
 	-- Charge les animations du Player (animations/skins) et les envoie dans un tableau a deux dimensions (animationsPlayer)
-	animationsPlayer['golemRunSkins1'] = animationLoad("golem", "golem", "run", 'golemRunSkins1', 'animations2D')
-	animationsPlayer['golemJumpSkins2'] = animationLoad("golem", "golem", "run", 'golemRunSkins2', 'animations2D')
-	animationsPlayer['gorilla'] = animationLoad("gorilla", "gorilla", "walk", nil, 'animations2D')
+	animationsCharactersPlayer['golemRunSkins1'] = animationLoad("golem", "golem", "run", 'golemRunSkins1', 'animationsCharactersSpine')
+	animationsCharactersPlayer['golemJumpSkins2'] = animationLoad("golem", "golem", "run", 'golemRunSkins2', 'animationsCharactersSpine')
+	animationsCharactersPlayer['gorilla'] = animationLoad("gorilla", "gorilla", "walk", nil, 'animationsCharactersSpine')
 
 
 	-- Initialisation de l'objet player qui contient le joueur.
@@ -142,8 +67,8 @@ function animationsCharacters.Load()
 	player.activeAnimation = 'gorilla' -- Juste à changer le nom pour pouvoir changer d'animations/skins
   player.speedAnimation = 1 -- Vitesse d'animations (1 : par défault)
   player.loopAnimation = true -- Animation en boucle (true or false)
-  player.width = animationsPlayer[player.activeAnimation]['state']['data']['skeletonData'].width
-  player.height = animationsPlayer[player.activeAnimation]['state']['data']['skeletonData'].height
+  player.width = animationsCharactersPlayer[player.activeAnimation]['state']['data']['skeletonData'].width
+  player.height = animationsCharactersPlayer[player.activeAnimation]['state']['data']['skeletonData'].height
   player.scaleX = 0.25
 	player.scaleY = -0.25 -- Bug sur le ScaleY il es a : -1, il devrais être a l'envers alors qu'il dans le bon sens avec -1 donc mettre à l'envers le Sprite/Animation : 1
   player.offsetX = nil 
@@ -163,29 +88,25 @@ function animationsCharacters.Load()
 end
 
 
-function animationsCharacters.Update(dt)
+function animationsCharactersSpine.update(dt)
   -- Mise à jour des données du Joueur
-  animationsPlayer[player.activeAnimation]['state'].timeScale = player.speedAnimation
-  animationsPlayer[player.activeAnimation]['state']['tracks'][0].loop = player.loopAnimation
-  animationsPlayer[player.activeAnimation]['state']['data']['skeletonData'].width = player.width
-  animationsPlayer[player.activeAnimation]['state']['data']['skeletonData'].height = player.height
-  animationsPlayer[player.activeAnimation]['skeleton'].scaleX = player.scaleX
-  animationsPlayer[player.activeAnimation]['skeleton'].scaleY = player.scaleY
-  animationsPlayer[player.activeAnimation]['skeleton'].x = player.x
-  animationsPlayer[player.activeAnimation]['skeleton'].y = player.y
-  animationsPlayer[player.activeAnimation]['skeleton']['color'].a = player.alpha
+  animationsCharactersPlayer[player.activeAnimation]['state'].timeScale = player.speedAnimation
+  animationsCharactersPlayer[player.activeAnimation]['state']['tracks'][0].loop = player.loopAnimation
+  animationsCharactersPlayer[player.activeAnimation]['state']['data']['skeletonData'].width = player.width
+  animationsCharactersPlayer[player.activeAnimation]['state']['data']['skeletonData'].height = player.height
+  animationsCharactersPlayer[player.activeAnimation]['skeleton'].scaleX = player.scaleX
+  animationsCharactersPlayer[player.activeAnimation]['skeleton'].scaleY = player.scaleY
+  animationsCharactersPlayer[player.activeAnimation]['skeleton'].x = player.x
+  animationsCharactersPlayer[player.activeAnimation]['skeleton'].y = player.y
+  animationsCharactersPlayer[player.activeAnimation]['skeleton']['color'].a = player.alpha
 
 
   -- Mise à jour des os du squelette en cours d'animations
   animationUpdate(dt)
-
-
-  -- Déplacement et saut du Joueur.
-	mouvementPlayer(dt)
 end
 
 
-function animationsCharacters.Draw()
+function animationsCharactersSpine.draw()
   -- Test offsetX et offsetY.
   --love.graphics.setColor(255, 0, 0, 1)
   --love.graphics.line(0, hauteurEcran / 2, largeurEcran, hauteurEcran / 2)
@@ -197,4 +118,5 @@ function animationsCharacters.Draw()
   animationDraw()
 end
 
-return animationsCharacters
+
+return animationsCharactersSpine

@@ -1,6 +1,7 @@
 local mapsInGame = {}
 
--- Charge les fichiers que j'ai besoins.
+
+--[[ Charge les fichiers que j'ai besoins.
 require("map")
 require("map2")
 require("mapObjects")
@@ -60,7 +61,7 @@ function drawTilesInTheGrilleMapInGame()
 end
 
 
--- Dessine les Objects qui a était ajouter dans le tableaux à deux dimensions des maps dans le fichier : mapObjects.lua
+-- Dessine les Tiles2 qui a était ajouter dans le tableaux à deux dimensions des maps dans le fichier : map2.lua
 function drawTiles2InTheGrilleMapInGame()
     local total_TILE_WIDTH = 0
     local total_TILE_HEIGHT = 0
@@ -174,7 +175,7 @@ function mapsInGame.Load()
         SpriteBatch[1]:flush()
         SpriteBatch[2]:flush()
     end]]
-end
+--[[end
 
 function mapsInGame.Update()
 
@@ -192,6 +193,7 @@ function mapsInGame.Draw()
     end
 
     printDrawCallandFPS()
-end
+end]]
+
 
 return mapsInGame

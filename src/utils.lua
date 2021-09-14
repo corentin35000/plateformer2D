@@ -1,12 +1,25 @@
-local decoupageSpriteSheet = {}
+-- Pour adapter une image a la taille d'écran actuel du joueur, grâce au scaleX et scaleY (background menu ...)
+-- Load : imageScaleX, imageScaleY = adaptImageToScreenSize(image)
+-- Draw : love.graphics.draw(img, x, y, 0, imageScaleX, imageScaleY)
+function adaptImageToScreenSize(image)
+	local imgWidth = image:getWidth()
+	local imgHeight = image:getHeight()
+
+	local scaleX = largeurEcran / imgWidth
+	local scaleY = hauteurEcran / imgHeight
+
+	return scaleX, scaleY
+end
+
+
 
 -- Découpage d'une Spritesheet.
 -- decoupeSpriteSheet(0, 0, largeurImg, hauteurImg, nombreImgParColonneSpriteSheet, nombreLignSpriteSheet, pNombreColonneADeduire, imgSpriteSheet)
 function decoupeSpriteSheet(pPixelWidth, pPixelHeight, pImgWidth, pImgHeight, pNombreColonneSpriteSheet, pNombreLignSpriteSheet, pNombreColonneADeduire, pImgSpriteSheet)
-    local arrayQuad = {}
+    local arrayQuads = {}
 
-    counterNombreColonneSpriteSheet = 0 
-    nombreTotalColonnes = pNombreLignSpriteSheet * pNombreColonneSpriteSheet 
+    local counterNombreColonneSpriteSheet = 0 
+    local nombreTotalColonnes = pNombreLignSpriteSheet * pNombreColonneSpriteSheet 
     nombreTotalColonnes = nombreTotalColonnes - pNombreColonneADeduire
 
     for i=0,nombreTotalColonnes,1 do
@@ -29,10 +42,21 @@ function decoupeSpriteSheet(pPixelWidth, pPixelHeight, pImgWidth, pImgHeight, pN
         end
 
         local quad = love.graphics.newQuad(pPixelWidth, pPixelHeight, pImgWidth, pImgHeight, pImgSpriteSheet)
-        table.insert(arrayQuad, quad)
+        table.insert(arrayQuads, quad)
     end
 
-    return arrayQuad
+    return arrayQuads
 end
 
-return decoupageSpriteSheet
+
+
+-- Timer / Minuteur
+timer = {}
+timer.minuteur = 0
+timer.onMouse = 2 -- Décrémenter jusqu'a 0 et afficher l'image en preview / test
+
+function timerr(dt)
+    timer.minuteur = timer.minuteur + dt
+
+    --print("TEMPS : " .. timer.minuteur)
+end

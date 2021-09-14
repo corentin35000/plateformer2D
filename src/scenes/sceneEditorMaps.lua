@@ -1,6 +1,7 @@
-----------------------------------------------DOCUMENTATION DU FRAMEWORK-----------------------------------------------------------------------------------------------------
+----------------------------------------------DOCUMENTATION DU MOTEUR DE JEU-----------------------------------------------------------------------------------------------------
 
 -- 1) Quand on lance l'éditeur on'as aucune map créer encore, si le niveau de la map est affichée comme ceci : 'MAP_NIVEAU : ?' c'est que c'est une map non générer.
+-- 2) On ne peut pas changer de calques..etc tant qu'ont n'as pas une map générer ou load un Niveau
 -- 2) Donc quand on n'as : '?' il faut configurer la LARGEUR/HAUTEUR de la MAP/TILES puis aller sur 'GENERATE MAP' et faire 'ENTER' pour générer la MAP.
 -- 3) Quand on créer un niveau de Map on'as normalement : 'MAP_NIVEAU' : 1.. 2.. avec le niveau actuelle de la TileMap du niveau.
 -- 4) Quand on n'es sur un niveau de map déjà charger, sur l'éditeur de Map il faut faire : 'NEW MAP' ça va regénérer une nouvelle map VIDE et faut la reconfigurer et faire GENERATE_MAP.
@@ -21,45 +22,33 @@
     --local tableTileSheetDecouper2 = decoupeSpriteSheet(0, 0, TILE_WIDTH, TILE_HEIGHT, 16, 6, 12, Game.TileSheets[2])
     --table.insert(tablesTileSheetsDecouperAll, tableTileSheetDecouper2)
 
-
--- 3) Supprimer une map il faudra le faire manuellement dans le fichier : map.lua -> IMPORTANT IL FAUT BIEN LAISSER UN ESPACE ENTRE CHAQUE TABLEAU A DEUX DIMENSIONS.
-
--- 4) Créer au minimum un fichier : map.lua à la racine du projet -> local map = {} return map : Puis faire un -> require("map") dans main.lua
-
--- 5) Les TileSet doivent être extremement bien faite, que chaque Tile sois bien coller entre eux et bien configurer la fonction pour découpé la SpriteSheet. 
-
-
--- sceneTileMapEditor == true sera obligatoire pour certaine condition ne pas oublier quand je change de jeu
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-local tileMapsEditor = {}
-
-require("map")
-require("map2")
-require("mapObjects")
-require("mapCollision")
+local sceneEditorMaps = {}
 
 
 -- Toute les données importante de l'éditeur de Map.
-ORIENTATION_TILES = "Orthogonale"
-MAP_WIDTH = 0
-MAP_HEIGHT = 0
-TILE_WIDTH = 0
-TILE_HEIGHT = 0
-NOMBRE_LIGNE = MAP_HEIGHT * TILE_HEIGHT 
-NOMBRE_COLONNE = MAP_WIDTH * TILE_WIDTH
-MAP_PIXELS = NOMBRE_LIGNE .. ' x ' .. NOMBRE_COLONNE .. ' pixels'
-CURRENT_LIGNE = 0
-CURRENT_COLONNE = 0
-MAP_NIVEAU = "?"
-LOAD_MAP = "" 
-SAVE_MAP = ""
-CALQUES = 'Tiles'
+local ORIENTATION_TILES = "Orthogonale"
+local MAP_WIDTH = 0
+local MAP_HEIGHT = 0
+local TILE_WIDTH = 0
+local TILE_HEIGHT = 0
+local NOMBRE_LIGNE = MAP_HEIGHT * TILE_HEIGHT 
+local NOMBRE_COLONNE = MAP_WIDTH * TILE_WIDTH
+local MAP_PIXELS = NOMBRE_LIGNE .. ' x ' .. NOMBRE_COLONNE .. ' pixels'
+local CURRENT_LIGNE = 0
+local CURRENT_COLONNE = 0
+local MAP_NIVEAU = "?"
+local LOAD_MAP = "" 
+local SAVE_MAP = ""
+local DELETE_MAP = ""
+local CALQUES = 'Calque1'
+local TYPE = "Tile"
 
 
 --
-Game = {}
+local Game = {}
 Game.TileSheets = {}
 Game.TileSheetsActive = {}
 Game.Tiles = {}
@@ -69,44 +58,71 @@ Game.MapNiveauActive = nil
 
 
 --
-CalquesActive = {}
-CalquesActive.Tiles = "ON"
-CalquesActive.Tiles2 = "ON"
+local MapsDataLua = {}
+MapsDataLua.Calque1 = {}
+MapsDataLua.Calque2 = {}
+MapsDataLua.Calque3 = {}
+MapsDataLua.Calque4 = {}
+
+
+--
+local CalquesActive = {}
+CalquesActive.Calque1 = "ON"
+CalquesActive.Calque2 = "ON"
+CalquesActive.Calque3 = "ON"
+CalquesActive.Calque4 = "ON"
 CalquesActive.Objects = "ON"
+CalquesActive.AnimationsEffectsFX = "ON"
 CalquesActive.Collision = "OFF"
-CalquesActive.IDTiles = "OFF"
-CalquesActive.IDTiles2 = "OFF"
+CalquesActive.IDCalque1 = "OFF"
+CalquesActive.IDCalque2 = "OFF"
+CalquesActive.IDCalque3 = "OFF"
+CalquesActive.IDCalque4 = "OFF"
 CalquesActive.IDObjects = "OFF"
+CalquesActive.IDAnimationsEffectsFX = "OFF"
 
 
 -- Permet de revenir en arrière ou en avant après modification de la Map.
-Historique = {}
+local Historique = {}
 Historique.ArriereDonnees = {}
 Historique.AvantDonnees = {}
-Historique.Counter = 0
-
+Historique.CounterArriere = 0
+Historique.CounterAvant = 0
+Historique.Bool = false
 
 
 -- Données View Tiles
-ligneViewTile = 0
-colonneViewTile = 0
-grilleViewTilesWidth = 0
-grilleViewTilesHeight = 0
-inGrilleMapViewTiles = false
-clickInOneTile = false
-clickTileCurrentColonne = 0
-clickTileCurrentLigne = 0
-scrollY_ViewTile = 0
-scrollY_counterMax = 0
-scrollY_counter = 0
-scrollY_TileAlphaSortZone = 1
+local ligneViewTile = 0
+local colonneViewTile = 0
+local grilleViewTilesWidth = 0
+local grilleViewTilesHeight = 0
+local inGrilleMapViewTiles = false
+local clickInOneTile = false
+local clickTileCurrentColonne = 0
+local clickTileCurrentLigne = 0
+local scrollY_ViewTile = 0
+local scrollY_counterMax = 0
+local scrollY_counter = 0
+local scrollY_TileAlphaSortZone = 1
+
+
+-- Données View Files
+local inGrilleMapViewFiles = false
+local clickInOneFile = false
+local clickFile = ""
+local scrollY_counterMax2 = 6
+local scrollY_counter2 = 0
+local counterNombreFiles = 0
+
 
 
 -- L'outils actuellement activé (Pinceau, gomme...)
-pinceauAlpha = 1 -- alpha
-gommeAlpha = 1 -- alpha
-outilsActive = nil
-mouseOnTheOutils = false
+local pinceauAlpha = 1 -- alpha
+local gommeAlpha = 1 -- alpha
+local mainobjetAlpha = 1 -- alpha
+local pipeAlpha = 1 -- alpha
+local outilsActive = nil
+local mouseOnTheOutils = false
 
 
 --
@@ -139,8 +155,10 @@ inputText.GENERATE_MAP = { widthFont = font:getWidth('GENERATE MAP :') }
 inputText.NEW_MAP = { widthFont = font:getWidth('NEW MAP') }
 inputText.LOAD_MAP = { txt = "", widthFont = font:getWidth('LOAD_MAP : ' .. LOAD_MAP) }
 inputText.SAVE_MAP = { txt = SAVE_MAP, widthFont = font:getWidth('SAVE_MAP') }
+inputText.DELETE_MAP = { txt = DELETE_MAP, widthFont = font:getWidth('DELETE_MAP : ' .. DELETE_MAP) }
 
 inputText.CALQUES = { txt = CALQUES, widthFont = font:getWidth('CALQUES : ' .. CALQUES) }
+inputText.TYPE = { txt = TYPE, widthFont = font:getWidth('TYPE : ' .. TYPE) }
 
 inputText.backgroundColorRed = { widthFont = font:getWidth('Background-color (r) : ' .. backgroundColor.red) }
 inputText.backgroundColorGreen = { widthFont = font:getWidth('Background-color (r) : ' .. backgroundColor.green) }
@@ -157,7 +175,6 @@ local GUI = {}
 GUI.grilleMapActive = true
 GUI.grilleMapLines = true
 GUI.grilleMapPointiller = false
-GUI.grilleMapStyleLinesPointiller = "smooth" -- "fin/doux" (rough) ou "épais/gras"(smooth) -> natif a Love2D
 GUI.grilleMapColor = "black"
 GUI.grilleMapChangedColorWhite = love.graphics.setColor(1, 1, 1)
 GUI.grilleMapChangedColorBlack = love.graphics.setColor(0, 0, 0)
@@ -165,6 +182,8 @@ GUI.drawGUIandText = true
 GUI.imgFleche = { img = nil, x = inputText.ORIENTATION_TILES.widthFont + 15, y = 0 }
 GUI.imgButtonDessinerGrille = nil
 GUI.imgButtonGommeGrille = nil
+GUI.imgButtonMainObjetGrille = nil
+GUI.imgButtonPipeGrille = nil
 GUI.imgButtonNone = nil
 GUI.imgButtonCalqueOeilOuvert = nil
 GUI.imgButtonCalqueOeilOuvert2 = nil
@@ -180,7 +199,7 @@ GUI.imgButtonCalqueOeilFermer4 = nil
 GUI.imgButtonCalqueOeilFermer5 = nil
 GUI.imgButtonCalqueOeilFermer6 = nil
 GUI.imgButtonCalqueOeilFermer7 = nil
-
+GUI.imgButtonDecoupageSpriteSheet = nil
 
 --
 local mouse = {}
@@ -216,8 +235,6 @@ dscale = 2^(1/6) -- Le mouvement de la roue six fois change le zoom deux fois (z
 
 
 
-
-
 --[[   
 ███████ ██    ██ ███    ██  ██████ ████████ ██  ██████  ███    ██ ███████     ███████ ██████  ██ ████████  ██████  ██████  ███    ███  █████  ██████  
 ██      ██    ██ ████   ██ ██         ██    ██ ██    ██ ████   ██ ██          ██      ██   ██ ██    ██    ██    ██ ██   ██ ████  ████ ██   ██ ██   ██ 
@@ -225,6 +242,109 @@ dscale = 2^(1/6) -- Le mouvement de la roue six fois change le zoom deux fois (z
 ██      ██    ██ ██  ██ ██ ██         ██    ██ ██    ██ ██  ██ ██      ██     ██      ██   ██ ██    ██    ██    ██ ██   ██ ██  ██  ██ ██   ██ ██      
 ██       ██████  ██   ████  ██████    ██    ██  ██████  ██   ████ ███████     ███████ ██████  ██    ██     ██████  ██   ██ ██      ██ ██   ██ ██                                                                                                                                                                                                                                                                                                                 
 ]]
+
+
+--
+function getAllNameFiles(pDirName)
+    local files = love.filesystem.getDirectoryItems(pDirName)
+
+    --for k, file in pairs(files) do
+        --print(k .. ". " .. file) 
+    --end
+
+    return files
+end
+
+
+--
+function getDataMapCalquesAndNiveau(pCalque, pNiveauMap)
+    local pNiveauMap = tonumber(pNiveauMap)
+
+    local data = fileDecodeJSON(pCalque)
+    local dataMap = data[pNiveauMap]
+
+    return dataMap
+end
+
+
+--
+function mapExist(pNiveauMap)
+    local pNiveauMap = tonumber(pNiveauMap)
+
+    if mapExistInFile() == true then
+        local dataMaps = fileDecodeJSON("mapCalque1.json")
+
+        if dataMaps[pNiveauMap] ~= nil then
+            return true
+        end
+    end
+end
+
+
+--
+function mapExistInFile()
+    if #fileReadAll("mapCalque1.json") == 0 then
+        return false
+    else
+        return true
+    end
+end
+
+
+--
+function fileExists(pFileName)
+    local file = io.open(pathCurrent .. "/dataMaps/" .. pFileName, "r")
+
+    if file ~= nil then 
+        io.close(file) 
+        
+        return true
+    else 
+        return false
+    end
+end
+
+
+--
+function fileReadAll(pNameFile)
+    local file = assert(io.open(pathCurrent .. "/dataMaps/" .. pNameFile, "r"))
+    local content = file:read("*all")
+    file:close()
+
+    return content
+end
+
+
+--
+function fileWriteAndEncodeJSON(pNameFile, pContent)
+    local dataJSON = json.encode(pContent)
+
+    local file = io.open(pathCurrent .. "/dataMaps/" .. pNameFile, 'w+')
+    file:write(dataJSON)
+    file:close()
+end
+
+
+--
+function fileDecodeJSON(pNameFile)
+    local file = assert(io.open(pathCurrent .. "/dataMaps/" .. pNameFile, "r"))
+    local content = file:read("*all")
+    file:close()
+
+    local dataLua = json.decode(content)
+
+    return dataLua
+end
+
+
+--
+function fileWrite(pNameFile)
+    local file = io.open(pathCurrent .. "/dataMaps/" .. pNameFile, 'w+')
+    file:write("")
+    file:close()
+end
+
+
 
 --
 function updateMouseXandY()
@@ -255,8 +375,8 @@ end
 -- 
 function getPositionCursorInGrilleMap()
     if window.zoom < 1 then
-        newTileWidthForZoomX = (window.zoom * 100) / 100 * TILE_WIDTH
-        newTileHeightForZoomY = (window.zoom * 100) / 100 * TILE_HEIGHT
+        newTileWidthForZoomX = window.zoom * TILE_WIDTH
+        newTileHeightForZoomY = window.zoom * TILE_HEIGHT
 
         colonnesCursorInGrilleMap = mouse.posX / newTileWidthForZoomX
         lignesCursorInGrilleMap = mouse.posY / newTileHeightForZoomY
@@ -292,42 +412,37 @@ function getPositionCursorInGrilleMap()
 end
 
 
--- Le tracer des colonnes et lignes de la map : Grille Map
-function drawTheLinesOrPointiller()
+-- Le tracer des colonnes et lignes de la Grille Map
+function drawTheLinesForGrilleMap()
     if GUI.grilleMapActive == true then
-
-        if GUI.grilleMapLines == true then
             
-            local counterHeight = TILE_HEIGHT
-            for i=0,MAP_HEIGHT do
-                if i == 0 then
-                    love.graphics.line(0, 0, NOMBRE_COLONNE, 0)
-                    love.graphics.line(0, TILE_HEIGHT, NOMBRE_COLONNE, TILE_HEIGHT)
-                elseif i < MAP_HEIGHT then
-                    counterHeight = counterHeight + TILE_HEIGHT
-                    love.graphics.line(0, counterHeight, NOMBRE_COLONNE, counterHeight)
-                end
-            end 
+        local counterHeight = TILE_HEIGHT
+        for i=0,MAP_HEIGHT do
+            if i == 0 then
+                love.graphics.line(0, 0, NOMBRE_COLONNE, 0)
+                love.graphics.line(0, TILE_HEIGHT, NOMBRE_COLONNE, TILE_HEIGHT)
+            elseif i < MAP_HEIGHT then
+                counterHeight = counterHeight + TILE_HEIGHT
+                love.graphics.line(0, counterHeight, NOMBRE_COLONNE, counterHeight)
+            end
+        end 
 
-            local counterWidth = TILE_WIDTH
-            for i=0,MAP_WIDTH do
-                if i == 0 then
-                    love.graphics.line(0, 0, 0, NOMBRE_LIGNE)
-                    love.graphics.line(TILE_WIDTH, 0, TILE_WIDTH, NOMBRE_LIGNE)
-                elseif i < MAP_WIDTH then
-                    counterWidth = counterWidth + TILE_WIDTH
-                    love.graphics.line(counterWidth, 0, counterWidth, NOMBRE_LIGNE)
-                end
-            end 
-        elseif GUI.grilleMapPointiller == true then
-
-        end
+        local counterWidth = TILE_WIDTH
+        for i=0,MAP_WIDTH do
+            if i == 0 then
+                love.graphics.line(0, 0, 0, NOMBRE_LIGNE)
+                love.graphics.line(TILE_WIDTH, 0, TILE_WIDTH, NOMBRE_LIGNE)
+            elseif i < MAP_WIDTH then
+                counterWidth = counterWidth + TILE_WIDTH
+                love.graphics.line(counterWidth, 0, counterWidth, NOMBRE_LIGNE)
+            end
+        end 
 
     end 
 end
 
 
---
+-- Couleur de la GrilleMap (Lines)
 function colorGrilleMap()
     -- Change la couleur des grille de la Map noir ou blanc
     if GUI.grilleMapColor == 'black' then
@@ -344,6 +459,16 @@ function colorBackgroundMap(pRed, pGreen, pBlue, pAlpha)
 end
 
 
+function calquesViewObjects()
+    if MAP_NIVEAU ~= "?" then
+        -- Fond noir (rect)
+        love.graphics.setColor(0, 0, 0, 1)
+        love.graphics.rectangle("fill", largeurEcran - 160 - window.translate.x, 0 + 220 - window.translate.y, 160, 300)
+        love.graphics.setColor(1, 1, 1, 1)
+    end
+end
+
+
 function calquesViewOeil()
     if MAP_NIVEAU ~= "?" then
         -- Fond noir (rect)
@@ -351,22 +476,22 @@ function calquesViewOeil()
         love.graphics.rectangle("fill", largeurEcran - 160 - window.translate.x, hauteurEcran - grilleViewTilesHeight - 210 - window.translate.y, 160, 207)
         love.graphics.setColor(1, 1, 1, 1)
 
-        love.graphics.print('Calque Tiles : ', largeurEcran - 150 - window.translate.x, hauteurEcran - grilleViewTilesWidth - 200 - window.translate.y)
-        love.graphics.print('Calque Tiles2 : ', largeurEcran - 150 - window.translate.x, hauteurEcran - grilleViewTilesWidth - 170 - window.translate.y)
+        love.graphics.print('Calque1 : ', largeurEcran - 150 - window.translate.x, hauteurEcran - grilleViewTilesWidth - 200 - window.translate.y)
+        love.graphics.print('Calque2 : ', largeurEcran - 150 - window.translate.x, hauteurEcran - grilleViewTilesWidth - 170 - window.translate.y)
         love.graphics.print('Calque Objects : ', largeurEcran - 150 - window.translate.x, hauteurEcran - grilleViewTilesWidth - 140 - window.translate.y)
         love.graphics.print('Calque Collision : ', largeurEcran - 150 - window.translate.x, hauteurEcran - grilleViewTilesWidth - 110 - window.translate.y)
-        love.graphics.print('Numero Tiles : ', largeurEcran - 150 - window.translate.x, hauteurEcran - grilleViewTilesWidth - 80 - window.translate.y)
-        love.graphics.print('Numero Tiles2 : ', largeurEcran - 150 - window.translate.x, hauteurEcran - grilleViewTilesWidth - 50 - window.translate.y)
+        love.graphics.print('ID Calque1 : ', largeurEcran - 150 - window.translate.x, hauteurEcran - grilleViewTilesWidth - 80 - window.translate.y)
+        love.graphics.print('ID Calque2 : ', largeurEcran - 150 - window.translate.x, hauteurEcran - grilleViewTilesWidth - 50 - window.translate.y)
         love.graphics.print('ID Objects : ', largeurEcran - 150 - window.translate.x, hauteurEcran - grilleViewTilesWidth - 20 - window.translate.y)
 
         --
-        if CalquesActive.Tiles == "ON" then
+        if CalquesActive.Calque1 == "ON" then
             love.graphics.draw(GUI.imgButtonCalqueOeilOuvert, largeurEcran - GUI.imgButtonCalqueOeilOuvert:getWidth() - 20 - window.translate.x, hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilOuvert:getHeight() / 2 - window.translate.y, 0, 1, 1, GUI.imgButtonCalqueOeilOuvert:getWidth() / 2, GUI.imgButtonCalqueOeilOuvert:getHeight() / 2)
         else
             love.graphics.draw(GUI.imgButtonCalqueOeilFermer, largeurEcran - GUI.imgButtonCalqueOeilFermer:getWidth() - 20 - window.translate.x, hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilFermer:getHeight() / 2 - window.translate.y, 0, 1, 1, GUI.imgButtonCalqueOeilFermer:getWidth() / 2, GUI.imgButtonCalqueOeilFermer:getHeight() / 2)
         end
 
-        if CalquesActive.Tiles2 == "ON" then
+        if CalquesActive.Calque2 == "ON" then
             love.graphics.draw(GUI.imgButtonCalqueOeilOuvert2, largeurEcran - GUI.imgButtonCalqueOeilOuvert2:getWidth() - 5 - window.translate.x, hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilOuvert2:getHeight() + 20 - window.translate.y, 0, 1, 1, GUI.imgButtonCalqueOeilOuvert2:getWidth() / 2, GUI.imgButtonCalqueOeilOuvert2:getHeight() / 2)
         else
             love.graphics.draw(GUI.imgButtonCalqueOeilFermer2, largeurEcran - GUI.imgButtonCalqueOeilFermer2:getWidth() - 5 - window.translate.x, hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilFermer2:getHeight() + 20 - window.translate.y, 0, 1, 1, GUI.imgButtonCalqueOeilFermer2:getWidth() / 2, GUI.imgButtonCalqueOeilFermer2:getHeight() / 2)
@@ -384,13 +509,13 @@ function calquesViewOeil()
             love.graphics.draw(GUI.imgButtonCalqueOeilFermer4, largeurEcran - GUI.imgButtonCalqueOeilFermer4:getWidth() - window.translate.x, hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilFermer4:getHeight() + GUI.imgButtonCalqueOeilFermer4:getWidth() / 2 + 66 - window.translate.y, 0, 1, 1, GUI.imgButtonCalqueOeilFermer4:getWidth() / 2, GUI.imgButtonCalqueOeilFermer4:getHeight() / 2)
         end
 
-        if CalquesActive.IDTiles == "ON" then
+        if CalquesActive.IDCalque1 == "ON" then
             love.graphics.draw(GUI.imgButtonCalqueOeilOuvert5, largeurEcran - GUI.imgButtonCalqueOeilOuvert5:getWidth() - 10 - window.translate.x, hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilOuvert5:getHeight() + GUI.imgButtonCalqueOeilOuvert5:getWidth() / 2 + 97 - window.translate.y, 0, 1, 1, GUI.imgButtonCalqueOeilOuvert5:getWidth() / 2, GUI.imgButtonCalqueOeilOuvert5:getHeight() / 2)
         else
             love.graphics.draw(GUI.imgButtonCalqueOeilFermer5, largeurEcran - GUI.imgButtonCalqueOeilFermer5:getWidth() - 10 - window.translate.x, hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilFermer5:getHeight() + GUI.imgButtonCalqueOeilFermer5:getWidth() / 2 + 97 - window.translate.y, 0, 1, 1, GUI.imgButtonCalqueOeilFermer5:getWidth() / 2, GUI.imgButtonCalqueOeilFermer5:getHeight() / 2)
         end
 
-        if CalquesActive.IDTiles2 == "ON" then
+        if CalquesActive.IDCalque2 == "ON" then
             love.graphics.draw(GUI.imgButtonCalqueOeilOuvert6, largeurEcran - GUI.imgButtonCalqueOeilOuvert6:getWidth() - 5 - window.translate.x, hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilOuvert6:getHeight() + GUI.imgButtonCalqueOeilOuvert6:getWidth() / 2 + 127 - window.translate.y, 0, 1, 1, GUI.imgButtonCalqueOeilOuvert6:getWidth() / 2, GUI.imgButtonCalqueOeilOuvert6:getHeight() / 2)
         else
             love.graphics.draw(GUI.imgButtonCalqueOeilFermer6, largeurEcran - GUI.imgButtonCalqueOeilFermer6:getWidth() - 5 - window.translate.x, hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilFermer6:getHeight() + GUI.imgButtonCalqueOeilFermer6:getWidth() / 2 + 127 - window.translate.y, 0, 1, 1, GUI.imgButtonCalqueOeilFermer6:getWidth() / 2, GUI.imgButtonCalqueOeilFermer6:getHeight() / 2)
@@ -422,28 +547,33 @@ function guiTileMapEditor()
     love.graphics.print('NEW MAP', 0 - window.translate.x, 220 - window.translate.y)
     love.graphics.printf('LOAD_MAP : ' .. inputText.LOAD_MAP.txt, 0 - window.translate.x, 240 - window.translate.y, love.graphics.getWidth())
     love.graphics.printf('SAVE_MAP'  .. inputText.SAVE_MAP.txt, 0 - window.translate.x, 260 - window.translate.y, love.graphics.getWidth())
+    love.graphics.printf('DELETE_MAP :'  .. inputText.DELETE_MAP.txt, 0 - window.translate.x, 280 - window.translate.y, love.graphics.getWidth())
 
-    love.graphics.print('CALQUES : ' .. CALQUES, 0 - window.translate.x, 300 - window.translate.y)
+    love.graphics.print('CALQUES : ' .. CALQUES, 0 - window.translate.x, 320 - window.translate.y)
+    love.graphics.print('TYPE : ' .. TYPE, 0 - window.translate.x, 340 - window.translate.y)
 
-    love.graphics.print('Background-color (r) : ' .. backgroundColor.red, 0 - window.translate.x, 340 - window.translate.y)
-    love.graphics.print('Background-color (g) : ' .. backgroundColor.green, 0 - window.translate.x, 360 - window.translate.y)
-    love.graphics.print('Background-color (b) : ' .. backgroundColor.blue, 0 - window.translate.x, 380 - window.translate.y)
-    love.graphics.print('Background-color (a) : ' .. backgroundColor.alpha, 0 - window.translate.x, 400 - window.translate.y)
+    love.graphics.print('Background-color (r) : ' .. backgroundColor.red, 0 - window.translate.x, 380 - window.translate.y)
+    love.graphics.print('Background-color (g) : ' .. backgroundColor.green, 0 - window.translate.x, 400 - window.translate.y)
+    love.graphics.print('Background-color (b) : ' .. backgroundColor.blue, 0 - window.translate.x, 420 - window.translate.y)
+    love.graphics.print('Background-color (a) : ' .. backgroundColor.alpha, 0 - window.translate.x, 440 - window.translate.y)
 
-    love.graphics.print('Opacity - Lines Grille Map : ' .. colorLinesGrilleMap.alpha, 0 - window.translate.x, 440 - window.translate.y)
+    love.graphics.print('Opacity - Lines Grille Map : ' .. colorLinesGrilleMap.alpha, 0 - window.translate.x, 480 - window.translate.y)
 
-    love.graphics.print('MOUSE.X : ' .. mouse.posX, 0 - window.translate.x, 480 - window.translate.y)
-    love.graphics.print('MOUSE.Y : ' .. mouse.posY, 0 - window.translate.x, 500 - window.translate.y)
-    love.graphics.print('ZOOM : ' .. window.zoom, 0 - window.translate.x, 520 - window.translate.y)
+    love.graphics.print('MOUSE.X : ' .. mouse.posX, 0 - window.translate.x, 520 - window.translate.y)
+    love.graphics.print('MOUSE.Y : ' .. mouse.posY, 0 - window.translate.x, 540 - window.translate.y)
+    love.graphics.print('ZOOM : ' .. window.zoom, 0 - window.translate.x, 560 - window.translate.y)
 
-    love.graphics.print('F1 : Editor/Gameplay ', 0 - window.translate.x, 560 - window.translate.y)
-    love.graphics.print('F2 : Change la couleur des Lines/Pointiller de la GrilleMap', 0 - window.translate.x, 580 - window.translate.y)
-    love.graphics.print('F3 : Active/Désactive la Grille de la Map', 0 - window.translate.x, 600 - window.translate.y)
-    love.graphics.print('F4 : Camera + Zoom par défault', 0 - window.translate.x, 620 - window.translate.y)
-    love.graphics.print('F5 : Active/Désactive la GUI', 0 - window.translate.x, 640 - window.translate.y)
-    love.graphics.print('F6 : Remet par défault toute la GUI (background-color..)', 0 - window.translate.x, 660 - window.translate.y)
-    love.graphics.print('F7 : Les Lines/Pointiller de la Grille en mode doux/gras', 0 - window.translate.x, 680 - window.translate.y)
-    love.graphics.print('Boutton Molette : Remet le Zoom par défault', 0 - window.translate.x, 700 - window.translate.y)
+    love.graphics.print('F1 : Editor/Gameplay ', 0 - window.translate.x, 600 - window.translate.y)
+    love.graphics.print('F2 : Change la couleur des Lines de la GrilleMap', 0 - window.translate.x, 620 - window.translate.y)
+    love.graphics.print('F3 : Active/Désactive la Grille de la Map', 0 - window.translate.x, 640 - window.translate.y)
+    love.graphics.print('F4 : GrilleMap à 0,0 (x,y) + Zoom par défault', 0 - window.translate.x, 660 - window.translate.y)
+    love.graphics.print('F5 : Active/Désactive la GUI', 0 - window.translate.x, 680 - window.translate.y)
+    love.graphics.print('F6 : Remet par défault toute la GUI (background-color..)', 0 - window.translate.x, 700 - window.translate.y)
+    love.graphics.print('Boutton Molette Souris : Remet le Zoom par défault', 0 - window.translate.x, 720 - window.translate.y)
+    love.graphics.print('CTRL - ALT : Permet de revenir en arrière / avant', 0 - window.translate.x, 740 - window.translate.y)
+    love.graphics.print('Z-Q-S-D : Pour ce deplacer sur la GrilleMap', 0 - window.translate.x, 760 - window.translate.y)
+    love.graphics.print('Click droit enfoncée : Pour déplacer la GrilleMap', 0 - window.translate.x, 780 - window.translate.y)
+    love.graphics.print('Molette Souris : Zoom/DeZoom', 0 - window.translate.x, 800 - window.translate.y)
 
 
     --
@@ -457,6 +587,14 @@ function guiTileMapEditor()
     love.graphics.draw(GUI.imgButtonGommeGrille, largeurEcran - GUI.imgButtonGommeGrille:getWidth() - window.translate.x, GUI.imgButtonDessinerGrille:getHeight() + GUI.imgButtonGommeGrille:getHeight() - window.translate.y, 0, 1, 1, GUI.imgButtonGommeGrille:getWidth() / 2, GUI.imgButtonGommeGrille:getHeight() / 2)
     love.graphics.setColor(1, 1, 1, 1)
 
+    love.graphics.setColor(1, 1, 1, mainobjetAlpha)
+    love.graphics.draw(GUI.imgButtonMainObjetGrille, largeurEcran - GUI.imgButtonDessinerGrille:getWidth() - GUI.imgButtonMainObjetGrille:getWidth() - window.translate.x, GUI.imgButtonDessinerGrille:getHeight() - window.translate.y, 0, 1, 1, GUI.imgButtonDessinerGrille:getWidth() / 2, GUI.imgButtonDessinerGrille:getHeight() / 2)
+    love.graphics.setColor(1, 1, 1, 1)
+
+    love.graphics.setColor(1, 1, 1, pipeAlpha)
+    love.graphics.draw(GUI.imgButtonPipeGrille, largeurEcran - GUI.imgButtonGommeGrille:getWidth() - GUI.imgButtonPipeGrille:getWidth() - window.translate.x, GUI.imgButtonDessinerGrille:getHeight() + GUI.imgButtonGommeGrille:getHeight() - window.translate.y, 0, 1, 1, GUI.imgButtonGommeGrille:getWidth() / 2, GUI.imgButtonGommeGrille:getHeight() / 2)
+    love.graphics.setColor(1, 1, 1, 1)
+
     love.graphics.draw(GUI.imgButtonNone, largeurEcran - (GUI.imgButtonNone:getWidth() - 5) - window.translate.x, GUI.imgButtonGommeGrille:getHeight() + GUI.imgButtonGommeGrille:getHeight() + GUI.imgButtonNone:getHeight() + - window.translate.y, 0, 1, 1, GUI.imgButtonNone:getWidth() / 2, GUI.imgButtonNone:getHeight() / 2)
 
 
@@ -468,6 +606,12 @@ function guiTileMapEditor()
 
     --
     calquesViewOeil()
+
+    --
+    calquesViewObjects()
+
+    --
+    drawViewFiles("assets")
 end
 
 
@@ -484,7 +628,7 @@ end
 
 -- 
 function deplacementInGrilleMapZQSD()
-    if sceneTileMapEditor == true and not love.keyboard.isDown('lctrl') then
+    if not love.keyboard.isDown('lctrl') then
         if love.keyboard.isDown('z') and love.keyboard.isDown('d') then -- Déplacement : Haut Droite
             cursorPersoActive = true
             love.mouse.setCursor(cursorImg.mouvementHautDroiteBasGaucheInMapEditor)
@@ -532,7 +676,7 @@ end
 function deplacerGrilleMapClickRight()
     -- BUG : QUAND LES 4 IF SONT ACTIF LE DEPLACEMENT EST BUG, SI DEUX IF LE DEPLACEMENT EST OK -> ?? / REFAIRE EN 8 DIRECTION PEU ETRE
     -- Clique droit enfoncée en continue 
-    if love.mouse.isDown(2) and sceneTileMapEditor == true then
+    if love.mouse.isDown(2) then
         cursorPersoActive = true
         love.mouse.setCursor(cursorImg.deplacementMapEditor)
 
@@ -542,19 +686,19 @@ function deplacerGrilleMapClickRight()
         end
 
         if mouse.posX > mouseXClick then
-            window.translate.x = window.translate.x + 10
+            window.translate.x = window.translate.x + 15
         end
         
         if mouse.posX < mouseXClick then
-            window.translate.x = window.translate.x + -10
+            window.translate.x = window.translate.x + -15
         end
         
         if mouse.posY > mouseYClick then
-            window.translate.y = window.translate.y + 10
+            window.translate.y = window.translate.y + 15
         end
         
         if mouse.posY < mouseYClick then
-            window.translate.y = window.translate.y + -10
+            window.translate.y = window.translate.y + -15
         end
     end
 
@@ -570,239 +714,79 @@ end
 function generateMap()
     -- Génére la Map.
     local map = {}
-    map.MAP_WIDTH = tonumber(inputText.MAP_WIDTH.txt)
-    map.MAP_HEIGHT = tonumber(inputText.MAP_HEIGHT.txt)
-    map.TILE_WIDTH = tonumber(inputText.TILE_WIDTH.txt)
-    map.TILE_HEIGHT = tonumber(inputText.TILE_HEIGHT.txt)
+    local mapProperties = {}
+    mapProperties.MAP_WIDTH = tonumber(inputText.MAP_WIDTH.txt)
+    mapProperties.MAP_HEIGHT = tonumber(inputText.MAP_HEIGHT.txt)
+    mapProperties.TILE_WIDTH = tonumber(inputText.TILE_WIDTH.txt)
+    mapProperties.TILE_HEIGHT = tonumber(inputText.TILE_HEIGHT.txt)
 
     for l=1,MAP_HEIGHT do
         local lineTable = {}
 
         for c=1,MAP_WIDTH do
-            local colonne = 0 -- 0 = aucune Tile
-            lineTable[c] = colonne
+            local colonne = 0 -- 0 = du vide
+            lineTable[c] = 0
         end
 
         map[l] = lineTable
     end
 
+    table.insert(map, mapProperties)
     table.insert(Game.MapNiveau, map)
 
-    if TileMaps == nil then
+
+    -- Je regarde si il y a 0 maps créer ALORS je créer toute les maps puis j'encode en JSON.
+    -- SINON si il y a au minimum une map créer je récupère toute les data déjà disponible qui viens du JSON et je rajoute la map générer + je récupère le nombre de niveaux.
+    if mapExistInFile() == false then
         Game.MapNiveauActive = 1
         MAP_NIVEAU = Game.MapNiveauActive
-    else
-        Game.MapNiveauActive = #TileMaps + 1
+        
+        fileWriteAndEncodeJSON("mapCalque1.json", { map })
+        fileWriteAndEncodeJSON("mapCalque2.json", { map })
+        fileWriteAndEncodeJSON("mapCalque3.json", { map })
+        fileWriteAndEncodeJSON("mapCalque4.json", { map })
+    else 
+        local data = fileDecodeJSON("mapCalque1.json")
+        local data2 = fileDecodeJSON("mapCalque2.json")
+        local data3 = fileDecodeJSON("mapCalque3.json")
+        local data4 = fileDecodeJSON("mapCalque4.json")
+
+        local nombreMaps = #data -- 1er dimensions ou ce trouve toute les maps / Récupèrer le nombre de maps.
+
+        table.insert(data, map)
+        table.insert(data2, map)
+        table.insert(data3, map)
+        table.insert(data4, map)
+
+        fileWriteAndEncodeJSON("mapCalque1.json", data)
+        fileWriteAndEncodeJSON("mapCalque2.json", data2)
+        fileWriteAndEncodeJSON("mapCalque3.json", data3)
+        fileWriteAndEncodeJSON("mapCalque4.json", data4)
+
+        Game.MapNiveauActive = nombreMaps + 1
         MAP_NIVEAU = Game.MapNiveauActive
     end
 
-
-    -- Je commence a reparcourir ma map qui a était créer précédement plus haut, 
-    -- pour permettre d'inserer dans le fichier avec une indentation propre..etc
-    data = nil
-    data2 = nil
-    data3 = nil
-    lengthLigneMap = #Game.MapNiveau[#Game.MapNiveau]
-    lengthColonneMap = #Game.MapNiveau[#Game.MapNiveau][1]
-
-    -- Map qui contient les Tiles
-    for l=1,lengthLigneMap do
-        local ligne = "                    { "
-
-        for c=1,lengthColonneMap do
-            if c == lengthColonneMap then
-                ligne = ligne .. Game.MapNiveau[#Game.MapNiveau][lengthLigneMap][lengthColonneMap]
-            else
-                ligne = ligne .. Game.MapNiveau[#Game.MapNiveau][lengthLigneMap][lengthColonneMap] .. ", "
-            end
-        end
-
-        ligne = ligne .. " },"
-        
-        if l ~= 1 then
-            data = data .. "\n" .. ligne
-        else
-            data = ligne
-        end
-    end
-
-
-    -- Map qui contient les Tiles2 (Deuxième Calques)
-    for l=1,lengthLigneMap do
-        local ligne = "                    { "
-
-        for c=1,lengthColonneMap do
-            if c == lengthColonneMap then
-                ligne = ligne .. Game.MapNiveau[#Game.MapNiveau][lengthLigneMap][lengthColonneMap]
-            else
-                ligne = ligne .. Game.MapNiveau[#Game.MapNiveau][lengthLigneMap][lengthColonneMap] .. ", "
-            end
-        end
-
-        ligne = ligne .. " },"
-        
-        if l ~= 1 then
-            data2 = data2 .. "\n" .. ligne
-        else
-            data2 = ligne
-        end
-    end
-
-
-    -- Map qui contient les Collision
-    for l=1,lengthLigneMap do
-        local ligne = "                            { "
-
-        for c=1,lengthColonneMap do
-            if c == lengthColonneMap then
-                ligne = ligne .. Game.MapNiveau[#Game.MapNiveau][lengthLigneMap][lengthColonneMap]
-            else
-                ligne = ligne .. Game.MapNiveau[#Game.MapNiveau][lengthLigneMap][lengthColonneMap] .. ", "
-            end
-        end
-
-        ligne = ligne .. " },"
-        
-        if l ~= 1 then
-            data3 = data3 .. "\n" .. ligne
-        else
-            data3 = ligne
-        end
-    end
-
-
-    dataMap = "                {" .. "\n" ..
-                    data .. "\n" .. "\n" ..
-                    "                    MAP_WIDTH = " .. MAP_WIDTH .. "," .. "\n" ..
-                    "                    MAP_HEIGHT = " .. MAP_HEIGHT .. "," .. "\n" ..
-                    "                    TILE_WIDTH = " .. TILE_WIDTH .. "," .. "\n" ..
-                    "                    TILE_HEIGHT = " .. TILE_HEIGHT .. "," .. "\n" ..
-              "                },"
-
-    dataMap2 = "                {" .. "\n" ..
-                    data2 .. "\n" .. "\n" ..
-                    "                    MAP_WIDTH = " .. MAP_WIDTH .. "," .. "\n" ..
-                    "                    MAP_HEIGHT = " .. MAP_HEIGHT .. "," .. "\n" ..
-                    "                    TILE_WIDTH = " .. TILE_WIDTH .. "," .. "\n" ..
-                    "                    TILE_HEIGHT = " .. TILE_HEIGHT .. "," .. "\n" ..
-                "                },"
-
-    dataMap3 = "                        {" .. "\n" ..
-                    data3 .. "\n" .. "\n" ..
-                    "                            MAP_WIDTH = " .. MAP_WIDTH .. "," .. "\n" ..
-                    "                            MAP_HEIGHT = " .. MAP_HEIGHT .. "," .. "\n" ..
-                    "                            TILE_WIDTH = " .. TILE_WIDTH .. "," .. "\n" ..
-                    "                            TILE_HEIGHT = " .. TILE_HEIGHT .. "," .. "\n" ..
-                "                        },"
-
-
-    -- Map qui contient les Tiles
-    fileData = "local map = {}" .. "\n" .. "\n" ..
-               "ORIENTATION_TILES = " .. '"' .. ORIENTATION_TILES .. '"' .. "\n" ..
-               "TILE_OFFSETX = " .. 0 .. "\n" ..
-               "TILE_OFFSETY = " .. 0 .. "\n" ..
-               "TileMaps = {" .. "\n" .. dataMap .. "\n" .. "           }" .. "\n" .. "\n" ..
-               "return map"
-
-    -- Map qui contient les Tiles2 (Deuxième Calques)
-    fileData2 = "local map2 = {}" .. "\n" .. "\n" ..
-               "ORIENTATION_TILES = " .. '"' .. ORIENTATION_TILES .. '"' .. "\n" ..
-               "TILE_OFFSETX = " .. 0 .. "\n" ..
-               "TILE_OFFSETY = " .. 0 .. "\n" ..
-               "TileMaps2 = {" .. "\n" .. dataMap2 .. "\n" .. "            }" .. "\n" .. "\n" ..
-               "return map2"
-
-    -- Map qui contient les Collision
-    fileData3 = "local mapCollision = {}" .. "\n" .. "\n" ..
-                "ORIENTATION_TILES = " .. '"' .. ORIENTATION_TILES .. '"' .. "\n" ..
-                "TILE_OFFSETX = " .. 0 .. "\n" ..
-                "TILE_OFFSETY = " .. 0 .. "\n" ..
-                "TileMapsCollision = {" .. "\n" .. dataMap3 .. "\n" .. "                    }" .. "\n" .. "\n" ..
-                "return mapCollision"
-
-
-    -- Bugs je suis obliger de déclarer deux fichiers pour récupèrer la longueur du fichier et toute la chaîne de caractères.
-    -- Map qui contient les Tiles
-    file1 = io.open(pathCurrent .. '/map.lua', "r")
-    file2 = io.open(pathCurrent .. '/map.lua', "r")
-    fileDataLength = #file1:read("*all")
-    fileDataCurrent = file2:read("*all")
-
-    -- Map qui contient les Tiles2 (Deuxième Calques)
-    file2 = io.open(pathCurrent .. '/map2.lua', "r")
-    file3 = io.open(pathCurrent .. '/map2.lua', "r")
-    fileDataLength2 = #file2:read("*all")
-    fileDataCurrent2 = file3:read("*all")
-
-    -- Map qui contient les Collision
-    file3 = io.open(pathCurrent .. '/mapCollision.lua', "r")
-    file4 = io.open(pathCurrent .. '/mapCollision.lua', "r")
-    fileDataLength3 = #file3:read("*all")
-    fileDataCurrent3 = file4:read("*all")
-
-
-    -- Si il y a au moins une map de créer alors..
-    if fileDataLength >= 50 then
-        fileDataCurrent = string.sub(fileDataCurrent, 1, fileDataLength - 15)
-        fileData = fileDataCurrent .. "\n" .. dataMap .. "\n" .. "           }" .. "\n" .. "\n" .. "return map"
-
-        fileDataCurrent2 = string.sub(fileDataCurrent2, 1, fileDataLength2 - 15)
-        fileData2 = fileDataCurrent2 .. "\n" .. dataMap2 .. "\n" .. "            }" .. "\n" .. "\n" .. "return map2"
-
-        fileDataCurrent3 = string.sub(fileDataCurrent3, 1, fileDataLength3 - 23)
-        fileData3 = fileDataCurrent3 .. "\n" .. dataMap3 .. "\n" .. "                    }" .. "\n" .. "\n" .. "return mapCollision"
-
-        -- Map qui contient les Tiles
-        file = io.open(pathCurrent .. '/map.lua', 'w+')
-        file:write(fileData)
-        file:close()
-
-        -- Map qui contient les Tiles2 (Deuxième Calques)
-        file2 = io.open(pathCurrent .. '/map2.lua', 'w+')
-        file2:write(fileData2)
-        file2:close()
-
-        -- Map qui contient les Collision.
-        file3 = io.open(pathCurrent .. '/mapCollision.lua', 'w+')
-        file3:write(fileData3)
-        file3:close()
-    else
-        -- Si jamais il n'y a encore aucune Map 
-        -- J'ouvre le fichier, puis j'écrase ce qui a dessus et j'écris les nouvelles données.
-        -- Map qui contient les Tiles
-        file = io.open(pathCurrent .. '/map.lua', 'w+')
-        file:write(fileData)
-        file:close()
-
-        -- Map qui contient les Tiles2 (Deuxième Calques)
-        file2 = io.open(pathCurrent .. '/map2.lua', 'w+')
-        file2:write(fileData2)
-        file2:close()
-
-        -- Map qui contient les Collision.
-        file3 = io.open(pathCurrent .. '/mapCollision.lua', 'w+')
-        file3:write(fileData3)
-        file3:close()
-    end
-
-
-    -- Après avoir générer une map, le fichier map.lua, mapObjects.lua, mapCollision.lua est modifier mais en mémoire dans Love2D rien n'est modifier donc on le charge a nouveau et on l'éxecute
-    love.filesystem.load("map.lua")()
-    love.filesystem.load("map2.lua")()
-    love.filesystem.load("mapCollision.lua")()
+    table.insert(MapsDataLua.Calque1, map)
+    table.insert(MapsDataLua.Calque2, map)
+    table.insert(MapsDataLua.Calque3, map)
+    table.insert(MapsDataLua.Calque4, map)
 end
 
 
 -- LoadMap
 function loadMap(pNiveauMap)
     pNiveauMap = tonumber(pNiveauMap)
-    
-    if LOAD_MAP ~= "" and TileMaps ~= nil and TileMaps[pNiveauMap] ~= nil then
-        MAP_WIDTH = TileMaps[pNiveauMap].MAP_WIDTH 
-        MAP_HEIGHT = TileMaps[pNiveauMap].MAP_HEIGHT 
 
-        TILE_WIDTH = TileMaps[pNiveauMap].TILE_WIDTH 
-        TILE_HEIGHT = TileMaps[pNiveauMap].TILE_HEIGHT
+    if LOAD_MAP ~= "" and mapExist(pNiveauMap) == true then
+        data = fileDecodeJSON("mapCalque1.json")
+        propertiesMap = #data[pNiveauMap]
+
+        MAP_WIDTH = data[pNiveauMap][propertiesMap].MAP_WIDTH 
+        MAP_HEIGHT = data[pNiveauMap][propertiesMap].MAP_HEIGHT
+        
+        TILE_WIDTH = data[pNiveauMap][propertiesMap].TILE_WIDTH 
+        TILE_HEIGHT = data[pNiveauMap][propertiesMap].TILE_HEIGHT
 
         inputText.MAP_WIDTH.txt = MAP_WIDTH
         inputText.MAP_HEIGHT.txt = MAP_HEIGHT
@@ -822,11 +806,34 @@ function loadMap(pNiveauMap)
         clickInOneTile = false
         Game.TileActive = nil
 
-        CALQUES = "Tiles"
+        CALQUES = "Calque1"
+
+        TYPE = "Tile"
 
         Historique.ArriereDonnees = {}
         Historique.AvantDonnees = {}
-        Historique.Counter = 0
+        Historique.CounterArriere = 0
+        Historique.CounterAvant = 0
+        Historique.Bool = false
+
+        -- Récupère les données des Maps qui viennent du JSON pour les récupèrer en Lua lors du chargement du niveau pour éviter de tout le temps
+        -- écrire dans les fichiers ou récupèrer les données et permettra de ne pas sauvegarder à chaque changement et 
+        -- laisser la possibilité de sauvegarder manuellement ce qui a était fait ou non.
+        Game.MapNiveau = nil
+        MapsDataLua.Calque1 = {}
+        MapsDataLua.Calque2 = {}
+        MapsDataLua.Calque3 = {}
+        MapsDataLua.Calque4 = {}
+        
+        dataMapCalque1 = fileDecodeJSON("mapCalque1.json")
+        dataMapCalque2 = fileDecodeJSON("mapCalque2.json")
+        dataMapCalque3 = fileDecodeJSON("mapCalque3.json")
+        dataMapCalque4 = fileDecodeJSON("mapCalque4.json")
+
+        table.insert(MapsDataLua.Calque1, dataMapCalque1[pNiveauMap])
+        table.insert(MapsDataLua.Calque2, dataMapCalque2[pNiveauMap])
+        table.insert(MapsDataLua.Calque3, dataMapCalque3[pNiveauMap])
+        table.insert(MapsDataLua.Calque4, dataMapCalque4[pNiveauMap])
     end
 end
 
@@ -835,387 +842,24 @@ end
 function saveMap(pNiveauMap)
     pNiveauMap = tonumber(pNiveauMap)
 
-    if TileMaps[pNiveauMap] ~= nil then
-        local lengthLigneMap = TileMaps[pNiveauMap].MAP_HEIGHT
-        local lengthColonneMap = TileMaps[pNiveauMap].MAP_WIDTH
+    if mapExist(pNiveauMap) == true then
+        local data = fileDecodeJSON("mapCalque1.json")
+        local data2 = fileDecodeJSON("mapCalque2.json")
+        local data3 = fileDecodeJSON("mapCalque3.json")
+        local data4 = fileDecodeJSON("mapCalque4.json")
 
-
-        -- Map qui contient les Tiles
-        local data = nil
-
-        for l=1,lengthLigneMap do
-            local ligne = "                    { "
-
-            for c=1,lengthColonneMap do
-                if c == lengthColonneMap then
-                    ligne = ligne .. TileMaps[pNiveauMap][l][c]
-                else
-                    ligne = ligne .. TileMaps[pNiveauMap][l][c] .. ", "
-                end
-            end
-
-            ligne = ligne .. " },"
-            
-            if l ~= 1 then
-                data = data .. "\n" .. ligne
-            else
-                data = ligne
-            end
+        for k=1,4 do
+            for l=1,MAP_HEIGHT do
+                for c=1,MAP_WIDTH do
+                    data[l][c] = MapsDataLua.Calque1[1][l][c]
+                end 
+            end 
         end
 
-        dataMapChanger = "                {" .. "\n" ..
-                                            data .. "\n" .. "\n" ..
-                        "                    MAP_WIDTH = " .. MAP_WIDTH .. "," .. "\n" ..
-                        "                    MAP_HEIGHT = " .. MAP_HEIGHT .. "," .. "\n" ..
-                        "                    TILE_WIDTH = " .. TILE_WIDTH .. "," .. "\n" ..
-                        "                    TILE_HEIGHT = " .. TILE_HEIGHT .. "," .. "\n" ..
-                        "                },"
-
-        saveMapCurrent = pNiveauMap
-        lengthMaps = #TileMaps
-
-        dataMapsRestant = ""
-        dataMapsRestant2 = ""
-
-        dataDebutARecuperer = saveMapCurrent - 1 -- Le numéro du niveau - 1 pour récupèrer tout les niveaux avant 
-        dataFinARecuperer = lengthMaps
-        
-        --
-        file = io.open(pathCurrent .. '/map.lua', "r")
-        file2 = io.open(pathCurrent .. '/map.lua', "r")
-        counterLines = 0
-        counterLines2 = 0
-
-        
-        leNumeroLigneACommencer = 6
-        leNumeroLigneDeFin = 0
-
-        -- Les données des maps a récupèrer au début
-        for n=1,dataDebutARecuperer do
-            leNumeroLigneDeFin = leNumeroLigneDeFin + (TileMaps[n].MAP_HEIGHT + 7)
-        end
-
-        -- Les données des maps a récupèrer après la map qui a était changer jusqu'a la fin du fichier.
-        leNumeroLigneACommencer2 = leNumeroLigneACommencer + leNumeroLigneDeFin + TileMaps[saveMapCurrent].MAP_HEIGHT + 7
-
-        if saveMapCurrent >= 3 then
-            leNumeroLigneDeFin = leNumeroLigneDeFin + saveMapCurrent - 2
-            leNumeroLigneACommencer2 = leNumeroLigneACommencer2 + saveMapCurrent - 2
-        end
-
-        --
-        for line in file2:lines() do
-            counterLines2 = counterLines2 + 1
-        end
-
-        for line in file:lines() do
-            if counterLines >= 6 then
-
-                if saveMapCurrent == 1 then
-                    leNumeroLigneACommencer = TileMaps[pNiveauMap].MAP_HEIGHT + 7 + 6
-
-                    if counterLines >= leNumeroLigneACommencer then
-                        dataMapsRestant = dataMapsRestant .. line .. "\n"
-                    end
-                elseif saveMapCurrent == lengthMaps then
-                    if counterLines < counterLines2 - (TileMaps[lengthMaps].MAP_HEIGHT + 10) then
-                        dataMapsRestant = dataMapsRestant .. line .. "\n"
-                    end
-                else
-                    if counterLines <= (leNumeroLigneACommencer + leNumeroLigneDeFin) then
-                        dataMapsRestant = dataMapsRestant .. line .. "\n"
-                    elseif counterLines > leNumeroLigneACommencer2 then
-                        dataMapsRestant2 = dataMapsRestant2 .. line .. "\n"
-                    end
-                end
-
-            end
-
-            counterLines = counterLines + 1
-        end
-
-
-        if saveMapCurrent == 1 then -- Si c'est la map 1 de mon niveau.
-            fileData = "local map = {}" .. "\n" .. "\n" ..
-                        "ORIENTATION_TILES = " .. '"' .. ORIENTATION_TILES .. '"' .. "\n" ..
-                        "TILE_OFFSETX = " .. 0 .. "\n" ..
-                        "TILE_OFFSETY = " .. 0 .. "\n" ..
-                        "TileMaps = {" .. "\n" .. dataMapChanger .. "\n" .. dataMapsRestant
-
-        elseif saveMapCurrent == lengthMaps then -- Si c'est la derniere de mon niveau.
-            fileData = "local map = {}" .. "\n" .. "\n" ..
-                        "ORIENTATION_TILES = " .. '"' .. ORIENTATION_TILES .. '"' .. "\n" ..
-                        "TILE_OFFSETX = " .. 0 .. "\n" ..
-                        "TILE_OFFSETY = " .. 0 .. "\n" ..
-                        "TileMaps = {" .. "\n" .. dataMapsRestant .. dataMapChanger .. "\n" .. "           }" .. "\n" .. "\n" ..
-                        "return map"
-        else -- Sinon..
-            fileData = "local map = {}" .. "\n" .. "\n" ..
-                        "ORIENTATION_TILES = " .. '"' .. ORIENTATION_TILES .. '"' .. "\n" ..
-                        "TILE_OFFSETX = " .. 0 .. "\n" ..
-                        "TILE_OFFSETY = " .. 0 .. "\n" ..
-                        "TileMaps = {" .. "\n" .. dataMapsRestant .. dataMapChanger .. "\n" .. dataMapsRestant2
-        end
-
-
-
-        -- Map qui contient les Tiles2 (deuxième calque)
-        local data2 = nil
-
-        for l=1,lengthLigneMap do
-            local ligne = "                    { "
-
-            for c=1,lengthColonneMap do
-                if c == lengthColonneMap then
-                    ligne = ligne .. TileMaps2[pNiveauMap][l][c]
-                else
-                    ligne = ligne .. TileMaps2[pNiveauMap][l][c] .. ", "
-                end
-            end
-
-            ligne = ligne .. " },"
-            
-            if l ~= 1 then
-                data2 = data2 .. "\n" .. ligne
-            else
-                data2 = ligne
-            end
-        end
-
-        dataMapChanger2 = "                {" .. "\n" ..
-                                            data2 .. "\n" .. "\n" ..
-                        "                    MAP_WIDTH = " .. MAP_WIDTH .. "," .. "\n" ..
-                        "                    MAP_HEIGHT = " .. MAP_HEIGHT .. "," .. "\n" ..
-                        "                    TILE_WIDTH = " .. TILE_WIDTH .. "," .. "\n" ..
-                        "                    TILE_HEIGHT = " .. TILE_HEIGHT .. "," .. "\n" ..
-                        "                },"
-
-        saveMapCurrent = pNiveauMap
-        lengthMaps = #TileMaps
-
-        dataMapsRestantTilesDeuxieme = ""
-        dataMapsRestantTilesDeuxieme2 = ""
-
-        dataDebutARecuperer = saveMapCurrent - 1 -- Le numéro du niveau - 1 pour récupèrer tout les niveaux avant 
-        dataFinARecuperer = lengthMaps
-        
-        --
-        file = io.open(pathCurrent .. '/map2.lua', "r")
-        file2 = io.open(pathCurrent .. '/map2.lua', "r")
-        counterLines = 0
-        counterLines2 = 0
-
-        
-        leNumeroLigneACommencer = 6
-        leNumeroLigneDeFin = 0
-
-        -- Les données des maps a récupèrer au début
-        for n=1,dataDebutARecuperer do
-            leNumeroLigneDeFin = leNumeroLigneDeFin + (TileMaps[n].MAP_HEIGHT + 7)
-        end
-
-        -- Les données des maps a récupèrer après la map qui a était changer jusqu'a la fin du fichier.
-        leNumeroLigneACommencer2 = leNumeroLigneACommencer + leNumeroLigneDeFin + TileMaps[saveMapCurrent].MAP_HEIGHT + 7
-
-        if saveMapCurrent >= 3 then
-            leNumeroLigneDeFin = leNumeroLigneDeFin + saveMapCurrent - 2
-            leNumeroLigneACommencer2 = leNumeroLigneACommencer2 + saveMapCurrent - 2
-        end
-
-        --
-        for line in file2:lines() do
-            counterLines2 = counterLines2 + 1
-        end
-
-        for line in file:lines() do
-            if counterLines >= 6 then
-
-                if saveMapCurrent == 1 then
-                    leNumeroLigneACommencer = TileMaps[pNiveauMap].MAP_HEIGHT + 7 + 6
-
-                    if counterLines >= leNumeroLigneACommencer then
-                        dataMapsRestantTilesDeuxieme = dataMapsRestantTilesDeuxieme .. line .. "\n"
-                    end
-                elseif saveMapCurrent == lengthMaps then
-                    if counterLines < counterLines2 - (TileMaps[lengthMaps].MAP_HEIGHT + 10) then
-                        dataMapsRestantTilesDeuxieme = dataMapsRestantTilesDeuxieme .. line .. "\n"
-                    end
-                else
-                    if counterLines <= (leNumeroLigneACommencer + leNumeroLigneDeFin) then
-                        dataMapsRestantTilesDeuxieme = dataMapsRestantTilesDeuxieme .. line .. "\n"
-                    elseif counterLines > leNumeroLigneACommencer2 then
-                        dataMapsRestantTilesDeuxieme2 = dataMapsRestantTilesDeuxieme2 .. line .. "\n"
-                    end
-                end
-
-            end
-
-            counterLines = counterLines + 1
-        end
-
-
-        if saveMapCurrent == 1 then -- Si c'est la map 1 de mon niveau.
-            fileData2 = "local map2 = {}" .. "\n" .. "\n" ..
-                        "ORIENTATION_TILES = " .. '"' .. ORIENTATION_TILES .. '"' .. "\n" ..
-                        "TILE_OFFSETX = " .. 0 .. "\n" ..
-                        "TILE_OFFSETY = " .. 0 .. "\n" ..
-                        "TileMaps2 = {" .. "\n" .. dataMapChanger2 .. "\n" .. dataMapsRestantTilesDeuxieme
-
-        elseif saveMapCurrent == lengthMaps then -- Si c'est la derniere de mon niveau.
-            fileData2 = "local map2 = {}" .. "\n" .. "\n" ..
-                        "ORIENTATION_TILES = " .. '"' .. ORIENTATION_TILES .. '"' .. "\n" ..
-                        "TILE_OFFSETX = " .. 0 .. "\n" ..
-                        "TILE_OFFSETY = " .. 0 .. "\n" ..
-                        "TileMaps2 = {" .. "\n" .. dataMapsRestantTilesDeuxieme .. dataMapChanger2 .. "\n" .. "            }" .. "\n" .. "\n" ..
-                        "return map2"
-        else -- Sinon..
-            fileData2 = "local map2 = {}" .. "\n" .. "\n" ..
-                        "ORIENTATION_TILES = " .. '"' .. ORIENTATION_TILES .. '"' .. "\n" ..
-                        "TILE_OFFSETX = " .. 0 .. "\n" ..
-                        "TILE_OFFSETY = " .. 0 .. "\n" ..
-                        "TileMaps2 = {" .. "\n" .. dataMapsRestantTilesDeuxieme .. dataMapChanger2 .. "\n" .. dataMapsRestantTilesDeuxieme2
-        end
-
-
-
-        -- Map qui contient les Collision
-        local data3 = nil
-
-        for l=1,lengthLigneMap do
-            local ligne = "                            { "
-
-            for c=1,lengthColonneMap do
-                if c == lengthColonneMap then
-                    ligne = ligne .. TileMapsCollision[pNiveauMap][l][c]
-                else
-                    ligne = ligne .. TileMapsCollision[pNiveauMap][l][c] .. ", "
-                end
-            end
-
-            ligne = ligne .. " },"
-            
-            if l ~= 1 then
-                data3 = data3 .. "\n" .. ligne
-            else
-                data3 = ligne
-            end
-        end
-
-        dataMapChanger3 =  "                        {" .. "\n" ..
-                                                data3 .. "\n" .. "\n" ..
-                            "                            MAP_WIDTH = " .. MAP_WIDTH .. "," .. "\n" ..
-                            "                            MAP_HEIGHT = " .. MAP_HEIGHT .. "," .. "\n" ..
-                            "                            TILE_WIDTH = " .. TILE_WIDTH .. "," .. "\n" ..
-                            "                            TILE_HEIGHT = " .. TILE_HEIGHT .. "," .. "\n" ..
-                            "                        },"
-                            
-        saveMapCurrent = pNiveauMap
-        lengthMaps = #TileMaps
-
-        dataMapsRestantCollision = ""
-        dataMapsRestantCollision2 = ""
-
-        dataDebutARecuperer = saveMapCurrent - 1 -- Le numéro du niveau - 1 pour récupèrer tout les niveaux avant 
-        dataFinARecuperer = lengthMaps
-        
-        --
-        file = io.open(pathCurrent .. '/mapCollision.lua', "r")
-        file2 = io.open(pathCurrent .. '/mapCollision.lua', "r")
-        counterLines = 0
-        counterLines2 = 0
-
-        
-        leNumeroLigneACommencer = 6
-        leNumeroLigneDeFin = 0
-
-        -- Les données des maps a récupèrer au début
-        for n=1,dataDebutARecuperer do
-            leNumeroLigneDeFin = leNumeroLigneDeFin + (TileMaps[n].MAP_HEIGHT + 7)
-        end
-
-        -- Les données des maps a récupèrer après la map qui a était changer jusqu'a la fin du fichier.
-        leNumeroLigneACommencer2 = leNumeroLigneACommencer + leNumeroLigneDeFin + TileMaps[saveMapCurrent].MAP_HEIGHT + 7
-
-        if saveMapCurrent >= 3 then
-            leNumeroLigneDeFin = leNumeroLigneDeFin + saveMapCurrent - 2
-            leNumeroLigneACommencer2 = leNumeroLigneACommencer2 + saveMapCurrent - 2
-        end
-
-        --
-        for line in file2:lines() do
-            counterLines2 = counterLines2 + 1
-        end
-
-        for line in file:lines() do
-            if counterLines >= 6 then
-
-                if saveMapCurrent == 1 then
-                    leNumeroLigneACommencer = TileMaps[pNiveauMap].MAP_HEIGHT + 7 + 6
-
-                    if counterLines >= leNumeroLigneACommencer then
-                        dataMapsRestantCollision = dataMapsRestantCollision .. line .. "\n"
-                    end
-                elseif saveMapCurrent == lengthMaps then
-                    if counterLines < counterLines2 - (TileMaps[lengthMaps].MAP_HEIGHT + 10) then
-                        dataMapsRestantCollision = dataMapsRestantCollision .. line .. "\n"
-                    end
-                else
-                    if counterLines <= (leNumeroLigneACommencer + leNumeroLigneDeFin) then
-                        dataMapsRestantCollision = dataMapsRestantCollision .. line .. "\n"
-                    elseif counterLines > leNumeroLigneACommencer2 then
-                        dataMapsRestantCollision2 = dataMapsRestantCollision2 .. line .. "\n"
-                    end
-                end
-
-            end
-
-            counterLines = counterLines + 1
-        end
-
-
-        if saveMapCurrent == 1 then -- Si c'est la map 1 de mon niveau.
-            fileData3 = "local mapCollision = {}" .. "\n" .. "\n" ..
-                        "ORIENTATION_TILES = " .. '"' .. ORIENTATION_TILES .. '"' .. "\n" ..
-                        "TILE_OFFSETX = " .. 0 .. "\n" ..
-                        "TILE_OFFSETY = " .. 0 .. "\n" ..
-                        "TileMapsCollision = {" .. "\n" .. dataMapChanger3 .. "\n" .. dataMapsRestantCollision
-
-        elseif saveMapCurrent == lengthMaps then -- Si c'est la derniere de mon niveau.
-            fileData3 = "local mapCollision = {}" .. "\n" .. "\n" ..
-                        "ORIENTATION_TILES = " .. '"' .. ORIENTATION_TILES .. '"' .. "\n" ..
-                        "TILE_OFFSETX = " .. 0 .. "\n" ..
-                        "TILE_OFFSETY = " .. 0 .. "\n" ..
-                        "TileMapsCollision = {" .. "\n" .. dataMapsRestantCollision .. dataMapChanger3 .. "\n" .. "                    }" .. "\n" .. "\n" ..
-                        "return mapCollision"
-        else -- Sinon..
-            fileData3 = "local mapCollision = {}" .. "\n" .. "\n" ..
-                        "ORIENTATION_TILES = " .. '"' .. ORIENTATION_TILES .. '"' .. "\n" ..
-                        "TILE_OFFSETX = " .. 0 .. "\n" ..
-                        "TILE_OFFSETY = " .. 0 .. "\n" ..
-                        "TileMapsCollision = {" .. "\n" .. dataMapsRestantCollision .. dataMapChanger3 .. "\n" .. dataMapsRestantCollision2
-        end
-
-
-
-        -- J'écris dans le fichier les nouvelles données.
-        file = io.open(pathCurrent .. '/map.lua', 'w+')
-        file:write(fileData)
-        file:close()
-
-        file2 = io.open(pathCurrent .. '/map2.lua', 'w+')
-        file2:write(fileData2)
-        file2:close()
-
-        file3 = io.open(pathCurrent .. '/mapCollision.lua', 'w+')
-        file3:write(fileData3)
-        file3:close()
-
-
-        -- Après avoir sauvegarder les changement de la map, le fichier map.lua, mapObjects.lua, mapCollision est modifier mais en mémoire dans Love2D rien n'est modifier 
-        -- Donc on charge a nouveau et on l'éxecute
-        love.filesystem.load("map.lua")()
-        love.filesystem.load("map2.lua")()
-        love.filesystem.load("mapCollision.lua")()
+        fileWriteAndEncodeJSON("mapCalque1.json", data)
+        fileWriteAndEncodeJSON("mapCalque2.json", data2)
+        fileWriteAndEncodeJSON("mapCalque3.json", data3)
+        fileWriteAndEncodeJSON("mapCalque4.json", data4)
     end
 end
 
@@ -1249,14 +893,56 @@ function newMap()
     scrollY_counter = 0
     scrollY_ViewTile = 0
     
-    clickInOneTile = false
     Game.TileActive = nil
 
-    CALQUES = "Tiles"
+    CALQUES = "Calque1"
+    
+    TYPE = "Tile"
 
     Historique.ArriereDonnees = {}
     Historique.AvantDonnees = {}
-    Historique.Counter = 0
+    Historique.CounterArriere = 0
+    Historique.CounterAvant = 0
+    Historique.Bool = false
+
+    Game.MapNiveau = {}
+    MapsDataLua.Calque1 = {}
+    MapsDataLua.Calque2 = {}
+    MapsDataLua.Calque3 = {}
+    MapsDataLua.Calque4 = {}
+end
+
+
+-- Delete Map
+function deleteMap(pNiveauMap)
+    local pNiveauMap = tonumber(pNiveauMap)
+
+    -- Je regarde si au moins une map existe + (CHECKER SI IL RESTE QUE UN NIVEAU SUPPRIMER TOUT CE QUI AS DANS LE FICHIER)
+    if #fileReadAll("mapCalque1.json") ~= 0 then
+        local data = fileDecodeJSON("mapCalque1.json")
+        local data2 = fileDecodeJSON("mapCalque2.json")
+        local data3 = fileDecodeJSON("mapCalque3.json")
+        local data4 = fileDecodeJSON("mapCalque4.json")
+
+        if pNiveauMap <= #data then
+            if #data == 1 then
+                fileWrite("mapCalque1.json")
+                fileWrite("mapCalque2.json")
+                fileWrite("mapCalque3.json")
+                fileWrite("mapCalque4.json")
+            else
+                table.remove(data, pNiveauMap)
+                table.remove(data2, pNiveauMap)
+                table.remove(data3, pNiveauMap)
+                table.remove(data4, pNiveauMap)
+    
+                fileWriteAndEncodeJSON("mapCalque1.json", data)
+                fileWriteAndEncodeJSON("mapCalque2.json", data2)
+                fileWriteAndEncodeJSON("mapCalque3.json", data3)
+                fileWriteAndEncodeJSON("mapCalque4.json", data4)
+            end
+        end
+    end
 end
 
 
@@ -1393,22 +1079,24 @@ function getPositionCursorInGrilleMapViewTilesandDraw()
 end
 
 
--- Dessine les Tiles qui a était ajouter dans les tableaux des maps.
-function drawTilesInTheGrilleMap()
-    if CalquesActive.Tiles == "ON" then
-        testTILE_WIDTH = 0
-        testTILE_HEIGHT = 0
+-- Dessine les Tiles/Objects/AnimationsParticlesEffectsFX des Calques.
+function drawCalqueInTheGrilleMap(pCalque, pCalqueActive)
+    if pCalqueActive == "ON" then
+        local mapCalque = pCalque
+
+        local TILE_WIDTH2 = 0
+        local TILE_HEIGHT2 = 0
 
         love.graphics.setColor(1, 1, 1, 1)
 
         if MAP_NIVEAU ~= "?" then 
             for l=1,MAP_HEIGHT do
                 for c=1,MAP_WIDTH do
-                    tileCurrent = TileMaps[MAP_NIVEAU][l][c]
+                    tileCurrent = mapCalque[1][l][c]
 
                     local currentTileSheet = 1
                     for key, valeur in pairs(Game.TileSheetsActive) do
-                        if TileMaps[MAP_NIVEAU][l][c] <= valeur then
+                        if mapCalque[1][l][c] <= valeur then
                             currentTileSheet = key
                             
                             break
@@ -1416,51 +1104,14 @@ function drawTilesInTheGrilleMap()
                     end 
 
                     if tileCurrent ~= 0 then
-                        love.graphics.draw(Game.TileSheets[currentTileSheet], Game.Tiles[tileCurrent], testTILE_WIDTH, testTILE_HEIGHT)
+                        love.graphics.draw(Game.TileSheets[currentTileSheet], Game.Tiles[tileCurrent], TILE_WIDTH2, TILE_HEIGHT2)
                     end
 
-                    testTILE_WIDTH = testTILE_WIDTH + TILE_WIDTH
+                    TILE_WIDTH2 = TILE_WIDTH2 + TILE_WIDTH
                 end
 
-                testTILE_WIDTH = 0
-                testTILE_HEIGHT = testTILE_HEIGHT + TILE_HEIGHT
-            end
-        end
-    end
-end
-
-
--- Dessine les Tiles qui a était ajouter dans les tableaux des maps.
-function drawTiles2InTheGrilleMap()
-    if CalquesActive.Tiles2 == "ON" then
-        testTILE_WIDTH2 = 0
-        testTILE_HEIGHT2 = 0
-
-        love.graphics.setColor(1, 1, 1, 1)
-
-        if MAP_NIVEAU ~= "?" then 
-            for l=1,MAP_HEIGHT do
-                for c=1,MAP_WIDTH do
-                    tileCurrent = TileMaps2[MAP_NIVEAU][l][c]
-
-                    local currentTileSheet = 1
-                    for key, valeur in pairs(Game.TileSheetsActive) do
-                        if TileMaps2[MAP_NIVEAU][l][c] <= valeur then
-                            currentTileSheet = key
-                            
-                            break
-                        end
-                    end 
-
-                    if tileCurrent ~= 0 then
-                        love.graphics.draw(Game.TileSheets[currentTileSheet], Game.Tiles[tileCurrent], testTILE_WIDTH2, testTILE_HEIGHT2)
-                    end
-
-                    testTILE_WIDTH2 = testTILE_WIDTH2 + TILE_WIDTH
-                end
-
-                testTILE_WIDTH2 = 0
-                testTILE_HEIGHT2 = testTILE_HEIGHT2 + TILE_HEIGHT
+                TILE_WIDTH2 = 0
+                TILE_HEIGHT2 = TILE_HEIGHT2 + TILE_HEIGHT
             end
         end
     end
@@ -1470,8 +1121,8 @@ end
 -- Dessine en Jaune par dessus les Tiles/Tiles2 et Objects, ou ce trouvent les collision sur la GrilleMap.
 function drawCollisionInTheGrilleMap()
     if CalquesActive.Collision == "ON" then
-        testTILE_WIDTH3 = 0
-        testTILE_HEIGHT3 = 0
+        local TILE_WIDTH3 = 0
+        local TILE_HEIGHT3 = 0
 
         love.graphics.setColor(1, 1, 1, 1)
 
@@ -1491,15 +1142,15 @@ function drawCollisionInTheGrilleMap()
 
                     if tileCurrent == 1 then
                         love.graphics.setColor(255, 165, 0, 0.4)
-                        love.graphics.rectangle("fill", testTILE_WIDTH3, testTILE_HEIGHT3, TILE_WIDTH, TILE_HEIGHT)
+                        love.graphics.rectangle("fill", TILE_WIDTH3, TILE_HEIGHT3, TILE_WIDTH, TILE_HEIGHT)
                         love.graphics.setColor(1, 1, 1, 1)
                     end
 
-                    testTILE_WIDTH3 = testTILE_WIDTH3 + TILE_WIDTH
+                    TILE_WIDTH3 = TILE_WIDTH3 + TILE_WIDTH
                 end
 
-                testTILE_WIDTH3 = 0
-                testTILE_HEIGHT3 = testTILE_HEIGHT3 + TILE_HEIGHT
+                TILE_WIDTH3 = 0
+                TILE_HEIGHT3 = TILE_HEIGHT3 + TILE_HEIGHT
             end
         end
     end
@@ -1540,80 +1191,78 @@ function drawNumeroTilesandTiles2andIDObjectsInTheGrilleMap()
 end
 
 
--- Pinceau GrilleMap pour les Tiles, button de la souris en continue
-function pinceauTilesInTheGrilleMap()
-    if love.mouse.isDown(1) and sceneTileMapEditor == true and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Pinceau' and Game.TileActive ~= nil and MAP_NIVEAU ~= "?" and CALQUES == "Tiles" and mouseOnTheOutils == false then
+-- Pinceau GrilleMap pour les Tiles/Objects, button de la souris en continue
+function pinceauInTheGrilleMap()
+    if love.mouse.isDown(1) and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Pinceau' and Game.TileActive ~= nil and MAP_NIVEAU ~= "?" and mouseOnTheOutils == false then
         LIGNE = CURRENT_LIGNE + 1 
-        COLONNE = CURRENT_COLONNE + 1 
+        COLONNE = CURRENT_COLONNE + 1
 
-        if TileMaps[MAP_NIVEAU][LIGNE][COLONNE] ~= Game.TileActive then
+        if CALQUES == "Calque1" and MapsDataLua.Calque1[1][LIGNE][COLONNE] ~= Game.TileActive then
+            if Historique.Bool == true then
+                Historique.Bool = false
+                Historique.AvantDonnees = {}
+                Historique.CounterAvant = 0
+
+                local i = Historique.CounterArriere + 1
+                for i=i,#Historique.ArriereDonnees do
+                    table.remove(Historique.ArriereDonnees, #Historique.ArriereDonnees)
+                end
+            end
+
             -- Historique Arriere
-            local tab = { MAP_NIVEAU = MAP_NIVEAU, LIGNE = LIGNE, COLONNE = COLONNE, MAP = "TileMaps", DATAMAP = TileMaps[MAP_NIVEAU][LIGNE][COLONNE] }
+            local tab = { LIGNE = LIGNE, COLONNE = COLONNE, CALQUE = "Calque1", DATAMAP = MapsDataLua.Calque1[1][LIGNE][COLONNE] }
             table.insert(Historique.ArriereDonnees, tab)
+            Historique.CounterArriere = Historique.CounterArriere + 1
 
-            TileMaps[MAP_NIVEAU][LIGNE][COLONNE] = Game.TileActive
-
-            -- Historique Avant
-            local tab2 = { MAP_NIVEAU = MAP_NIVEAU, LIGNE = LIGNE, COLONNE = COLONNE, MAP = "TileMaps", DATAMAP = TileMaps[MAP_NIVEAU][LIGNE][COLONNE] }
-            table.insert(Historique.AvantDonnees, tab2)
-
-            Historique.Counter = Historique.Counter + 1
+            -- Nouvelle données
+            MapsDataLua.Calque1[1][LIGNE][COLONNE] = Game.TileActive
+        elseif CALQUES == "Calque2" then
+            MapsDataLua.Calque2[1][LIGNE][COLONNE] = Game.TileActive
+        elseif CALQUES == "Calque3" then
+            MapsDataLua.Calque3[1][LIGNE][COLONNE] = Game.TileActive
+        elseif CALQUES == "Calque4" then
+            MapsDataLua.Calque4[1][LIGNE][COLONNE] = Game.TileActive
+        elseif CALQUES == "Collision" then
+            --MapsDataLua.Calque4[1][LIGNE][COLONNE] = Game.TileActive
         end
     end
 end
 
 
--- Pinceau GrilleMap pour les Objects, button de la souris en continue
-function pinceauTiles2InTheGrilleMap()
-    if love.mouse.isDown(1) and sceneTileMapEditor == true and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Pinceau' and Game.TileActive ~= nil and MAP_NIVEAU ~= "?" and CALQUES == "Tiles2" and mouseOnTheOutils == false then
-        LIGNE = CURRENT_LIGNE + 1 
-        COLONNE = CURRENT_COLONNE + 1 
-
-        TileMaps2[MAP_NIVEAU][LIGNE][COLONNE] = Game.TileActive 
-    end
-end
-
-
--- Pinceau GrilleMap pour les Objects, button de la souris en continue
-function pinceauCollisionInTheGrilleMap()
-    if love.mouse.isDown(1) and sceneTileMapEditor == true and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Pinceau' and MAP_NIVEAU ~= "?" and CALQUES == "Collision" and mouseOnTheOutils == false then
-        LIGNE = CURRENT_LIGNE + 1 
-        COLONNE = CURRENT_COLONNE + 1 
-        
-        TileMapsCollision[MAP_NIVEAU][LIGNE][COLONNE] = 1
-    end
-end
-
-
 -- Gommer GrilleMap button de la souris en continue
-function gommeTilesInTheGrilleMap()
-    if love.mouse.isDown(1) and sceneTileMapEditor == true and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Gomme' and MAP_NIVEAU ~= "?" and CALQUES == "Tiles" and mouseOnTheOutils == false then
+function gommeInTheGrilleMap()
+    if love.mouse.isDown(1) and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Gomme' and MAP_NIVEAU ~= "?" and mouseOnTheOutils == false then
         LIGNE = CURRENT_LIGNE + 1 
         COLONNE = CURRENT_COLONNE + 1 
 
-        TileMaps[MAP_NIVEAU][LIGNE][COLONNE] = 0 
-    end
-end
+        if CALQUES == "Calque1" and MapsDataLua.Calque1[1][LIGNE][COLONNE] ~= 0 then
+            if Historique.Bool == true then
+                Historique.Bool = false
+                Historique.AvantDonnees = {}
+                Historique.CounterAvant = 0
 
+                local i = Historique.CounterArriere + 1
+                for i=i,#Historique.ArriereDonnees do
+                    table.remove(Historique.ArriereDonnees, #Historique.ArriereDonnees)
+                end
+            end
 
--- Gommer GrilleMap pour les Objects, button de la souris en continue
-function gommeTiles2InTheGrilleMap()
-    if love.mouse.isDown(1) and sceneTileMapEditor == true and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Gomme' and MAP_NIVEAU ~= "?" and CALQUES == "Tiles2" and mouseOnTheOutils == false then
-        LIGNE = CURRENT_LIGNE + 1 
-        COLONNE = CURRENT_COLONNE + 1 
+            -- Historique Arriere
+            local tab = { LIGNE = LIGNE, COLONNE = COLONNE, CALQUE = "Calque1", DATAMAP = MapsDataLua.Calque1[1][LIGNE][COLONNE] }
+            table.insert(Historique.ArriereDonnees, tab)
+            Historique.CounterArriere = Historique.CounterArriere + 1
 
-        TileMaps2[MAP_NIVEAU][LIGNE][COLONNE] = 0 
-    end
-end
-
-
--- Gommer GrilleMap pour les Objects, button de la souris en continue
-function gommeCollisionInTheGrilleMap()
-    if love.mouse.isDown(1) and sceneTileMapEditor == true and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Gomme' and MAP_NIVEAU ~= "?" and CALQUES == "Collision" and mouseOnTheOutils == false then
-        LIGNE = CURRENT_LIGNE + 1 
-        COLONNE = CURRENT_COLONNE + 1 
-
-        TileMapsCollision[MAP_NIVEAU][LIGNE][COLONNE] = 0 
+            -- Nouvelle données
+            MapsDataLua.Calque1[1][LIGNE][COLONNE] = 0
+        elseif CALQUES == "Calque2" then
+            MapsDataLua.Calque2[1][LIGNE][COLONNE] = 0
+        elseif CALQUES == "Calque3" then
+            MapsDataLua.Calque3[1][LIGNE][COLONNE] = 0
+        elseif CALQUES == "Calque4" then
+            MapsDataLua.Calque4[1][LIGNE][COLONNE] = 0
+        elseif CALQUES == "Collision" then
+            --MapsDataLua.Calque4[1][LIGNE][COLONNE] = Game.TileActive
+        end
     end
 end
 
@@ -1680,6 +1329,73 @@ function drawTileRedOrTexture()
 end
 
 
+-- drawViewFiles / Découpage SpriteSheet
+function drawViewFiles(pDirName)
+    local mouseX = love.mouse.getX()
+    local mouseY = love.mouse.getY()
+
+    if MAP_NIVEAU ~= "?" then
+        -- Fond noir (rect)
+        love.graphics.setColor(0, 0, 0, 1)
+        love.graphics.rectangle("fill", 0 - window.translate.x, hauteurEcran - 200 - window.translate.y, 850, hauteurEcran)
+    
+        -- Affichage du texte, des bouttons, et des lignes.
+        love.graphics.setColor(255, 165, 0, 1)
+        love.graphics.print(".EXT :", 1 - window.translate.x, hauteurEcran - 198 - window.translate.y)
+        love.graphics.print("NAME FILES", 80 - window.translate.x, hauteurEcran - 198 - window.translate.y)
+        love.graphics.print("DECOUPAGE FAIT", 250 - window.translate.x, hauteurEcran - 198 - window.translate.y)
+        love.graphics.print("ADD/MODIFY", 400 - window.translate.x, hauteurEcran - 198 - window.translate.y)
+        love.graphics.print("VIEW TILES", 500 - window.translate.x, hauteurEcran - 198 - window.translate.y)
+        love.graphics.print("VIEW OBJECTS", 600 - window.translate.x, hauteurEcran - 198 - window.translate.y)
+        love.graphics.print("VIEW ANIMATIONSFX", 710 - window.translate.x, hauteurEcran - 198 - window.translate.y)
+        love.graphics.setColor(1, 1, 1, 1)
+
+        love.graphics.line(35 - window.translate.x, hauteurEcran - 200 - window.translate.y, 35 - window.translate.x, hauteurEcran - window.translate.y)
+        love.graphics.line(240 - window.translate.x, hauteurEcran - 200 - window.translate.y, 240 - window.translate.x, hauteurEcran - window.translate.y)
+        love.graphics.line(380 - window.translate.x, hauteurEcran - 200 - window.translate.y, 380 - window.translate.x, hauteurEcran - window.translate.y)
+        love.graphics.line(490 - window.translate.x, hauteurEcran - 200 - window.translate.y, 490 - window.translate.x, hauteurEcran - window.translate.y)
+        love.graphics.line(590 - window.translate.x, hauteurEcran - 200 - window.translate.y, 590 - window.translate.x, hauteurEcran - window.translate.y)
+        love.graphics.line(700 - window.translate.x, hauteurEcran - 200 - window.translate.y, 700 - window.translate.x, hauteurEcran - window.translate.y)
+
+        local x = 0
+        local y = 20
+        local y2 = 35
+        
+        for k,file in pairs(files) do
+            startString = string.find(file, "%p", #file - 4)
+            extensionFichier = string.sub(file, startString + 1)
+            love.graphics.print(string.upper(extensionFichier), 5 - window.translate.x, hauteurEcran - 205 + y2 - window.translate.y)
+
+            love.graphics.print(file, 40 - window.translate.x, hauteurEcran - 205 + y2 - window.translate.y)
+
+            love.graphics.setColor(255, 0, 0, 1)
+            love.graphics.circle("fill", 300 - window.translate.x, hauteurEcran - 200 + y2 - window.translate.y, 10)
+            love.graphics.setColor(1, 1, 1, 1)
+
+            love.graphics.setColor(255, 0, 0, 1)
+            love.graphics.circle("fill", 540 - window.translate.x, hauteurEcran - 200 + y2 - window.translate.y, 10)
+            love.graphics.circle("fill", 640 - window.translate.x, hauteurEcran - 200 + y2 - window.translate.y, 10)
+            love.graphics.circle("fill", 780 - window.translate.x, hauteurEcran - 200 + y2 - window.translate.y, 10)
+            love.graphics.setColor(1, 1, 1, 1)
+
+            love.graphics.line(0 - window.translate.x, hauteurEcran - 200 + y - window.translate.y, 850 - window.translate.x, hauteurEcran - 200 + y - window.translate.y)
+
+            love.graphics.draw(GUI.imgButtonDecoupageSpriteSheet, 430 - window.translate.x, hauteurEcran - 195 + y - window.translate.y)
+
+            y2 = y2 + 30
+            y = y + 30
+        end
+
+
+        if mouseX >= 0 and mouseX <= 850 and mouseY >= hauteurEcran - 200 and mouseY <= hauteurEcran then
+            inGrilleMapViewFiles = true
+        else
+            inGrilleMapViewFiles = false
+        end
+    end 
+end
+
+
 -- Charge les Tiles par rapport au TILE_WIDTH et TILE_HEIGHT de la map actuellement chargée.
 function loadTiles()
     -- Reset la liste des Tiles a chaque nouveau chargement d'une nouvelle map si jamais les TILES_WIDTH et TILE_HEIGHT ne sont pas les mêmes
@@ -1710,15 +1426,12 @@ function loadTiles()
             break
         end
     end 
-
-    print("\n")
-    print("Nombre de Tiles IN EDITOR : " .. #Game.Tiles)
 end
 
 
 -- Je charge une TileSheets et l'envoie dans la table : Game.TileSheets
 function loadTileSheets(pNomDossierRessources, pNomFicherTileSheet)
-    local tileSheet = love.graphics.newImage(pNomDossierRessources .. "/" .. pNomFicherTileSheet .. ".png")
+    local tileSheet = love.graphics.newImage(pNomDossierRessources .. "/" .. pNomFicherTileSheet)
     table.insert(Game.TileSheets, tileSheet)
 end
 
@@ -1737,51 +1450,78 @@ end
 ███████  ██████  ██   ██ ██████                                                                    
 ]]
 
-function tileMapsEditor.Load()
+function sceneEditorMaps.load()
     -- Récupère le chemin jusqu'a avant le dossier du jeu, puis je récupère le nom du dossier du jeu.
     path = love.filesystem.getSourceBaseDirectory()
     dirNameGame = love.filesystem.getIdentity()
     pathCurrent = path .. "/" .. dirNameGame
 
 
-    -- Je charge toutes mes TileSheets (Une SpriteSheet qui contient des Tiles (Textures))
+    -- Créer les fichiers JSON qui contiendras les données des maps si jamais il ne sont pas créer.
+    if fileExists("mapCalque1.json") ~= true then
+        local file = io.open(pathCurrent ..  "/dataMaps/mapCalque1.json","w")
+        file:close()
+
+        local file2 = io.open(pathCurrent ..  "/dataMaps/mapCalque2.json","w")
+        file2:close()
+
+        local file3 = io.open(pathCurrent ..  "/dataMaps/mapCalque3.json","w")
+        file3:close()
+
+        local file4 = io.open(pathCurrent ..  "/dataMaps/mapCalque4.json","w")
+        file4:close()
+    end
+
+
+    -- Je charge toutes mes TileSheets (Une SpriteSheet qui contient des Tiles)
     -- loadTileSheets(nomDuDossier, nomFichierImgTileSheet)
-    loadTileSheets('assets', 'tileSet')
-    loadTileSheets('assets', 'tileSet2')
+    loadTileSheets('assets', 'tileSet.png')
+    loadTileSheets('assets', 'tileSet2.png')
 
 
     -- Je charge les images de la GUI de l'éditeur de Map
-    GUI.imgButtonDessinerGrille = love.graphics.newImage("assets/dessinerGrille.png")
-    GUI.imgButtonGommeGrille = love.graphics.newImage("assets/gommeGrille.png")
-    GUI.imgButtonNone = love.graphics.newImage("assets/buttonNone.png")
-    GUI.imgFleche.img = love.graphics.newImage("assets/flecheGauche.png")
-    GUI.imgButtonCalqueOeilOuvert = love.graphics.newImage("assets/oeil_ouvert.png")
-    GUI.imgButtonCalqueOeilOuvert2 = love.graphics.newImage("assets/oeil_ouvert.png")
-    GUI.imgButtonCalqueOeilOuvert3 = love.graphics.newImage("assets/oeil_ouvert.png")
-    GUI.imgButtonCalqueOeilOuvert4 = love.graphics.newImage("assets/oeil_ouvert.png")
-    GUI.imgButtonCalqueOeilOuvert5 = love.graphics.newImage("assets/oeil_ouvert.png")
-    GUI.imgButtonCalqueOeilOuvert6 = love.graphics.newImage("assets/oeil_ouvert.png")
-    GUI.imgButtonCalqueOeilOuvert7 = love.graphics.newImage("assets/oeil_ouvert.png")
-    GUI.imgButtonCalqueOeilFermer = love.graphics.newImage("assets/oeil_fermer.png")
-    GUI.imgButtonCalqueOeilFermer2 = love.graphics.newImage("assets/oeil_fermer.png")
-    GUI.imgButtonCalqueOeilFermer3 = love.graphics.newImage("assets/oeil_fermer.png")
-    GUI.imgButtonCalqueOeilFermer4 = love.graphics.newImage("assets/oeil_fermer.png")
-    GUI.imgButtonCalqueOeilFermer5 = love.graphics.newImage("assets/oeil_fermer.png")
-    GUI.imgButtonCalqueOeilFermer6 = love.graphics.newImage("assets/oeil_fermer.png")
-    GUI.imgButtonCalqueOeilFermer7 = love.graphics.newImage("assets/oeil_fermer.png")
+    GUI.imgButtonDessinerGrille = love.graphics.newImage("assetsEditor/dessinerGrille.png")
+    GUI.imgButtonGommeGrille = love.graphics.newImage("assetsEditor/gommeGrille.png")
+    GUI.imgButtonMainObjetGrille = love.graphics.newImage("assetsEditor/mainObject.png")
+    GUI.imgButtonPipeGrille = love.graphics.newImage("assetsEditor/pipe.png")
+    GUI.imgButtonNone = love.graphics.newImage("assetsEditor/buttonNone.png")
+    GUI.imgFleche.img = love.graphics.newImage("assetsEditor/flecheGauche.png")
+    GUI.imgButtonCalqueOeilOuvert = love.graphics.newImage("assetsEditor/oeil_ouvert.png")
+    GUI.imgButtonCalqueOeilOuvert2 = love.graphics.newImage("assetsEditor/oeil_ouvert.png")
+    GUI.imgButtonCalqueOeilOuvert3 = love.graphics.newImage("assetsEditor/oeil_ouvert.png")
+    GUI.imgButtonCalqueOeilOuvert4 = love.graphics.newImage("assetsEditor/oeil_ouvert.png")
+    GUI.imgButtonCalqueOeilOuvert5 = love.graphics.newImage("assetsEditor/oeil_ouvert.png")
+    GUI.imgButtonCalqueOeilOuvert6 = love.graphics.newImage("assetsEditor/oeil_ouvert.png")
+    GUI.imgButtonCalqueOeilOuvert7 = love.graphics.newImage("assetsEditor/oeil_ouvert.png")
+    GUI.imgButtonCalqueOeilFermer = love.graphics.newImage("assetsEditor/oeil_fermer.png")
+    GUI.imgButtonCalqueOeilFermer2 = love.graphics.newImage("assetsEditor/oeil_fermer.png")
+    GUI.imgButtonCalqueOeilFermer3 = love.graphics.newImage("assetsEditor/oeil_fermer.png")
+    GUI.imgButtonCalqueOeilFermer4 = love.graphics.newImage("assetsEditor/oeil_fermer.png")
+    GUI.imgButtonCalqueOeilFermer5 = love.graphics.newImage("assetsEditor/oeil_fermer.png")
+    GUI.imgButtonCalqueOeilFermer6 = love.graphics.newImage("assetsEditor/oeil_fermer.png")
+    GUI.imgButtonCalqueOeilFermer7 = love.graphics.newImage("assetsEditor/oeil_fermer.png")
+    GUI.imgButtonDecoupageSpriteSheet = love.graphics.newImage("assetsEditor/buttonConfigDecoupage.png")
 
 
     -- Je charge les images différentes pour le cursor.
-    cursorImg.deplacementMapEditor = love.mouse.newCursor("assets/cursor_deplacementTileMapEditor.png", 10, 10)
-    cursorImg.mouvementHautBasInMapEditor = love.mouse.newCursor("assets/cursor_HautBas.png", 10, 10)
-    cursorImg.mouvementGaucheDroiteInMapEditor = love.mouse.newCursor("assets/cursor_GaucheDroite.png", 10, 10)
-    cursorImg.mouvementHautDroiteBasGaucheInMapEditor = love.mouse.newCursor("assets/cursor_HautDroiteBasGauche.png", 10, 10)
-    cursorImg.mouvementHautGaucheBasDroiteInMapEditor = love.mouse.newCursor("assets/cursor_HautGaucheBasDroite.png", 10, 10)
+    cursorImg.deplacementMapEditor = love.mouse.newCursor("assetsEditor/cursor_deplacementTileMapEditor.png", 10, 10)
+    cursorImg.mouvementHautBasInMapEditor = love.mouse.newCursor("assetsEditor/cursor_HautBas.png", 10, 10)
+    cursorImg.mouvementGaucheDroiteInMapEditor = love.mouse.newCursor("assetsEditor/cursor_GaucheDroite.png", 10, 10)
+    cursorImg.mouvementHautDroiteBasGaucheInMapEditor = love.mouse.newCursor("assetsEditor/cursor_HautDroiteBasGauche.png", 10, 10)
+    cursorImg.mouvementHautGaucheBasDroiteInMapEditor = love.mouse.newCursor("assetsEditor/cursor_HautGaucheBasDroite.png", 10, 10)
 
 
     --
     love.keyboard.setKeyRepeat(true)
-end
+
+        
+    -- Récupère tout les noms des fichiers.    
+    getAllNameFiles("assets")
+    files = love.filesystem.getDirectoryItems("assets")
+    counterNombreFiles = #files 
+    scrollY_counterMax2 = counterNombreFiles - 6
+    tableTempoFileScroll = nil
+end     
 
 
 
@@ -1794,7 +1534,11 @@ end
  ██████  ██      ██████  ██   ██    ██    ███████                                                                                                                                                                      
 ]]
 
-function tileMapsEditor.Update(dt)
+function sceneEditorMaps.update(dt)
+    --
+    timerr(dt)
+
+
     -- Mise à jour de la position X et Y de la souris en continue. 
     updateMouseXandY()
 
@@ -1810,15 +1554,13 @@ function tileMapsEditor.Update(dt)
 
 
     --
-    pinceauTilesInTheGrilleMap()
-    pinceauTiles2InTheGrilleMap()
-    pinceauCollisionInTheGrilleMap()
+    pinceauInTheGrilleMap()
+    --pinceauCollisionInTheGrilleMap()
 
 
     --
-    gommeTilesInTheGrilleMap()
-    gommeTiles2InTheGrilleMap()
-    gommeCollisionInTheGrilleMap()
+    gommeInTheGrilleMap()
+    --gommeCollisionInTheGrilleMap()
 
 
     --
@@ -1844,7 +1586,7 @@ end
 ██████  ██   ██ ██   ██  ███ ███                                                                                                                                                                                                                                    
 ]]
 
-function tileMapsEditor.Draw()
+function sceneEditorMaps.draw()
     -- Set un background color
     colorBackgroundMap(backgroundColor.red, backgroundColor.green, backgroundColor.blue, backgroundColor.alpha)    
 
@@ -1857,26 +1599,24 @@ function tileMapsEditor.Draw()
 	love.graphics.scale(window.zoom)
 
 
-    -- Le style des Lines/Pointiller de la GrilleMap -> fin/doux ou épais/gras.
-    love.graphics.setLineStyle(GUI.grilleMapStyleLinesPointiller)
-
-
     --
-    drawTilesInTheGrilleMap()
-    drawTiles2InTheGrilleMap()
-    drawNumeroTilesandTiles2andIDObjectsInTheGrilleMap()
-    drawCollisionInTheGrilleMap()
+    drawCalqueInTheGrilleMap(MapsDataLua.Calque1, CalquesActive.Calque1)
+    drawCalqueInTheGrilleMap(MapsDataLua.Calque2, CalquesActive.Calque2)
+    drawCalqueInTheGrilleMap(MapsDataLua.Calque3, CalquesActive.Calque3)
+    drawCalqueInTheGrilleMap(MapsDataLua.Calque4, CalquesActive.Calque4)
+    --drawCollisionInTheGrilleMap()
+    --drawNumeroTilesandTiles2andIDObjectsInTheGrilleMap()
 
 
     --
     colorGrilleMap()
 
 
-    -- Le tracer des Lines ou Pointillées -> des colonnes et lignes de la map : Grille Map
-    drawTheLinesOrPointiller()
+    -- Le tracer des Lines des colonnes et lignes de la map : Grille Map
+    drawTheLinesForGrilleMap()
 
 
-    -- Remet la palette de couleur par défault après avoir appliquer une palette de couleur pour les Lines/Pointiller de la grille de la Map.
+    -- Remet la palette de couleur par défault après avoir appliquer une palette de couleur pour les Lines de la grille de la Map.
     love.graphics.setColor(1, 1, 1)    
 
 
@@ -1905,8 +1645,7 @@ end
    ██    ███████ ██   ██    ██        ██ ██   ████ ██       ██████     ██                                                                                                                                                                                                                                                                                                                                                                                            
 ]]
 
-function tileMapsEditor.textinput(event)
-
+function sceneEditorMaps.textinput(event)
     event = tonumber(event)
 
     if type(event) == "number" then
@@ -1924,6 +1663,8 @@ function tileMapsEditor.textinput(event)
             inputText.TILE_HEIGHT.txt = inputText.TILE_HEIGHT.txt .. event
         elseif inputTextActive == "LOAD_MAP" then
             inputText.LOAD_MAP.txt = inputText.LOAD_MAP.txt .. event
+        elseif inputTextActive == "DELETE_MAP" then
+            inputText.DELETE_MAP.txt = inputText.DELETE_MAP.txt .. event
         end
     end
 
@@ -1935,6 +1676,7 @@ function tileMapsEditor.textinput(event)
     NOMBRE_COLONNE = MAP_WIDTH * TILE_WIDTH
     MAP_PIXELS = NOMBRE_LIGNE .. ' x ' .. NOMBRE_COLONNE .. ' pixels'
     LOAD_MAP = tonumber(inputText.LOAD_MAP.txt)
+    DELETE_MAP = tonumber(inputText.DELETE_MAP.txt)
 end
 
 
@@ -1948,9 +1690,9 @@ end
 ██   ██ ███████    ██        ██      ██   ██ ███████ ███████ ███████ ███████ ██████                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
 ]]
 
-function tileMapsEditor.keypressed(key, isrepeat)
+function sceneEditorMaps.keypressed(key, isrepeat)
   
-    -- Change la couleur des Lines/Pointiller de la GrilleMap. (noir ou blanc)
+    -- Change la couleur des Lines de la GrilleMap
     if key == "f2" then
         if GUI.grilleMapColor == 'black' then 
             GUI.grilleMapColor = 'white'
@@ -1960,7 +1702,7 @@ function tileMapsEditor.keypressed(key, isrepeat)
     end
 
 
-    -- Active ou désactive le tracer des Lines/Pointiller de la GrilleMap.
+    -- Active ou désactive le tracer des Lines de la GrilleMap.
     if key == "f3" then
         if GUI.grilleMapActive == true then 
             GUI.grilleMapActive = false
@@ -1994,16 +1736,6 @@ function tileMapsEditor.keypressed(key, isrepeat)
     end
 
 
-    -- Style des Lines/Pointiller sois en doux/épais.
-    if key == "f7" then
-        if GUI.grilleMapStyleLinesPointiller == "smooth" then
-            GUI.grilleMapStyleLinesPointiller = "rough"
-        else
-            GUI.grilleMapStyleLinesPointiller = "smooth"
-        end
-    end
-
-
     -- Permet a la fleche de bouger (GUI)
     if key == "down" then
         if GUI.imgFleche.x == inputText.ORIENTATION_TILES.widthFont + 15 then
@@ -2031,19 +1763,26 @@ function tileMapsEditor.keypressed(key, isrepeat)
             GUI.imgFleche.y = GUI.imgFleche.y + 20
             inputTextActive = "NEW_MAP"
         elseif GUI.imgFleche.x == inputText.NEW_MAP.widthFont + 15 then
-            GUI.imgFleche.x = inputText.LOAD_MAP.widthFont + 15
+            GUI.imgFleche.x = inputText.LOAD_MAP.widthFont + 22
             GUI.imgFleche.y = GUI.imgFleche.y + 20
             inputTextActive = "LOAD_MAP"
-        elseif GUI.imgFleche.x == inputText.LOAD_MAP.widthFont + 15 then
+        elseif GUI.imgFleche.x == inputText.LOAD_MAP.widthFont + 22 then
             GUI.imgFleche.x = inputText.SAVE_MAP.widthFont + 15
             GUI.imgFleche.y = GUI.imgFleche.y + 20
             inputTextActive = "SAVE_MAP"
         elseif GUI.imgFleche.x == inputText.SAVE_MAP.widthFont + 15 then
-            GUI.imgFleche.x = inputText.CALQUES.widthFont + 23
+            GUI.imgFleche.x = inputText.DELETE_MAP.widthFont + 20
+            GUI.imgFleche.y = GUI.imgFleche.y + 20
+            inputTextActive = "DELETE_MAP"
+        elseif GUI.imgFleche.x == inputText.DELETE_MAP.widthFont + 20 then
+            GUI.imgFleche.x = inputText.CALQUES.widthFont + 10
             GUI.imgFleche.y = GUI.imgFleche.y + 40
             inputTextActive = "CALQUES"
-           ---------BUG A PARTIR D ICI ------------
-        --[[elseif GUI.imgFleche.x == inputText.SAVE_MAP.widthFont + 15 then
+        elseif GUI.imgFleche.x == inputText.CALQUES.widthFont + 10 then
+            GUI.imgFleche.x = inputText.TYPE.widthFont + 5
+            GUI.imgFleche.y = GUI.imgFleche.y + 20
+            inputTextActive = "TYPE"
+        --[[elseif GUI.imgFleche.x == inputText.TYPE.widthFont + 5 then
             GUI.imgFleche.x = inputText.backgroundColorRed.widthFont + 15
             GUI.imgFleche.y = GUI.imgFleche.y + 40
             inputTextActive = "backgroundColorRed"
@@ -2051,10 +1790,18 @@ function tileMapsEditor.keypressed(key, isrepeat)
             GUI.imgFleche.x = inputText.backgroundColorGreen.widthFont + 15
             GUI.imgFleche.y = GUI.imgFleche.y + 20
             inputTextActive = "backgroundColorGreen"
-        elseif GUI.imgFleche.x == inputText.backgroundColorRed.widthFont + 15 then
-            GUI.imgFleche.x = inputText.backgroundColorGreen.widthFont + 15
+        elseif GUI.imgFleche.x == inputText.backgroundColorGreen.widthFont + 15 then
+            GUI.imgFleche.x = inputText.backgroundColorBlue.widthFont + 15
             GUI.imgFleche.y = GUI.imgFleche.y + 20
-            inputTextActive = "backgroundColorGreen"]]
+            inputTextActive = "backgroundColorBlue"
+        elseif GUI.imgFleche.x == inputText.backgroundColorBlue.widthFont + 15 then
+            GUI.imgFleche.x = inputText.backgroundColorAlpha.widthFont + 15
+            GUI.imgFleche.y = GUI.imgFleche.y + 20
+            inputTextActive = "backgroundColorAlpha"]]
+        elseif GUI.imgFleche.x == inputText.TYPE.widthFont + 5 then
+            GUI.imgFleche.x = inputText.LinesGrilleAlpha.widthFont + 20
+            GUI.imgFleche.y = GUI.imgFleche.y + 140
+            inputTextActive = "LinesGrilleAlpha"
         else
             GUI.imgFleche.x = inputText.ORIENTATION_TILES.widthFont + 15
             GUI.imgFleche.y = 0
@@ -2071,6 +1818,7 @@ function tileMapsEditor.keypressed(key, isrepeat)
         local byteoffsetTILE_WIDTH = utf8.offset(inputText.TILE_WIDTH.txt, -1)
         local byteoffsetTILE_HEIGHT = utf8.offset(inputText.TILE_HEIGHT.txt, -1)
         local byteoffsetLOAD_MAP = utf8.offset(inputText.LOAD_MAP.txt, -1)
+        local byteoffsetDELETE_MAP = utf8.offset(inputText.DELETE_MAP.txt, -1)
 
         -- remove the last UTF-8 character.
         if byteoffsetMAP_WIDTH and inputTextActive == "MAP_WIDTH" then
@@ -2118,6 +1866,15 @@ function tileMapsEditor.keypressed(key, isrepeat)
                 inputText.LOAD_MAP.txt = tonumber(inputText.LOAD_MAP.txt)
                 LOAD_MAP = inputText.LOAD_MAP.txt
             end
+        elseif byteoffsetDELETE_MAP and inputTextActive == "DELETE_MAP" then
+            if tonumber(inputText.DELETE_MAP.txt) <= 9 then
+                inputText.DELETE_MAP.txt = ""
+                DELETE_MAP = inputText.DELETE_MAP.txt
+            else
+                inputText.DELETE_MAP.txt = string.sub(inputText.DELETE_MAP.txt, 1, byteoffsetDELETE_MAP - 1)
+                inputText.DELETE_MAP.txt = tonumber(inputText.DELETE_MAP.txt)
+                DELETE_MAP = inputText.DELETE_MAP.txt
+            end
         end
 
         NOMBRE_LIGNE = MAP_HEIGHT * TILE_HEIGHT 
@@ -2126,7 +1883,7 @@ function tileMapsEditor.keypressed(key, isrepeat)
     end
 
 
-    -- Generate Map
+    -- Generate Map etc avec la touche ENTER
     if key == "return" then
         if inputTextActive == "ORIENTATION_TILES" then
             if ORIENTATION_TILES == "Orthogonale" then
@@ -2146,18 +1903,41 @@ function tileMapsEditor.keypressed(key, isrepeat)
         elseif inputTextActive == "LOAD_MAP" then 
             loadMap(inputText.LOAD_MAP.txt)
             loadTiles()
-        
+
             inputText.LOAD_MAP.txt = ""
             LOAD_MAP = inputText.LOAD_MAP.txt
         elseif inputTextActive == "SAVE_MAP" and MAP_NIVEAU ~= "?" then 
             saveMap(MAP_NIVEAU)
-        elseif inputTextActive == "CALQUES" and MAP_NIVEAU ~= "?" then 
-            if CALQUES == "Tiles" then
-                CALQUES = "Tiles2"
-            elseif CALQUES == "Tiles2" then
-                CALQUES = "Collision"
+        elseif inputTextActive == "DELETE_MAP" then
+            if DELETE_MAP == MAP_NIVEAU then
+                deleteMap(inputText.DELETE_MAP.txt)
+                newMap()
             else
-                CALQUES = "Tiles"
+                deleteMap(inputText.DELETE_MAP.txt)
+            end
+
+            inputText.DELETE_MAP.txt = ""
+            DELETE_MAP = inputText.DELETE_MAP.txt
+        elseif inputTextActive == "CALQUES" and MAP_NIVEAU ~= "?" then
+            if CALQUES == "Calque1" then
+                CALQUES = "Calque2"
+            elseif CALQUES == "Calque2" then
+                CALQUES = "Calque3"
+            elseif CALQUES == "Calque3" then
+                CALQUES = "Calque4"
+            else
+                CALQUES = "Calque1"
+            end
+        elseif inputTextActive == "TYPE" and MAP_NIVEAU ~= "?" then
+            if TYPE == "Tile" then
+                GUI.imgFleche.x = GUI.imgFleche.x + 20
+                TYPE = "Object"
+            elseif TYPE == "Object" then
+                GUI.imgFleche.x = GUI.imgFleche.x + 50
+                TYPE = "AnimationsFX"
+            elseif TYPE == "AnimationsFX" then
+                GUI.imgFleche.x = GUI.imgFleche.x - 70
+                TYPE = "Tile"
             end
         end
     end
@@ -2189,73 +1969,61 @@ function tileMapsEditor.keypressed(key, isrepeat)
             elseif key == "right" then
                 backgroundColor.alpha = backgroundColor.alpha + 0.2
             end
-        elseif inputTextActive == "colorLinesGrilleMapAlpha" then
+        elseif inputTextActive == "LinesGrilleAlpha" then
             if key == "left" then
-                colorLinesGrilleMap.alpha = colorLinesGrilleMap.alpha - 0.2
+                if colorLinesGrilleMap.alpha > 0.15 then
+                    colorLinesGrilleMap.alpha = colorLinesGrilleMap.alpha - 0.1
+                end
             elseif key == "right" then
-                colorLinesGrilleMap.alpha = colorLinesGrilleMap.alpha + 0.2
+                if colorLinesGrilleMap.alpha ~= 1 then
+                    colorLinesGrilleMap.alpha = colorLinesGrilleMap.alpha + 0.1
+                end
             end
         end
     end
 
 
     -- Permet de revenir en Arrière après modification de la Map.
-    if key == "lctrl" and Historique.Counter ~= 0 then      
-        local VALUE_DATAMAP = Historique.ArriereDonnees[Historique.Counter].DATAMAP
-        local LIGNE = Historique.ArriereDonnees[Historique.Counter].LIGNE
-        local COLONNE = Historique.ArriereDonnees[Historique.Counter].COLONNE
-        local MAP_NIVEAU = Historique.ArriereDonnees[Historique.Counter].MAP_NIVEAU
-        local MAP = Historique.ArriereDonnees[Historique.Counter].MAP
+    if key == "lctrl" and Historique.CounterArriere ~= 0 and Historique.CounterArriere <= #Historique.ArriereDonnees then      
+        local VALUE_DATAMAP = Historique.ArriereDonnees[Historique.CounterArriere].DATAMAP
+        local LIGNE = Historique.ArriereDonnees[Historique.CounterArriere].LIGNE
+        local COLONNE = Historique.ArriereDonnees[Historique.CounterArriere].COLONNE
+        local CALQUE = Historique.ArriereDonnees[Historique.CounterArriere].CALQUE
 
-        print("\n")
-        print("VALUE DATA MAP : " .. VALUE_DATAMAP)
-        print("LIGNE : " .. LIGNE)
-        print("COLONNE : " .. COLONNE)
-        print("MAP NIVEAU : " .. MAP_NIVEAU)
-        print("MAP : " .. MAP)
-        print("HISTORIQUE COUNTER : " .. Historique.Counter)
+        if CALQUE == "Calque1" then
+            -- Historique Avant
+            local tab = { LIGNE = LIGNE, COLONNE = COLONNE, CALQUE = "Calque1", DATAMAP = MapsDataLua.Calque1[1][LIGNE][COLONNE] }
+            table.insert(Historique.AvantDonnees, tab)
 
-        if MAP == "TileMaps" then
-            print("changer")
-            TileMaps[MAP_NIVEAU][LIGNE][COLONNE] = VALUE_DATAMAP
-            --table.remove(Historique.ArriereDonnees, Historique.Counter)
-            Historique.Counter = Historique.Counter - 1
-        elseif MAP == "TileMaps2" then
-            TileMaps2[MAP_NIVEAU][LIGNE][COLONNE] = VALUE_DATAMAP
-            --table.remove(Historique.ArriereDonnees, Historique.Counter)
-            Historique.Counter = Historique.Counter - 1
+            MapsDataLua.Calque1[1][LIGNE][COLONNE] = VALUE_DATAMAP
+
+            Historique.CounterArriere = Historique.CounterArriere - 1
+            Historique.CounterAvant = Historique.CounterAvant + 1
+            Historique.Bool = true
+        elseif CALQUE == "Calque2" then
+
         end
     end
 
 
     -- Permet de revenir en Avant après modification de la Map.
-    if key == "lalt" and Historique.Counter ~= 0 and Historique.Counter <= #Historique.AvantDonnees then      
-        local VALUE_DATAMAP = Historique.AvantDonnees[Historique.Counter].DATAMAP
-        local LIGNE = Historique.AvantDonnees[Historique.Counter].LIGNE
-        local COLONNE = Historique.AvantDonnees[Historique.Counter].COLONNE
-        local MAP_NIVEAU = Historique.AvantDonnees[Historique.Counter].MAP_NIVEAU
-        local MAP = Historique.AvantDonnees[Historique.Counter].MAP
+    if key == "lalt" and Historique.CounterAvant ~= 0 and Historique.CounterAvant <= #Historique.AvantDonnees then      
+        local VALUE_DATAMAP = Historique.AvantDonnees[Historique.CounterAvant].DATAMAP
+        local LIGNE = Historique.AvantDonnees[Historique.CounterAvant].LIGNE
+        local COLONNE = Historique.AvantDonnees[Historique.CounterAvant].COLONNE        
+        local CALQUE = Historique.AvantDonnees[Historique.CounterAvant].CALQUE
 
-        print("\n")
-        print("VALUE DATA MAP : " .. VALUE_DATAMAP)
-        print("LIGNE : " .. LIGNE)
-        print("COLONNE : " .. COLONNE)
-        print("MAP NIVEAU : " .. MAP_NIVEAU)
-        print("MAP : " .. MAP)
-        print("HISTORIQUE COUNTER : " .. Historique.Counter)
+        if CALQUE == "Calque1" then
+            MapsDataLua.Calque1[1][LIGNE][COLONNE] = VALUE_DATAMAP
 
-        if MAP == "TileMaps" then
-            print("changer")
-            TileMaps[MAP_NIVEAU][LIGNE][COLONNE] = VALUE_DATAMAP
-            --table.remove(Historique.ArriereDonnees, Historique.Counter)
-            Historique.Counter = Historique.Counter + 1
-        elseif MAP == "TileMaps2" then
-            TileMaps2[MAP_NIVEAU][LIGNE][COLONNE] = VALUE_DATAMAP
-            --table.remove(Historique.ArriereDonnees, Historique.Counter)
-            Historique.Counter = Historique.Counter + 1
+            table.remove(Historique.AvantDonnees, #Historique.AvantDonnees)
+
+            Historique.CounterArriere = Historique.CounterArriere + 1
+            Historique.CounterAvant = Historique.CounterAvant - 1
+        elseif CALQUE == "Calque2" then
+
         end
     end
-
 end
 
 
@@ -2269,7 +2037,7 @@ end
 ██      ██  ██████   ██████  ███████ ███████     ██      ██   ██ ███████ ███████ ███████ ███████ ██████                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
 ]]
 
-function tileMapsEditor.mousepressed(x, y, button, isTouch)
+function sceneEditorMaps.mousepressed(x, y, button)
     -- Appuie sur le boutton de la roulette = Remet le ZoomX et ZoomY par défault
     if button == 3 then
         window.zoom = 1
@@ -2297,6 +2065,8 @@ function tileMapsEditor.mousepressed(x, y, button, isTouch)
         outilsActive = 'Pinceau'
         pinceauAlpha = 0.3
         gommeAlpha = 1
+        mainobjetAlpha = 1
+        pipeAlpha = 1
     end 
     
     
@@ -2305,22 +2075,51 @@ function tileMapsEditor.mousepressed(x, y, button, isTouch)
        y >= GUI.imgButtonDessinerGrille:getHeight() / 2 + GUI.imgButtonDessinerGrille:getHeight() and y <= GUI.imgButtonDessinerGrille:getHeight() / 2 + GUI.imgButtonDessinerGrille:getHeight() + GUI.imgButtonGommeGrille:getHeight() then    
         
         outilsActive = 'Gomme'
-        pinceauAlpha = 1
         gommeAlpha = 0.3
+        pinceauAlpha = 1
+        mainobjetAlpha = 1
+        pipeAlpha = 1
+    end
+
+
+    -- Button de déplacement d'Objets
+    if x <= largeurEcran - GUI.imgButtonDessinerGrille:getWidth() - GUI.imgButtonDessinerGrille:getWidth() / 2 and x >= largeurEcran - (GUI.imgButtonDessinerGrille:getWidth() + GUI.imgButtonDessinerGrille:getWidth() / 2 + GUI.imgButtonMainObjetGrille:getWidth()) and
+       y >= GUI.imgButtonMainObjetGrille:getHeight() / 2 and y <= GUI.imgButtonMainObjetGrille:getHeight() + (GUI.imgButtonMainObjetGrille:getHeight() / 2) then
+    
+        outilsActive = 'MainObjet'
+        mainobjetAlpha = 0.3
+        pinceauAlpha = 1
+        gommeAlpha = 1
+        pipeAlpha = 1
+    end 
+
+
+    -- Button de la pipe (pour récupèrer une Tile/Objects/AnimationsFX..) au lieu de récupèrer et cliquer dans les Views Tiles..etc
+    if x <= largeurEcran - GUI.imgButtonGommeGrille:getWidth() - GUI.imgButtonGommeGrille:getWidth() / 2 and x >= largeurEcran - (GUI.imgButtonGommeGrille:getWidth() + GUI.imgButtonGommeGrille:getWidth() / 2 + GUI.imgButtonPipeGrille:getWidth()) and
+       y >= GUI.imgButtonMainObjetGrille:getHeight() / 2 + GUI.imgButtonMainObjetGrille:getHeight() and y <= GUI.imgButtonMainObjetGrille:getHeight() / 2 + GUI.imgButtonDessinerGrille:getHeight() + GUI.imgButtonGommeGrille:getHeight() then    
+        
+        outilsActive = 'Pipe'
+        pipeAlpha = 0.3
+        gommeAlpha = 1
+        pinceauAlpha = 1
+        mainobjetAlpha = 1
     end
 
 
     -- Button 'None', remet la variable -> outilsActive = nil (aucun outils sélectionner)
     if x <= largeurEcran - GUI.imgButtonNone:getWidth() / 2 and x >= largeurEcran - (GUI.imgButtonNone:getWidth() + (GUI.imgButtonNone:getWidth() / 2)) and
-       y >= GUI.imgButtonDessinerGrille:getHeight() / 2 + GUI.imgButtonDessinerGrille:getHeight() + GUI.imgButtonGommeGrille:getHeight() and y <= GUI.imgButtonDessinerGrille:getHeight() / 2 + GUI.imgButtonDessinerGrille:getHeight() + GUI.imgButtonGommeGrille:getHeight() + GUI.imgButtonNone:getHeight() then    
+       y >= GUI.imgButtonDessinerGrille:getHeight() / 2 + GUI.imgButtonDessinerGrille:getHeight() + GUI.imgButtonGommeGrille:getHeight() and y <= GUI.imgButtonDessinerGrille:getHeight() / 2 
+       + GUI.imgButtonDessinerGrille:getHeight() + GUI.imgButtonGommeGrille:getHeight() + GUI.imgButtonNone:getHeight() then    
         
         outilsActive = nil
         pinceauAlpha = 1
         gommeAlpha = 1
+        mainobjetAlpha = 1
+        pipeAlpha = 1
     end
 
 
-    -- Récupère la Tile choisi
+    -- Récupère la Tile choisi dans la View des Tiles
     if MAP_NIVEAU ~= "?" and mouseX >= (largeurEcran - grilleViewTilesWidth) and mouseY >= (hauteurEcran - grilleViewTilesHeight) then
         numeroTileCurrent = ((CURRENT_LIGNE2 + scrollY_counter) * colonneViewTile) + (CURRENT_COLONNE2 + 1)
 
@@ -2334,80 +2133,14 @@ function tileMapsEditor.mousepressed(x, y, button, isTouch)
     end
 
 
-    --  Click une fois sur la Grille Map avec la Tile qui a était choisi.
-    if button == 1 and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Pinceau' and Game.TileActive ~= nil and MAP_NIVEAU ~= "?" and CALQUES == "Tiles" and mouseOnTheOutils == false and sceneTileMapEditor == true then
-        LIGNE = CURRENT_LIGNE + 1 
-        COLONNE = CURRENT_COLONNE + 1 
-
-        if TileMaps[MAP_NIVEAU][LIGNE][COLONNE] ~= Game.TileActive then
-            -- Historique Arriere
-            local tab = { MAP_NIVEAU = MAP_NIVEAU, LIGNE = LIGNE, COLONNE = COLONNE, MAP = "TileMaps", DATAMAP = TileMaps[MAP_NIVEAU][LIGNE][COLONNE] }
-            table.insert(Historique.ArriereDonnees, tab)
-
-            TileMaps[MAP_NIVEAU][LIGNE][COLONNE] = Game.TileActive
-
-            -- Historique Avant
-            local tab2 = { MAP_NIVEAU = MAP_NIVEAU, LIGNE = LIGNE, COLONNE = COLONNE, MAP = "TileMaps", DATAMAP = TileMaps[MAP_NIVEAU][LIGNE][COLONNE] }
-            table.insert(Historique.AvantDonnees, tab2)
-
-            Historique.Counter = Historique.Counter + 1
-        end
-    end
-
-
-    --  Click une fois sur la Grille Map pour gommer sur la Map.
-     if button == 1 and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Gomme' and MAP_NIVEAU ~= "?" and CALQUES == "Tiles" and mouseOnTheOutils == false and sceneTileMapEditor == true then
-        LIGNE = CURRENT_LIGNE + 1 
-        COLONNE = CURRENT_COLONNE + 1 
-
-        TileMaps[MAP_NIVEAU][LIGNE][COLONNE] = 0 
-    end
-
-
-    --  Click une fois sur la Grille Map avec les Tiles2 (deuxième calque) qui a était choisi 
-    if button == 1 and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Pinceau' and Game.TileActive ~= nil and MAP_NIVEAU ~= "?" and CALQUES == "Tiles2" and mouseOnTheOutils == false and sceneTileMapEditor == true then
-        LIGNE = CURRENT_LIGNE + 1 
-        COLONNE = CURRENT_COLONNE + 1 
-
-        TileMaps2[MAP_NIVEAU][LIGNE][COLONNE] = Game.TileActive 
-    end
-
-
-    --  Click une fois sur la Grille Map pour gommer sur la Map les Tiles2 (deuxième calque)
-     if button == 1 and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Gomme' and MAP_NIVEAU ~= "?" and CALQUES == "Tiles2" and mouseOnTheOutils == false and sceneTileMapEditor == true then
-        LIGNE = CURRENT_LIGNE + 1 
-        COLONNE = CURRENT_COLONNE + 1 
-
-        TileMaps2[MAP_NIVEAU][LIGNE][COLONNE] = 0 
-    end
-
-
-    --  Click une fois sur la Grille Map pour les Collision
-    if button == 1 and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Pinceau' and Game.TileActive ~= nil and MAP_NIVEAU ~= "?" and CALQUES == "Collision" and mouseOnTheOutils == false and sceneTileMapEditor == true then
-        LIGNE = CURRENT_LIGNE + 1 
-        COLONNE = CURRENT_COLONNE + 1 
-
-        TileMapsCollision[MAP_NIVEAU][LIGNE][COLONNE] = 1 
-    end
-
-
-    --  Click une fois sur la Grille Map pour gommer sur la Map les Collisions
-     if button == 1 and CURRENT_LIGNE >= 0 and CURRENT_LIGNE <= (MAP_HEIGHT - 1) and CURRENT_COLONNE >= 0 and CURRENT_COLONNE <= (MAP_WIDTH - 1) and inGrilleMapViewTiles == false and outilsActive == 'Gomme' and MAP_NIVEAU ~= "?" and CALQUES == "Collision" and mouseOnTheOutils == false and sceneTileMapEditor == true then
-        LIGNE = CURRENT_LIGNE + 1 
-        COLONNE = CURRENT_COLONNE + 1 
-
-        TileMapsCollision[MAP_NIVEAU][LIGNE][COLONNE] = 0 
-    end
-
-
     -- Click sur l'image de l'oeil de la GUI pour afficher / enlever l'affichage des Tiles    
     if x <= largeurEcran - GUI.imgButtonCalqueOeilOuvert:getWidth() / 2 - 25 and x >= largeurEcran - (GUI.imgButtonCalqueOeilOuvert:getWidth() + (GUI.imgButtonCalqueOeilOuvert:getWidth() / 2)) - 25 and
        y >= hauteurEcran - grilleViewTilesHeight - 200 and y <= hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilOuvert:getHeight() then    
         
-        if CalquesActive.Tiles == "ON" then
-            CalquesActive.Tiles = "OFF"
+        if CalquesActive.Calque1 == "ON" then
+            CalquesActive.Calque1 = "OFF"
         else
-            CalquesActive.Tiles = "ON"
+            CalquesActive.Calque1 = "ON"
         end
     end
 
@@ -2415,10 +2148,10 @@ function tileMapsEditor.mousepressed(x, y, button, isTouch)
     if x <= largeurEcran - GUI.imgButtonCalqueOeilOuvert:getWidth() / 2 + GUI.imgButtonCalqueOeilOuvert2:getWidth() / 2 - 25 and x >= largeurEcran - (GUI.imgButtonCalqueOeilOuvert2:getWidth() + (GUI.imgButtonCalqueOeilOuvert2:getWidth() / 2)) - 10 and
        y >= hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilOuvert2:getHeight() + 10 and y <= hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilOuvert:getHeight() + GUI.imgButtonCalqueOeilOuvert2:getHeight() + 10 then    
         
-        if CalquesActive.Tiles2 == "ON" then
-            CalquesActive.Tiles2 = "OFF"
+        if CalquesActive.Calque2 == "ON" then
+            CalquesActive.Calque2 = "OFF"
         else
-            CalquesActive.Tiles2 = "ON"
+            CalquesActive.Calque2 = "ON"
         end
     end
 
@@ -2448,10 +2181,10 @@ function tileMapsEditor.mousepressed(x, y, button, isTouch)
     if x <= largeurEcran - GUI.imgButtonCalqueOeilOuvert:getWidth() / 2 + GUI.imgButtonCalqueOeilOuvert2:getWidth() / 2 - 20 and x >= largeurEcran - (GUI.imgButtonCalqueOeilOuvert2:getWidth() + (GUI.imgButtonCalqueOeilOuvert2:getWidth() / 2)) and
        y >= hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilOuvert2:getHeight() + GUI.imgButtonCalqueOeilOuvert3:getHeight() + GUI.imgButtonCalqueOeilOuvert4:getHeight() + GUI.imgButtonCalqueOeilOuvert4:getHeight() + 40 and y <= hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilOuvert:getHeight() + GUI.imgButtonCalqueOeilOuvert2:getHeight() + GUI.imgButtonCalqueOeilOuvert3:getHeight() + GUI.imgButtonCalqueOeilOuvert4:getHeight() + GUI.imgButtonCalqueOeilOuvert5:getHeight() + 45 then    
         
-        if CalquesActive.IDTiles == "ON" then
-            CalquesActive.IDTiles = "OFF"
+        if CalquesActive.IDCalque1 == "ON" then
+            CalquesActive.IDCalque1 = "OFF"
         else
-            CalquesActive.IDTiles = "ON"
+            CalquesActive.IDCalque1 = "ON"
         end
     end
 
@@ -2459,10 +2192,10 @@ function tileMapsEditor.mousepressed(x, y, button, isTouch)
     if x <= largeurEcran - GUI.imgButtonCalqueOeilOuvert:getWidth() / 2 + GUI.imgButtonCalqueOeilOuvert2:getWidth() / 2 - 20 and x >= largeurEcran - (GUI.imgButtonCalqueOeilOuvert2:getWidth() + (GUI.imgButtonCalqueOeilOuvert2:getWidth() / 2)) and
        y >= hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilOuvert2:getHeight() + GUI.imgButtonCalqueOeilOuvert3:getHeight() + GUI.imgButtonCalqueOeilOuvert4:getHeight() + GUI.imgButtonCalqueOeilOuvert5:getHeight() + GUI.imgButtonCalqueOeilOuvert6:getHeight() + 55 and y <= hauteurEcran - grilleViewTilesHeight - 200 + GUI.imgButtonCalqueOeilOuvert:getHeight() + GUI.imgButtonCalqueOeilOuvert2:getHeight() + GUI.imgButtonCalqueOeilOuvert3:getHeight() + GUI.imgButtonCalqueOeilOuvert4:getHeight() + GUI.imgButtonCalqueOeilOuvert5:getHeight() + GUI.imgButtonCalqueOeilOuvert6:getHeight() + 65 then    
         
-        if CalquesActive.IDTiles2 == "ON" then
-            CalquesActive.IDTiles2 = "OFF"
+        if CalquesActive.IDCalque2 == "ON" then
+            CalquesActive.IDCalque2 = "OFF"
         else
-            CalquesActive.IDTiles2 = "ON"
+            CalquesActive.IDCalque2 = "ON"
         end
     end
 
@@ -2489,9 +2222,9 @@ end
  ███ ███  ██   ██ ███████ ███████ ███████     ██      ██  ██████    ████   ███████ ██████                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
 ]]
 
-function love.wheelmoved(x, y)
+function sceneEditorMaps.wheelmoved(x, y)
     -- Zoom avant sur un point ou Zoom arrière sur un point sauf si on ce trouve sur la View Tile
-    if not (y == 0) and inGrilleMapViewTiles == false then
+    if not (y == 0) and inGrilleMapViewTiles == false and inGrilleMapViewFiles == false then
 		local mouse_x = mouse.posX
 		local mouse_y = mouse.posY
 		local k = dscale^y
@@ -2518,8 +2251,27 @@ function love.wheelmoved(x, y)
             clickInOneTile = false
             Game.TileActive = nil
         end
+
+    -- Scrolling en Y de la View des Files
+    elseif y > 0 and inGrilleMapViewFiles == true and MAP_NIVEAU ~= "?" then -- Molette de la souris avec le haut
+        if scrollY_counter2 < scrollY_counterMax2 then
+            table.insert(files, tableTempoFileScroll[#tableTempoFileScroll])
+            table.remove(tableTempoFileScroll, #tableTempoFileScroll)
+            table.insert(files, tableTempo)
+
+            scrollY_counter2 = scrollY_counter2 + 1
+        end
+    elseif y < 0 and MAP_NIVEAU ~= "?" then -- Molette de la souris avec le bas        
+        if scrollY_counter2 < scrollY_counterMax2 then
+
+            tableTempoFileScroll = files[1]
+            table.remove(files, 1) 
+            table.insert(files, tableTempo)
+
+            scrollY_counter2 = scrollY_counter2 + 1
+        end
     end
 end
 
 
-return tileMapsEditor
+return sceneEditorMaps

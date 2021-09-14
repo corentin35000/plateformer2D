@@ -1,7 +1,7 @@
-local splashscreen = {}
+local sceneSplashScreen = {}
 
 
-function splashscreen.Load()
+function sceneSplashScreen.load()
 
   -- Video SplashScreen for Studio.
   -- La variable video est un Objet, qui contient le SplashScreen du Studio, il prend en parametre un boolean qui prend true si le son de la vidéo doit être activé.
@@ -15,7 +15,7 @@ function splashscreen.Load()
 end
 
 
-function splashscreen.Update(dt)
+function sceneSplashScreen.update(dt)
   
   -- Video SplashScreen for Studio / isPlaying() return true or false -> Obtient si la vidéo est en cours de lecture.
   -- Counter pour la video
@@ -31,16 +31,38 @@ function splashscreen.Update(dt)
   else
     love.mouse.setVisible(true)
   end
-  
+
 end
 
 
-function splashscreen.Draw()
+function sceneSplashScreen.draw()
 
-  -- Affichage de la video du SplashScreen
-  love.graphics.draw(video, (largeurEcran / 2), (hauteurEcran / 2), 0, 1, 1, (videoWidth / 2), (videoHeight / 2))
-  
+  if playingVideo == true then
+    -- Affichage de la video
+    love.graphics.draw(video, (largeurEcran / 2), (hauteurEcran / 2), 0, 1, 1, (videoWidth / 2), (videoHeight / 2))
+
+    -- Effet de transition d'ecran
+    ecransTransitionsModule.Draw.SplashScreen()
+  elseif playingVideo == false then
+    stateScene = "KeyBeta"
+  end
+
 end
 
 
-return splashscreen
+function sceneSplashScreen.keypressed(key, isrepeat)
+
+end
+
+
+function sceneSplashScreen.mousepressed(x, y, button)
+
+end
+
+
+function sceneSplashScreen.textinput(event)
+
+end
+
+
+return sceneSplashScreen
