@@ -58,26 +58,6 @@ function animationsCharactersSpine.load()
 	animationsCharactersPlayer['gorilla'] = animationLoad("gorilla", "gorilla", "walk", nil, 'animationsCharactersSpine')
 
 
-	-- Initialisation de l'objet player qui contient le joueur.
-  -- Exemple : scaleY = 1 (default) pour avoir l'offsetY au centre -> il faudra diviser player.height / 2 | si scaleY = 0.70 : il faudra diviser player.height / 3.2 
-	player = {}
-	player.activeAnimation = 'gorilla' -- Juste à changer le nom pour pouvoir changer d'animations/skins
-  player.speedAnimation = 1 -- Vitesse d'animations (1 : par défault)
-  player.loopAnimation = true -- Animation en boucle (true or false)
-  player.width = animationsCharactersPlayer[player.activeAnimation]['state']['data']['skeletonData'].width
-  player.height = animationsCharactersPlayer[player.activeAnimation]['state']['data']['skeletonData'].height
-  player.scaleX = 0.25
-	player.scaleY = -0.25 -- Bug sur le ScaleY il es a : -1, il devrais être a l'envers alors qu'il dans le bon sens avec -1 donc mettre à l'envers le Sprite/Animation : 1
-  player.offsetX = nil 
-  player.offsetY = 2 + (10 - (player.scaleX * 10)) / 0.5 * 0.2 -- Pour avoir l'offsetY au centre du Sprite/Anim : + player.height / player.offsetY
-	player.x = largeurEcran / 2
-	player.y = hauteurEcran / 2 + player.height / player.offsetY
-	player.vx = 10 
-	player.vy = 0
-  player.alpha = 1 -- Opacity
-  player.rotate = nil
-
-
   -- Test : Affiche les data du squelette d'animation en cours d'animation
   --for key, valeur in pairs(animationsPlayer[player.activeAnimation]['skeleton']['bones'][1]) do
     --print(key, valeur)

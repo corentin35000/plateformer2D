@@ -1,18 +1,18 @@
 local sceneManager = {}
 
 
-stateScene = "SplashScreen"
+stateScene = "Editor"
 versionJeuLocal = 0.8
 
 
 function sceneManager.load()
-    sceneSplashScreenModule.load()
+    --sceneSplashScreenModule.load()
     sceneKeyAccessModule.load()
+    sceneCreateUserModule.load()
     sceneMenuModule.load()
     sceneGameplayModule.load()
     sceneGameoverModule.load()
     sceneEditorMapsModule.load()
-    sceneCreateUserModule.load()
 end
 
 function sceneManager.update(dt)
