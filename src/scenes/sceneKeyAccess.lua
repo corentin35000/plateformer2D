@@ -22,6 +22,9 @@ function sceneKeyAccess.draw()
 end
 
 
+
+
+
 function sceneKeyAccess.keypressed(key, scancode, isrepeat)
     if key == "space" then
         if inputClient == keyAccessOfficiel then

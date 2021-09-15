@@ -12,6 +12,7 @@ function sceneManager.load()
     sceneGameplayModule.load()
     sceneGameoverModule.load()
     sceneEditorMapsModule.load()
+    sceneCreateUserModule.load()
 end
 
 function sceneManager.update(dt)
@@ -19,6 +20,8 @@ function sceneManager.update(dt)
         sceneSplashScreenModule.update(dt)
     elseif stateScene == "KeyAccess" then
         sceneKeyAccessModule.update(dt)
+    elseif stateScene == "CreateUser" then
+        sceneCreateUserModule.update(dt)
     elseif stateScene == "Menu" then
         sceneMenuModule.update(dt)
     elseif stateScene == "Gameplay" then
@@ -36,6 +39,8 @@ function sceneManager.draw()
         sceneSplashScreenModule.draw()
     elseif stateScene == "KeyAccess" then
         sceneKeyAccessModule.draw()
+    elseif stateScene == "CreateUser" then
+        sceneCreateUserModule.draw()
     elseif stateScene == "Menu" then
         sceneMenuModule.draw()
     elseif stateScene == "Gameplay" then
@@ -50,12 +55,15 @@ end
 
 
 
+
 -- Fonction de rappel déclenchée lorsqu'une touche est enfoncée.
 function sceneManager.keypressed(key, scancode, isrepeat)
     if stateScene == "SplashScreen" then
         sceneSplashScreenModule.keypressed(key, scancode, isrepeat)
     elseif stateScene == "KeyAccess" then
         sceneKeyAccessModule.keypressed(key, scancode, isrepeat)
+    elseif stateScene == "CreateUser" then
+        sceneCreateUserModule.keypressed(key, scancode, isrepeat)
     elseif stateScene == "Menu" then
         sceneMenuModule.keypressed(key, scancode, isrepeat)
     elseif stateScene == "Gameplay" then
@@ -74,6 +82,8 @@ function sceneManager.keyreleased(key, scancode, isrepeat)
         sceneSplashScreenModule.keyreleased(key, scancode, isrepeat)
     elseif stateScene == "KeyAccess" then
         sceneKeyAccessModule.keyreleased(key, scancode, isrepeat)
+    elseif stateScene == "CreateUser" then
+        sceneCreateUserModule.keyreleased(key, scancode, isrepeat)
     elseif stateScene == "Menu" then
         sceneMenuModule.keyreleased(key, scancode, isrepeat)
     elseif stateScene == "Gameplay" then
@@ -90,6 +100,8 @@ function sceneManager.textinput(event)
         sceneSplashScreenModule.textinput(event)
     elseif stateScene == "KeyAccess" then
         sceneKeyAccessModule.textinput(event)
+    elseif stateScene == "CreateUser" then
+        sceneCreateUserModule.textinput(event)
     elseif stateScene == "Menu" then
         sceneMenuModule.textinput(event)
     elseif stateScene == "Gameplay" then
@@ -108,6 +120,8 @@ function sceneManager.mousepressed(x, y, button, istouch, presses)
         sceneSplashScreenModule.mousepressed(x, y, button, istouch, presses)
     elseif stateScene == "KeyAccess" then
         sceneKeyAccessModule.mousepressed(x, y, button, istouch, presses)
+    elseif stateScene == "CreateUser" then
+        sceneCreateUserModule.mousepressed(x, y, button, istouch, presses)
     elseif stateScene == "Menu" then
         sceneMenuModule.mousepressed(x, y, button, istouch, presses)
     elseif stateScene == "Gameplay" then
@@ -126,6 +140,8 @@ function sceneManager.mousereleased(x, y, button, istouch, presses)
         sceneSplashScreenModule.mousereleased(x, y, button, istouch, presses)
     elseif stateScene == "KeyAccess" then
         sceneKeyAccessModule.mousereleased(x, y, button, istouch, presses)
+    elseif stateScene == "CreateUser" then
+        sceneCreateUserModule.mousereleased(x, y, button, istouch, presses)
     elseif stateScene == "Menu" then
         sceneMenuModule.mousereleased(x, y, button, istouch, presses)
     elseif stateScene == "Gameplay" then
@@ -142,6 +158,8 @@ function sceneManager.mousemoved(x, y, dx, dy)
         sceneSplashScreenModule.mousemoved(x, y, dx, dy)
     elseif stateScene == "KeyAccess" then
         sceneKeyAccessModule.mousemoved(x, y, dx, dy)
+    elseif stateScene == "CreateUser" then
+        sceneCreateUserModule.mousemoved(x, y, dx, dy)
     elseif stateScene == "Menu" then
         sceneMenuModule.mousemoved(x, y, dx, dy)
     elseif stateScene == "Gameplay" then
@@ -158,6 +176,8 @@ function sceneManager.wheelmoved(x, y)
         sceneSplashScreenModule.wheelmoved(x, y)
     elseif stateScene == "KeyAccess" then
         sceneKeyAccessModule.wheelmoved(x, y)
+    elseif stateScene == "CreateUser" then
+        sceneCreateUserModule.wheelmoved(x, y)
     elseif stateScene == "Menu" then
         sceneMenuModule.wheelmoved(x, y)
     elseif stateScene == "Gameplay" then
@@ -176,6 +196,8 @@ function sceneManager.gamepadpressed(joystick, button)
         sceneSplashScreenModule.gamepadpressed(joystick, button)
     elseif stateScene == "KeyAccess" then
         sceneKeyAccessModule.gamepadpressed(joystick, button)
+    elseif stateScene == "CreateUser" then
+        sceneCreateUserModule.gamepadpressed(joystick, button)
     elseif stateScene == "Menu" then
         sceneMenuModule.gamepadpressed(joystick, button)
     elseif stateScene == "Gameplay" then
@@ -192,6 +214,8 @@ function sceneManager.gamepadreleased(joystick, button)
         sceneSplashScreenModule.gamepadreleased(joystick, button)
     elseif stateScene == "KeyAccess" then
         sceneKeyAccessModule.gamepadreleased(joystick, button)
+    elseif stateScene == "CreateUser" then
+        sceneCreateUserModule.gamepadreleased(joystick, button)
     elseif stateScene == "Menu" then
         sceneMenuModule.gamepadreleased(joystick, button)
     elseif stateScene == "Gameplay" then
@@ -208,6 +232,8 @@ function sceneManager.joystickpressed(joystick, button)
         sceneSplashScreenModule.joystickpressed(joystick, button)
     elseif stateScene == "KeyAccess" then
         sceneKeyAccessModule.joystickpressed(joystick, button)
+    elseif stateScene == "CreateUser" then
+        sceneCreateUserModule.joystickpressed(joystick, button)
     elseif stateScene == "Menu" then
         sceneMenuModule.joystickpressed(joystick, button)
     elseif stateScene == "Gameplay" then
@@ -224,6 +250,8 @@ function sceneManager.joystickreleased(joystick, button)
         sceneSplashScreenModule.joystickreleased(joystick, button)
     elseif stateScene == "KeyAccess" then
         sceneKeyAccessModule.joystickreleased(joystick, button)
+    elseif stateScene == "CreateUser" then
+        sceneCreateUserModule.joystickreleased(joystick, button)
     elseif stateScene == "Menu" then
         sceneMenuModule.joystickreleased(joystick, button)
     elseif stateScene == "Gameplay" then
@@ -240,6 +268,8 @@ function sceneManager.joystickadded(joystick)
         sceneSplashScreenModule.joystickadded(joystick)
     elseif stateScene == "KeyAccess" then
         sceneKeyAccessModule.joystickadded(joystick)
+    elseif stateScene == "CreateUser" then
+        sceneCreateUserModule.joystickadded(joystick)
     elseif stateScene == "Menu" then
         sceneMenuModule.joystickadded(joystick)
     elseif stateScene == "Gameplay" then
@@ -256,6 +286,8 @@ function sceneManager.joystickremoved(joystick)
         sceneSplashScreenModule.joystickremoved(joystick)
     elseif stateScene == "KeyAccess" then
         sceneKeyAccessModule.joystickremoved(joystick)
+    elseif stateScene == "CreateUser" then
+        sceneCreateUserModule.joystickremoved(joystick)
     elseif stateScene == "Menu" then
         sceneMenuModule.joystickremoved(joystick)
     elseif stateScene == "Gameplay" then
