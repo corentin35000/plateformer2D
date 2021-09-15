@@ -1,24 +1,30 @@
 player = {}
 
 
-function mouvementPlayer(dt)
-  -- Inertie
-  player.x = player.x + player.vx
+-- Inertie
+function inertiePlayer(dt)
   player.vx = player.vx * 0.88
 
   if math.abs(player.vx) < 0.1 then
     player.vx = 0
   end
+end
 
 
-  -- Gravité
+-- Gravité
+function graviterPlayer(dt)
   player.vy = player.vy + (0.7 * dt)
+end
 
 
-  -- Mise a jour pour lui set la Gravité / Inertie en continue
+-- Mise a jour pour lui set la Gravité / Inertie en continue
+function setGraviterInertieForPlayer(dt)
   player.x = player.x + player.vx
   player.y = player.y + player.vy
+end
 
+
+function mouvementPlayer(dt)
 
   -- Déplacement GAUCHE
   if love.keyboard.isDown('left') == true then
@@ -28,10 +34,6 @@ function mouvementPlayer(dt)
 
     if player.activeAnimation ~= player.activeAnimation then
       player.activeAnimation = player.activeAnimation
-    end
-
-    if player.vx > -4 then
-      player.vx = player.vx - (60 * dt)
     end
   end
 
@@ -45,22 +47,8 @@ function mouvementPlayer(dt)
     if player.activeAnimation ~= player.activeAnimation then
       player.activeAnimation = player.activeAnimation²
     end
+  end
 
-    if player.vx < 4 then
-      player.vx = player.vx + (60 * dt)
-    end
-  end
-  
-  
-  -- Déplacement SAUTER vers le HAUT
-  if keySpace == true then
-    if currentTimerJump < 0.1 then
-      player.y = player.y - 250 + dt;
-    else
-      player.y = player.y + 0
-    end
-  end
-  
 end
 
 
@@ -85,6 +73,7 @@ function player.load()
   player.alpha = 1 -- Opacity
   player.rotate = nil -- Pas fait
 
+  -- VOIR POUR LES COLLISION DU PLAYER VU QUE PENDANT L'ANIMATION LA LARGEUR CHANGE 
 
   print(player.width)
   print(player.height)
@@ -92,6 +81,9 @@ end
 
 
 function player.update(dt)
+  inertiePlayer(dt)
+  graviterPlayer(dt)
+  setGraviterInertieForPlayer(dt)
   mouvementPlayer(dt)
 end
 
