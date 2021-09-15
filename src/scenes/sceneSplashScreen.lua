@@ -43,7 +43,7 @@ function sceneSplashScreen.draw()
     love.graphics.draw(video, (largeurEcran / 2), (hauteurEcran / 2), 0, 1, 1, (videoWidth / 2), (videoHeight / 2))
 
     -- Effet de transition d'ecran
-    ecransTransitionsModule.Draw.SplashScreen()
+    --ecransTransitionsModule.Draw.SplashScreen()
   elseif playingVideo == false then
     stateScene = "Menu"
   end

@@ -66,13 +66,12 @@ end
 
 -- Log status, code, headers..etc :
 --print('result : ' .. tostring(code3))
-print('code : ' .. tostring(code3))
-print('status : ' .. tostring(status3))
+--print('code : ' .. tostring(code3))
+--print('status : ' .. tostring(status3))
 --print('headers : ' .. tostring(headers3))
 
 
 -- Print result for Request²
-print("\n")
 --print("responses_body : " .. keyAccessOfficiel)
 --print("responses_body : " .. versionJeuOfficiel)
 --print("responses_body : " .. res_body)

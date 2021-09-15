@@ -1,7 +1,7 @@
 local sceneManager = {}
 
 
-stateScene = "Editor"
+stateScene = "Gameplay"
 versionJeuLocal = 0.8
 
 

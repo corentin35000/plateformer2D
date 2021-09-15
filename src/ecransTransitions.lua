@@ -1,7 +1,7 @@
 local ecransTransitions = {}
 
 
-ecransTransitions.Draw = {}
+--[[ecransTransitions.Draw = {}
 
 EcranTransitionMenu = true
 EcranTransitionInMenu = false
@@ -116,7 +116,7 @@ end
 
 function ecransTransitions.Draw.GameOver()
   
-end
+end]]
   
 
 return ecransTransitions

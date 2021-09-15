@@ -85,10 +85,13 @@ end
 
 function animationsCharactersSpine.draw()
   -- Test offsetX et offsetY.
-  --love.graphics.setColor(255, 0, 0, 1)
-  --love.graphics.line(0, hauteurEcran / 2, largeurEcran, hauteurEcran / 2)
-  --love.graphics.line(largeurEcran / 2, 0, largeurEcran / 2, hauteurEcran)
-  --love.graphics.setColor(1, 1, 1, 1)
+  love.graphics.setColor(255, 0, 0, 1)
+  love.graphics.line(0, hauteurEcran / 2, largeurEcran, hauteurEcran / 2)
+  love.graphics.line(largeurEcran / 2, 0, largeurEcran / 2, hauteurEcran)
+
+  love.graphics.setColor(0, 255, 0, 1)
+  love.graphics.rectangle("line", player.x - player.width / 2, player.y - player.height / 2, player.width, player.height)
+  love.graphics.setColor(1, 1, 1, 1)
 
 
   -- Affichage Sprite/Animation

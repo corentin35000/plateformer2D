@@ -30,10 +30,6 @@ end
 
 
 function sceneGameplay.draw()
-    --
-    love.graphics.setBackgroundColor(255, 255, 255, 1)
-
-
     -- Module mapsInGame.lua
     --mapsInGameModule.draw()
  

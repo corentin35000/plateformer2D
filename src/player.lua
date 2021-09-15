@@ -12,7 +12,7 @@ function mouvementPlayer(dt)
 
 
   -- Gravité
-  --player.vy = player.vy + (0.7 * dt)
+  player.vy = player.vy + (0.7 * dt)
 
 
   -- Mise a jour pour lui set la Gravité / Inertie en continue
@@ -22,8 +22,6 @@ function mouvementPlayer(dt)
 
   -- Déplacement GAUCHE
   if love.keyboard.isDown('left') == true then
-    testLeft = true;
-
     if player.scaleX == math.abs(player.scaleX)  then
       player.scaleX = -player.scaleX
     end
@@ -40,8 +38,6 @@ function mouvementPlayer(dt)
 
   -- Déplacement DROITE
   if love.keyboard.isDown('right') == true then
-    testRight = true
-
     if player.scaleX == player.scaleX  then
       player.scaleX = math.abs(player.scaleX) -- math.abs() pour convertir le nombre négatif en positif
     end
@@ -58,20 +54,15 @@ function mouvementPlayer(dt)
   
   -- Déplacement SAUTER vers le HAUT
   if keySpace == true then
-    
-    testSpace = true
-    bonusJump = true
-
     if currentTimerJump < 0.1 then
       player.y = player.y - 250 + dt;
     else
       player.y = player.y + 0
     end
-    
-    keySpace = false
   end
   
 end
+
 
 
 
@@ -81,10 +72,10 @@ function player.load()
   player.activeAnimation = 'gorilla' -- Juste à changer le nom pour pouvoir changer d'animations/skins
   player.speedAnimation = 1 -- Vitesse d'animations (1 : par défault)
   player.loopAnimation = true -- Animation en boucle (true or false)
-  player.width = animationsCharactersPlayer[player.activeAnimation]['state']['data']['skeletonData'].width
-  player.height = animationsCharactersPlayer[player.activeAnimation]['state']['data']['skeletonData'].height
-  player.scaleX = 0.25
-  player.scaleY = -0.25 -- Bug sur le ScaleY il es a : -1, il devrais être a l'envers alors qu'il dans le bon sens avec -1 donc mettre à l'envers le Sprite/Animation : 1
+  player.scaleX = 0.5
+  player.scaleY = -0.5 -- Bug sur le ScaleY il es a : -1, il devrais être a l'envers alors qu'il dans le bon sens avec -1 donc mettre à l'envers le Sprite/Animation : 1
+  player.width = animationsCharactersPlayer[player.activeAnimation]['state']['data']['skeletonData'].width / player.scaleX -- Faire la bonne operation
+  player.height = animationsCharactersPlayer[player.activeAnimation]['state']['data']['skeletonData'].height / player.scaleY -- Faire la bonne operation
   player.offsetX = nil 
   player.offsetY = 2 + (10 - (player.scaleX * 10)) / 0.5 * 0.2 -- Pour avoir l'offsetY au centre du Sprite/Anim : + player.height / player.offsetY
   player.x = largeurEcran / 2
@@ -92,13 +83,16 @@ function player.load()
   player.vx = 10 
   player.vy = 0
   player.alpha = 1 -- Opacity
-  player.rotate = nil
+  player.rotate = nil -- Pas fait
+
+
+  print(player.width)
+  print(player.height)
 end
 
 
 function player.update(dt)
-  --mouvementPlayer(dt)
-  --player.bonusPlayer(dt)  
+  mouvementPlayer(dt)
 end
 
 
