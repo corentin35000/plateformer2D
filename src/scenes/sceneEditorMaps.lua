@@ -1900,7 +1900,7 @@ function sceneEditorMaps.keypressed(key, scancode, isrepeat)
             newMap()
             inputText.LOAD_MAP.txt = ""
             LOAD_MAP = inputText.LOAD_MAP.txt
-        elseif inputTextActive == "LOAD_MAP" then 
+        elseif inputTextActive == "LOAD_MAP" and LOAD_MAP ~= MAP_NIVEAU then 
             loadMap(inputText.LOAD_MAP.txt)
             loadTiles()
 
