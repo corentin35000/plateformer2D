@@ -1,7 +1,7 @@
 local sceneManager = {}
 
 
-stateScene = "Gameplay"
+stateScene = "CreateUser"
 versionJeuLocal = 0.8
 
 
@@ -14,6 +14,7 @@ function sceneManager.load()
     sceneGameoverModule.load()
     sceneEditorMapsModule.load()
 end
+
 
 function sceneManager.update(dt)
     if stateScene == "SplashScreen" then

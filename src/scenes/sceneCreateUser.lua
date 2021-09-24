@@ -14,7 +14,11 @@ end
 
 function sceneCreateUser.draw()
     love.graphics.setColor(255, 0, 0)
-    love.graphics.print("CREATE USER : ", largeurEcran / 2, hauteurEcran / 2)
+    love.graphics.print("CREATE USER : ", largeurEcran / 2 - 50, 100)
+    love.graphics.print("Username : ", largeurEcran / 2 - 50, 300)
+    love.graphics.print("Password : ", largeurEcran / 2 - 50, 330)
+    love.graphics.print("PasswordConfirm : ", largeurEcran / 2 - 50, 360)
+    love.graphics.print("Email : ", largeurEcran / 2 - 50, 390)
 end
 
 
@@ -23,7 +27,10 @@ end
 
 -- Fonction de rappel déclenchée lorsqu'une touche est enfoncée.
 function sceneCreateUser.keypressed(key, scancode, isrepeat)
-
+    if "space" then
+        inscriptionUser("toto", "pPassword", "coco@orange.fr")
+        print("CREATE USER")
+    end
 end
   
 

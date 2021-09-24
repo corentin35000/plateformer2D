@@ -41,9 +41,9 @@ end
 
 
 -- Resultat qui renvoie "Success" ou "Déjà existant" concernat l'inscription de l'utilisateur (nom du joueur) (renvoie pas encore fait sur scriptPHP)
-function inscriptionUser(pValueNamePlayer)
+function inscriptionUser(pName, pPassword, pEmail)
     local res_body = {} -- responsesBody
-    local req_body = "namePlayer=" .. pValueNamePlayer
+    local req_body = "name=" .. pName .. "&password=" .. pPassword .. "&email=" .. pEmail
 
     local result3, code3, headers3, status3 = http.request {
         method = "POST",
@@ -57,6 +57,7 @@ function inscriptionUser(pValueNamePlayer)
     }
 
     res_body = table.concat(res_body)
+    print(res_body)
 
     return res_body
 end
